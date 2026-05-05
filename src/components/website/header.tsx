@@ -106,11 +106,19 @@ export function WebsiteHeader() {
           </button>
         </nav>
 
-        {/* Mobile Toggle & Search */}
-        <div className="flex items-center gap-4 lg:hidden z-50">
-          <button className="text-[#1a1a1a] p-2">
-            <Search className="w-6 h-6" />
-          </button>
+        {/* Mobile Middle Search Bar */}
+        <div className="flex-1 mx-4 lg:hidden relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            className="w-full bg-white/50 border border-gray-200 rounded-full py-2 pl-8 pr-4 text-[11px] font-bold text-[#1a1a1a] outline-none focus:border-[#eea000] transition-all"
+            style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+          />
+        </div>
+
+        {/* Mobile Toggle & Search Icon */}
+        <div className="flex items-center gap-2 lg:hidden z-50">
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="text-[#1a1a1a] p-2 hover:bg-gray-200/50 rounded-full transition-colors"
@@ -156,7 +164,20 @@ export function WebsiteHeader() {
           </button>
         </div>
 
-        <div className="p-8">
+        {/* Mobile Search Bar */}
+        <div className="p-8 pb-4">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#eea000] transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Search services or products..." 
+              className="w-full bg-white border border-gray-200 rounded-sm py-3.5 pl-10 pr-4 text-[13px] font-bold text-[#1a1a1a] outline-none focus:border-[#eea000] transition-all"
+              style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+            />
+          </div>
+        </div>
+
+        <div className="px-8 pb-8">
           <div className="flex flex-col gap-2">
             {navLinks.map((link) => (
               <div key={link.name} className="border-b border-gray-200/50 last:border-0">
