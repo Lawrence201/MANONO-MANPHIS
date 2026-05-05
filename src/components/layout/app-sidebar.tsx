@@ -88,7 +88,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
       {/* Logo */}
       <div className="h-16 flex items-center gap-2 px-4 border-b border-sidebar-border shrink-0">
         <Image 
-          src="/Logo.PNG" 
+          src="/logo.PNG" 
           alt="Logo" 
           width={40} 
           height={40} 

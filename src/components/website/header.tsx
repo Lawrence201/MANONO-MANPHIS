@@ -35,7 +35,7 @@ export function WebsiteHeader() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-0">
           <Image 
-            src="/Logo.PNG" 
+            src="/logo.PNG" 
             alt="Logo" 
             width={80} 
             height={80} 
