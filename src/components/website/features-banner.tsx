@@ -34,10 +34,16 @@ export function FeaturesBanner() {
                 <Image src={feature.icon} alt="" aria-hidden="true" width={32} height={32} className="object-contain" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-[18px] font-bold text-[#1a1a1a] leading-tight">
+                <span 
+                  className="text-[17px] font-bold text-[#1a1a1a] leading-tight uppercase tracking-[-0.04em] scale-x-95 transform origin-left"
+                  style={{ fontFamily: "var(--font-antonio)" }}
+                >
                   {feature.title}
                 </span>
-                <span className="text-[15px] font-medium text-gray-500 leading-tight">
+                <span 
+                  className="text-[11px] font-bold text-gray-500 leading-tight uppercase tracking-[0.1em]"
+                  style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+                >
                   {feature.subtitle}
                 </span>
               </div>
