@@ -102,15 +102,15 @@ export default function BillboardRentalPage() {
         <div className="container mx-auto px-4 max-w-[1500px]">
           
           {/* Main Title Section */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-20">
             <h1 
-              className="text-7xl md:text-9xl font-black text-[#1a1a1a] tracking-tight uppercase leading-[0.8]"
-              style={{ fontFamily: "var(--font-bebas-neue)" }}
+              className="text-7xl md:text-[90px] font-bold text-[#1a1a1a] tracking-[-0.1em] uppercase leading-[0.8] md:scale-x-[0.85] transform origin-center"
+              style={{ fontFamily: "var(--font-antonio)" }}
             >
               BILLBOARD ADVERTISING
             </h1>
             <p 
-              className="mt-8 text-gray-500 text-[13px] tracking-wide"
+              className="mt-10 text-gray-400 text-[12px] tracking-[0.1em] uppercase font-bold"
               style={{ fontFamily: "var(--font-jetbrains-mono)" }}
             >
               Search from over 1999+ Active Ads in 30+ Categories for Free
@@ -157,15 +157,15 @@ export default function BillboardRentalPage() {
                   `}
                 >
                   {/* Collapsed State: Vertical Title */}
-                  <div className={`absolute inset-0 z-20 flex flex-col items-center justify-end pb-8 gap-14 transition-all duration-500 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                  <div className={`absolute inset-0 z-20 flex flex-col items-center justify-between pt-60 pb-12 transition-all duration-500 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                     <span 
-                      className="rotate-[-90deg] whitespace-nowrap text-[21px] font-black tracking-[0.1em] text-[#1a1a1a] uppercase origin-center transform translate-y-[-50px]"
-                      style={{ fontFamily: "var(--font-bebas-neue)" }}
+                      className="rotate-[-90deg] whitespace-nowrap text-[24px] font-bold tracking-[-0.08em] text-[#1a1a1a] uppercase origin-center transform scale-x-90"
+                      style={{ fontFamily: "var(--font-antonio)" }}
                     >
                       {item.title}
                     </span>
                     <div className="relative w-8 h-8 flex items-center justify-center">
-                      <Image src="/tv.svg" alt="tv" width={24} height={24} className="object-contain" />
+                      <Image src="/tv.svg" alt="tv" width={28} height={28} className="object-contain" />
                     </div>
                   </div>
 
@@ -187,8 +187,8 @@ export default function BillboardRentalPage() {
                           <Image src="/tv.svg" alt="tv" width={40} height={40} />
                         </div>
                         <h3 
-                          className="text-3xl font-black text-white uppercase tracking-[0.05em] leading-none"
-                          style={{ fontFamily: "var(--font-bebas-neue)" }}
+                          className="text-3xl md:text-4xl font-bold text-white uppercase tracking-[-0.04em] leading-none scale-x-90 origin-left -mt-4"
+                          style={{ fontFamily: "var(--font-antonio)" }}
                         >
                           {item.title}
                         </h3>
@@ -219,8 +219,8 @@ export default function BillboardRentalPage() {
                 Together, We Transform
               </span>
               <h2 
-                className="text-5xl md:text-7xl font-black text-[#1a1a1a] uppercase leading-none"
-                style={{ fontFamily: "var(--font-bebas-neue)" }}
+                className="text-4xl md:text-6xl font-bold text-[#1a1a1a] uppercase leading-[0.85] tracking-[-0.06em] md:scale-x-[0.85] transform origin-center"
+                style={{ fontFamily: "var(--font-antonio)" }}
               >
                 Explore Our Most Popular<br />
                 Billboard Categories
@@ -246,13 +246,13 @@ export default function BillboardRentalPage() {
                     <category.icon className="w-6 h-6" />
                   </div>
                   <h3 
-                    className="text-3xl font-semibold text-[#1a1a1a] uppercase mb-2 tracking-[0.05em]"
-                    style={{ fontFamily: "var(--font-bebas-neue)" }}
+                    className="text-xl font-bold text-[#1a1a1a] uppercase mb-2 tracking-[-0.06em] scale-x-95 transform origin-center"
+                    style={{ fontFamily: "var(--font-antonio)" }}
                   >
                     {category.title}
                   </h3>
                   <span 
-                    className="text-gray-400 text-[13px] font-bold uppercase tracking-[0.2em]"
+                    className="text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em]"
                     style={{ fontFamily: "var(--font-jetbrains-mono)" }}
                   >
                     {category.ads} Ads
@@ -281,8 +281,8 @@ export default function BillboardRentalPage() {
                 Book Your Slot
               </span>
               <h2 
-                className="text-5xl md:text-7xl font-black text-[#1a1a1a] uppercase leading-none"
-                style={{ fontFamily: "var(--font-bebas-neue)" }}
+                className="text-4xl md:text-6xl font-bold text-[#1a1a1a] uppercase leading-[0.85] tracking-[-0.06em] md:scale-x-[0.85] transform origin-center"
+                style={{ fontFamily: "var(--font-antonio)" }}
               >
                 Available Bill Boards
               </h2>
@@ -353,8 +353,8 @@ export default function BillboardRentalPage() {
                   
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-4">
                     <h3 
-                      className="text-4xl font-black text-[#1a1a1a] uppercase tracking-tight"
-                      style={{ fontFamily: "var(--font-bebas-neue)" }}
+                      className="text-3xl font-bold text-[#1a1a1a] uppercase tracking-[-0.06em] scale-x-95 transform origin-left"
+                      style={{ fontFamily: "var(--font-antonio)" }}
                     >
                       {ad.title}
                     </h3>
