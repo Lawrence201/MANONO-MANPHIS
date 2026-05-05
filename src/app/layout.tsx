@@ -17,7 +17,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@100..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Anton&family=Antonio:wght@400;700&family=Bebas+Neue&family=JetBrains+Mono:wght@100..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet" />
       </head>
       <body 
         className="antialiased" 
@@ -25,7 +25,9 @@ export default function RootLayout({
           // @ts-ignore
           "--font-bebas-neue": "'Bebas Neue', sans-serif",
           "--font-jetbrains-mono": "'JetBrains Mono', monospace",
-          "--font-plus-jakarta": "'Plus Jakarta Sans', sans-serif"
+          "--font-plus-jakarta": "'Plus Jakarta Sans', sans-serif",
+          "--font-anton": "'Anton', sans-serif",
+          "--font-antonio": "'Antonio', sans-serif"
         }}
         suppressHydrationWarning
       >
