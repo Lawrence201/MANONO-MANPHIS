@@ -25,7 +25,7 @@ export function FeaturesBanner() {
   ];
 
   return (
-    <div className="w-full bg-[#ecf3f2] py-8 border-b border-gray-200">
+    <div className="w-full bg-[#ecf3f2] py-10 border-b border-gray-200">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 lg:px-8">
           {features.map((feature, index) => (
