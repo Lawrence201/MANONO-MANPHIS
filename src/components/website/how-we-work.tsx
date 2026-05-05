@@ -38,7 +38,7 @@ export function HowWeWork() {
               <div className="hidden lg:block absolute right-0 top-[60%] w-[30%] bg-[#050505] border border-white/20 p-12 shadow-2xl z-20">
                 <div className="flex flex-col gap-8 h-full justify-center items-end text-right">
                   <h2 
-                    className="text-white text-[42px] md:text-[52px] font-bold leading-[0.85] tracking-[-0.08em] uppercase text-right md:scale-x-[0.85] transform origin-right"
+                    className="text-white text-[46px] md:text-[62px] font-bold leading-[1.05] tracking-[-0.04em] uppercase text-right md:scale-x-[0.85] transform origin-right"
                     style={{ fontFamily: "var(--font-antonio)" }}
                   >
                     THE DIGITAL<br />
@@ -67,7 +67,7 @@ export function HowWeWork() {
             {/* Mobile Content Card */}
             <div className="lg:hidden w-full bg-[#050505] border border-white/20 p-10 mt-8 shadow-2xl flex flex-col items-end text-right">
               <h2 
-                className="text-white text-4xl font-bold leading-[0.85] tracking-[-0.08em] uppercase mb-8 scale-x-95 transform origin-right"
+                className="text-white text-[42px] font-bold leading-[1.05] tracking-[-0.04em] uppercase mb-8 scale-x-95 transform origin-right"
                 style={{ fontFamily: "var(--font-antonio)" }}
               >
                 THE DIGITAL<br />

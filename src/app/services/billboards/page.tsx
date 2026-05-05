@@ -104,7 +104,7 @@ export default function BillboardRentalPage() {
           {/* Main Title Section */}
           <div className="text-center mb-20">
             <h1 
-              className="text-7xl md:text-[90px] font-bold text-[#1a1a1a] tracking-[-0.1em] uppercase leading-[0.8] md:scale-x-[0.85] transform origin-center"
+              className="text-[80px] md:text-[110px] font-bold text-[#1a1a1a] tracking-[-0.04em] uppercase leading-[1.0] md:scale-x-[0.85] transform origin-center"
               style={{ fontFamily: "var(--font-antonio)" }}
             >
               BILLBOARD ADVERTISING
@@ -159,7 +159,7 @@ export default function BillboardRentalPage() {
                   {/* Collapsed State: Vertical Title */}
                   <div className={`absolute inset-0 z-20 flex flex-col items-center justify-between pt-60 pb-12 transition-all duration-500 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                     <span 
-                      className="rotate-[-90deg] whitespace-nowrap text-[24px] font-bold tracking-[-0.08em] text-[#1a1a1a] uppercase origin-center transform scale-x-90"
+                      className="rotate-[-90deg] whitespace-nowrap text-[28px] font-bold tracking-[-0.04em] text-[#1a1a1a] uppercase origin-center transform"
                       style={{ fontFamily: "var(--font-antonio)" }}
                     >
                       {item.title}
@@ -187,7 +187,7 @@ export default function BillboardRentalPage() {
                           <Image src="/tv.svg" alt="tv" width={40} height={40} />
                         </div>
                         <h3 
-                          className="text-3xl md:text-4xl font-bold text-white uppercase tracking-[-0.04em] leading-none scale-x-90 origin-left -mt-4"
+                          className="text-[38px] md:text-[52px] font-bold text-white uppercase tracking-[-0.02em] leading-none origin-left -mt-4"
                           style={{ fontFamily: "var(--font-antonio)" }}
                         >
                           {item.title}
@@ -219,7 +219,7 @@ export default function BillboardRentalPage() {
                 Together, We Transform
               </span>
               <h2 
-                className="text-4xl md:text-6xl font-bold text-[#1a1a1a] uppercase leading-[0.85] tracking-[-0.06em] md:scale-x-[0.85] transform origin-center"
+                className="text-[48px] md:text-[75px] font-bold text-[#1a1a1a] uppercase leading-[1.05] tracking-[-0.04em] transform origin-center"
                 style={{ fontFamily: "var(--font-antonio)" }}
               >
                 Explore Our Most Popular<br />
@@ -246,13 +246,13 @@ export default function BillboardRentalPage() {
                     <category.icon className="w-6 h-6" />
                   </div>
                   <h3 
-                    className="text-xl font-bold text-[#1a1a1a] uppercase mb-2 tracking-[-0.06em] scale-x-95 transform origin-center"
+                    className="text-[24px] font-bold text-[#1a1a1a] uppercase mb-2 tracking-[-0.02em] transform origin-center"
                     style={{ fontFamily: "var(--font-antonio)" }}
                   >
                     {category.title}
                   </h3>
                   <span 
-                    className="text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em]"
+                    className="text-gray-400 text-[13px] font-bold uppercase tracking-[0.15em]"
                     style={{ fontFamily: "var(--font-jetbrains-mono)" }}
                   >
                     {category.ads} Ads
@@ -281,7 +281,7 @@ export default function BillboardRentalPage() {
                 Book Your Slot
               </span>
               <h2 
-                className="text-4xl md:text-6xl font-bold text-[#1a1a1a] uppercase leading-[0.85] tracking-[-0.06em] md:scale-x-[0.85] transform origin-center"
+                className="text-[48px] md:text-[75px] font-bold text-[#1a1a1a] uppercase leading-[1.05] tracking-[-0.04em] transform origin-center"
                 style={{ fontFamily: "var(--font-antonio)" }}
               >
                 Available Bill Boards
@@ -353,7 +353,7 @@ export default function BillboardRentalPage() {
                   
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-4">
                     <h3 
-                      className="text-3xl font-bold text-[#1a1a1a] uppercase tracking-[-0.06em] scale-x-95 transform origin-left"
+                      className="text-[38px] font-bold text-[#1a1a1a] uppercase tracking-[-0.02em] transform origin-left"
                       style={{ fontFamily: "var(--font-antonio)" }}
                     >
                       {ad.title}
@@ -382,15 +382,15 @@ export default function BillboardRentalPage() {
                   <div className="flex flex-wrap items-center gap-8">
                     <div className="flex items-center gap-2 text-[#1a1a1a]">
                       <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-[12px] font-medium" style={{ fontFamily: "var(--font-jetbrains-mono)" }}>{ad.time}</span>
+                      <span className="text-[13px] font-medium" style={{ fontFamily: "var(--font-jetbrains-mono)" }}>{ad.time}</span>
                     </div>
                     <div className="flex items-center gap-2 text-[#1a1a1a]">
                       <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-[12px] font-medium" style={{ fontFamily: "var(--font-jetbrains-mono)" }}>{ad.location}</span>
+                      <span className="text-[13px] font-medium" style={{ fontFamily: "var(--font-jetbrains-mono)" }}>{ad.location}</span>
                     </div>
                     <div className="flex items-center gap-2 text-red-600">
                       <Tag className="w-4 h-4 text-red-600" />
-                      <span className="text-[12px] font-black" style={{ fontFamily: "var(--font-jetbrains-mono)" }}>{ad.price}</span>
+                      <span className="text-[13px] font-black" style={{ fontFamily: "var(--font-jetbrains-mono)" }}>{ad.price}</span>
                     </div>
                   </div>
                 </div>

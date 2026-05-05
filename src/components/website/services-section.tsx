@@ -57,10 +57,12 @@ export function ServicesSection() {
             Our Services
           </p>
           <h2 
-            className="text-6xl md:text-[75px] font-bold text-[#1a1a1a] leading-[0.85] tracking-[-0.08em] uppercase max-w-3xl origin-left transform md:scale-x-[0.85] -ml-4"
+            className="text-[62px] md:text-[85px] font-bold text-[#1a1a1a] leading-[1.05] tracking-[-0.02em] uppercase max-w-4xl origin-left -ml-4"
             style={{ fontFamily: "var(--font-antonio)" }}
           >
-            EMPOWERING BRANDS THROUGH CREATIVITY.
+            EMPOWERING<br />
+            BRANDS THROUGH<br />
+            CREATIVITY.
           </h2>
         </div>
 
@@ -97,7 +99,7 @@ export function ServicesSection() {
                 <div className="flex flex-col gap-10">
                   <div className="relative inline-block">
                     <h3 
-                      className="text-4xl md:text-[60px] font-bold text-[#1a1a1a] leading-[0.85] tracking-[-0.05em] uppercase origin-left transform md:scale-x-[0.85]"
+                      className="text-[38px] md:text-[64px] font-bold text-[#1a1a1a] leading-[1.05] tracking-[0.02em] uppercase origin-left transform md:scale-x-[0.85]"
                       style={{ fontFamily: "var(--font-antonio)" }}
                     >
                       {item.title}

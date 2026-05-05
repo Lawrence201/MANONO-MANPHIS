@@ -23,7 +23,7 @@ export function OutdoorSolution() {
           {/* Right: Text Content */}
           <div className="w-full lg:w-1/2 flex flex-col items-start">
             <h2 
-              className="text-5xl md:text-6xl font-bold text-[#1a1a1a] leading-[0.85] tracking-[-0.08em] uppercase mb-8 md:scale-x-[0.85] transform origin-left"
+              className="text-[64px] md:text-[88px] font-bold text-[#1a1a1a] leading-[1.05] tracking-[-0.04em] uppercase mb-8 md:scale-x-[0.85] transform origin-left"
               style={{ fontFamily: "var(--font-antonio)" }}
             >
               OUTDOOR<br />
