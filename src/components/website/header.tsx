@@ -130,11 +130,33 @@ export function WebsiteHeader() {
 
       {/* Mobile Menu Drawer */}
       <div 
-        className={`fixed top-0 left-0 bottom-0 w-full bg-[#f7f3f0] z-50 lg:hidden transition-transform duration-500 ease-in-out transform ${
+        className={`fixed inset-0 bg-[#f7f3f0] z-50 lg:hidden transition-transform duration-500 ease-in-out transform ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         } shadow-2xl overflow-y-auto`}
       >
-        <div className="p-8 pt-24">
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between h-20 px-4 border-b border-gray-200/50">
+          <Link href="/" className="flex items-center gap-0">
+            <Image 
+              src="/logo.PNG" 
+              alt="Logo" 
+              width={80} 
+              height={80} 
+              className="object-contain h-10 w-auto"
+            />
+            <span className="text-lg font-black text-[#1a1a1a] tracking-tight uppercase">
+              MANONO <span className="text-[#eea000]">MANPHIS</span>
+            </span>
+          </Link>
+          <button 
+            onClick={() => setIsMenuOpen(false)}
+            className="p-2 text-[#1a1a1a] hover:bg-gray-200/50 rounded-full transition-colors"
+          >
+            <X className="w-8 h-8" />
+          </button>
+        </div>
+
+        <div className="p-8">
           <div className="flex flex-col gap-2">
             {navLinks.map((link) => (
               <div key={link.name} className="border-b border-gray-200/50 last:border-0">
