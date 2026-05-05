@@ -37,10 +37,11 @@ export function ProductsHero({
         {/* Content */}
         <div className="relative z-20 text-center px-4">
           <h1
-            className="text-white uppercase font-black tracking-tight mb-4"
+            className="text-white uppercase font-black mb-4"
             style={{ 
-              fontSize: "clamp(48px, 8vw, 90px)", 
+              fontSize: "clamp(60px, 10vw, 110px)", 
               fontFamily: "var(--font-bebas-neue), sans-serif",
+              letterSpacing: "0.02em"
             }}
           >
             {title} <span style={{ color: highlightColor }}>{highlightTitle}</span>

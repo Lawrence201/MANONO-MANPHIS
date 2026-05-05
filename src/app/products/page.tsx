@@ -331,7 +331,7 @@ function ProductCard({ product }: { product: any }) {
             {product.originalPrice && <span className="text-[14px] text-gray-300 line-through font-bold">{product.originalPrice}</span>}
           </div>
 
-          <button className="w-full bg-black hover:bg-[#ffcc00] hover:text-black text-white py-3.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2">
+          <button className="w-full bg-[#ffcc00] hover:bg-black hover:text-white text-black py-3.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2">
             {product.hasVariants ? <Repeat className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
             {product.hasVariants ? "Select Options" : "Add to Cart"}
           </button>

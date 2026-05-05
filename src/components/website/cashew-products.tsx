@@ -153,7 +153,7 @@ export function CashewProducts() {
                         <span className="text-gray-400 text-[14px] line-through font-bold">{product.oldPrice}</span>
                       </div>
 
-                      <button className="w-full bg-black hover:bg-[#ffcc00] hover:text-black text-white py-3.5 rounded-full text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300">
+                      <button className="w-full bg-[#ffcc00] hover:bg-black hover:text-white text-black py-3.5 rounded-full text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300">
                         <ShoppingCart className="w-4 h-4" />
                         Add to Cart
                       </button>
