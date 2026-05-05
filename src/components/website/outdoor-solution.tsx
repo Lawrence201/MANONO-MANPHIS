@@ -23,8 +23,8 @@ export function OutdoorSolution() {
           {/* Right: Text Content */}
           <div className="w-full lg:w-1/2 flex flex-col items-start">
             <h2 
-              className="text-6xl md:text-7xl font-black text-[#1a1a1a] leading-[0.9] uppercase mb-8"
-              style={{ fontFamily: "var(--font-bebas-neue)" }}
+              className="text-5xl md:text-6xl font-bold text-[#1a1a1a] leading-[0.85] tracking-[-0.08em] uppercase mb-8 md:scale-x-[0.85] transform origin-left"
+              style={{ fontFamily: "var(--font-antonio)" }}
             >
               OUTDOOR<br />
               ADVERTISING<br />
@@ -33,7 +33,10 @@ export function OutdoorSolution() {
             
             <div className="flex items-center gap-6 mb-8 w-full">
               <div className="h-[2px] w-32 bg-[#eea000]" />
-              <p className="text-gray-400 text-sm max-w-sm leading-relaxed">
+              <p 
+                className="text-[#94a3b8] text-sm max-w-sm leading-relaxed"
+                style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+              >
                 We are a value-driven organization. Our core values inspire us to push our boundaries.
               </p>
             </div>
