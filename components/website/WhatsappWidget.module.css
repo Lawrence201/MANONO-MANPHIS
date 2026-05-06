@@ -1,0 +1,145 @@
+.widget {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 2000;
+    cursor: pointer;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.label {
+    background-color: rgba(74, 74, 74, 0.9);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.iconContainer {
+    position: relative;
+    background-color: var(--whatsapp-green);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    font-size: 2.2rem;
+    color: white;
+    transition: transform 0.3s;
+}
+
+.widget:hover .iconContainer {
+    transform: scale(1.1);
+}
+
+.badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* ===== Responsive Adjustments ===== */
+
+/* Medium devices (tablets) */
+@media (max-width: 768px) {
+    .widget {
+        bottom: 20px;
+        right: 20px;
+        gap: 8px;
+    }
+
+    .label {
+        font-size: 0.85rem;
+        padding: 8px 14px;
+    }
+
+    .iconContainer {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+    }
+
+    .badge {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+/* Small devices (phones <= 420px) */
+@media (max-width: 420px) {
+    .widget {
+        bottom: 15px;
+        right: 15px;
+        gap: 6px;
+    }
+
+    .label {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+
+    .iconContainer {
+        width: 45px;
+        height: 45px;
+        font-size: 1.6rem;
+    }
+
+    .badge {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+/* Extra small devices (phones <= 360px) */
+@media (max-width: 360px) {
+    .widget {
+        bottom: 12px;
+        right: 12px;
+        gap: 5px;
+    }
+
+    .label {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+
+    .iconContainer {
+        width: 40px;
+        height: 40px;
+        font-size: 1.4rem;
+    }
+
+    .badge {
+        width: 8px;
+        height: 8px;
+    }
+}

@@ -1,0 +1,473 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Hall {
+  id            Int                @id @default(autoincrement())
+  name          String             @db.VarChar(255)
+  description   String?
+  capacity      String             @db.VarChar(100)
+  price         String             @db.VarChar(100)
+  duration      String             @db.VarChar(100)
+  mainImagePath String?            @map("main_image_path") @db.VarChar(255)
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  contactEmail  String?            @map("contact_email") @db.VarChar(255)
+  contactImage  String?            @map("contact_image_path") @db.VarChar(255)
+  contactName   String?            @map("contact_name") @db.VarChar(255)
+  contactPhone  String?            @map("contact_phone") @db.VarChar(100)
+  bookedHalls   BookedHall[]
+  addOns        HallAddOn[]
+  amenities     HallAmenity[]
+  galleryImages HallGalleryImage[]
+  videos        HallGalleryVideo[]
+  plans         HallPlan[]
+  suitability   HallSuitability[]
+
+  @@map("halls")
+}
+
+model HallAddOn {
+  id        Int      @id @default(autoincrement())
+  hallId    Int      @map("hall_id")
+  name      String   @db.VarChar(255)
+  price     String   @db.VarChar(100)
+  unit      String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  hall      Hall     @relation(fields: [hallId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hall_addons_ibfk_1")
+
+  @@index([hallId], map: "idx_hall_addons_hall_id")
+  @@map("hall_addons")
+}
+
+model HallPlan {
+  id          Int               @id @default(autoincrement())
+  hallId      Int               @map("hall_id")
+  name        String            @db.VarChar(100)
+  description String?           @db.VarChar(255)
+  price       String            @db.VarChar(50)
+  validity    String?           @db.VarChar(100)
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamp(0)
+  features    HallPlanFeature[]
+  hall        Hall              @relation(fields: [hallId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hall_plans_ibfk_1")
+
+  @@index([hallId], map: "idx_hall_plans_hall_id")
+  @@map("hall_plans")
+}
+
+model HallPlanFeature {
+  id          Int      @id @default(autoincrement())
+  planId      Int      @map("plan_id")
+  featureText String   @map("feature_text") @db.VarChar(255)
+  plan        HallPlan @relation(fields: [planId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hall_plan_features_ibfk_1")
+
+  @@index([planId], map: "idx_hall_plan_features_plan_id")
+  @@map("hall_plan_features")
+}
+
+model HallGalleryVideo {
+  id        Int      @id @default(autoincrement())
+  hallId    Int      @map("hall_id")
+  videoPath String   @map("video_path") @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  videoType String   @default("file") @map("video_type") @db.VarChar(20)
+  hall      Hall     @relation(fields: [hallId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hall_gallery_videos_ibfk_1")
+
+  @@index([hallId], map: "idx_hall_gallery_videos_hall_id")
+  @@map("hall_gallery_videos")
+}
+
+model HallGalleryImage {
+  id        Int      @id @default(autoincrement())
+  hallId    Int      @map("hall_id")
+  imagePath String   @map("image_path") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  hall      Hall     @relation(fields: [hallId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hall_gallery_images_ibfk_1")
+
+  @@index([hallId], map: "idx_hall_gallery_hall_id")
+  @@map("hall_gallery_images")
+}
+
+model HallAmenity {
+  id          Int    @id @default(autoincrement())
+  hallId      Int    @map("hall_id")
+  amenityName String @map("amenity_name") @db.VarChar(255)
+  hall        Hall   @relation(fields: [hallId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hall_amenities_ibfk_1")
+
+  @@index([hallId], map: "idx_hall_amenities_hall_id")
+  @@map("hall_amenities")
+}
+
+model HallSuitability {
+  id        Int    @id @default(autoincrement())
+  hallId    Int    @map("hall_id")
+  eventType String @map("event_type") @db.VarChar(255)
+  hall      Hall   @relation(fields: [hallId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hall_suitability_ibfk_1")
+
+  @@index([hallId], map: "idx_hall_suitability_hall_id")
+  @@map("hall_suitability")
+}
+
+model Hostel {
+  id            Int                  @id @default(autoincrement())
+  name          String               @db.VarChar(255)
+  description   String?
+  capacity      String               @db.VarChar(100)
+  price         String               @db.VarChar(100)
+  duration      String               @db.VarChar(100)
+  mainImagePath String?              @map("main_image_path") @db.VarChar(255)
+  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  contactEmail  String?              @map("contact_email") @db.VarChar(255)
+  contactImage  String?              @map("contact_image_path") @db.VarChar(255)
+  contactName   String?              @map("contact_name") @db.VarChar(255)
+  contactPhone  String?              @map("contact_phone") @db.VarChar(100)
+  roomQuantity  Int?                 @map("room_quantity")
+  addOns        HostelAddOn[]
+  amenities     HostelAmenity[]
+  bookings      HostelBooking[]
+  galleryImages HostelGalleryImage[]
+  videos        HostelGalleryVideo[]
+  suitability   HostelSuitability[]
+
+  @@map("hostels")
+}
+
+model HostelGalleryVideo {
+  id        Int      @id @default(autoincrement())
+  hostelId  Int      @map("hostel_id")
+  videoPath String   @map("video_path") @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  videoType String   @default("file") @map("video_type") @db.VarChar(20)
+  hostel    Hostel   @relation(fields: [hostelId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hostel_gallery_videos_ibfk_1")
+
+  @@index([hostelId], map: "idx_hostel_gallery_videos_hostel_id")
+  @@map("hostel_gallery_videos")
+}
+
+model HostelGalleryImage {
+  id        Int      @id @default(autoincrement())
+  hostelId  Int      @map("hostel_id")
+  imagePath String   @map("image_path") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  hostel    Hostel   @relation(fields: [hostelId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hostel_gallery_images_ibfk_1")
+
+  @@index([hostelId], map: "idx_hostel_gallery_hostel_id")
+  @@map("hostel_gallery_images")
+}
+
+model HostelAmenity {
+  id          Int    @id @default(autoincrement())
+  hostelId    Int    @map("hostel_id")
+  amenityName String @map("amenity_name") @db.VarChar(255)
+  hostel      Hostel @relation(fields: [hostelId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hostel_amenities_ibfk_1")
+
+  @@index([hostelId], map: "idx_hostel_amenities_hostel_id")
+  @@map("hostel_amenities")
+}
+
+model HostelSuitability {
+  id        Int    @id @default(autoincrement())
+  hostelId  Int    @map("hostel_id")
+  eventType String @map("event_type") @db.VarChar(255)
+  hostel    Hostel @relation(fields: [hostelId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hostel_suitability_ibfk_1")
+
+  @@index([hostelId], map: "idx_hostel_suitability_hostel_id")
+  @@map("hostel_suitability")
+}
+
+model HostelAddOn {
+  id        Int      @id @default(autoincrement())
+  hostelId  Int      @map("hostel_id")
+  name      String   @db.VarChar(255)
+  price     String   @db.VarChar(100)
+  unit      String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  hostel    Hostel   @relation(fields: [hostelId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "hostel_addons_ibfk_1")
+
+  @@index([hostelId], map: "idx_hostel_addons_hostel_id")
+  @@map("hostel_addons")
+}
+
+model Package {
+  id            Int                   @id @default(autoincrement())
+  name          String                @db.VarChar(255)
+  description   String?
+  capacity      String                @db.VarChar(100)
+  price         String                @db.VarChar(100)
+  duration      String                @db.VarChar(100)
+  mainImagePath String?               @map("main_image_path") @db.VarChar(255)
+  createdAt     DateTime              @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  contactEmail  String?               @map("contact_email") @db.VarChar(255)
+  contactImage  String?               @map("contact_image_path") @db.VarChar(255)
+  contactName   String?               @map("contact_name") @db.VarChar(255)
+  contactPhone  String?               @map("contact_phone") @db.VarChar(100)
+  packageType   String                @default("event") @map("package_type") @db.VarChar(50)
+  addOns        PackageAddOn[]
+  bookings      PackageBooking[]
+  features      PackageFeature[]
+  galleryImages PackageGalleryImage[]
+  videos        PackageGalleryVideo[]
+  suitability   PackageSuitability[]
+
+  @@map("packages")
+}
+
+model PackageBooking {
+  id            Int                   @id @default(autoincrement())
+  reference     String                @unique @db.VarChar(50)
+  packageId     Int                   @map("package_id")
+  eventType     String                @map("event_type") @db.VarChar(100)
+  eventDate     DateTime              @map("event_date") @db.Date
+  startTime     String                @map("start_time") @db.VarChar(20)
+  duration      String                @db.VarChar(50)
+  guests        Int?                  @default(1)
+  firstName     String                @map("first_name") @db.VarChar(100)
+  lastName      String                @map("last_name") @db.VarChar(100)
+  email         String                @db.VarChar(255)
+  phone         String                @db.VarChar(50)
+  organization  String?               @db.VarChar(255)
+  message       String?
+  totalAmount   Decimal               @map("total_amount") @db.Decimal(10, 2)
+  paymentMethod String                @map("payment_method") @db.VarChar(50)
+  paymentStatus String                @default("pending") @map("payment_status") @db.VarChar(20)
+  staffMember   String?               @map("staff_member") @db.VarChar(100)
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+  receiptPath   String?               @map("receipt_path") @db.VarChar(500)
+  addOns        PackageBookingAddOn[]
+  package       Package               @relation(fields: [packageId], references: [id])
+
+  @@index([packageId])
+  @@map("package_bookings")
+}
+
+model PackageBookingAddOn {
+  id        Int            @id @default(autoincrement())
+  bookingId Int            @map("booking_id")
+  name      String         @db.VarChar(255)
+  price     Decimal        @db.Decimal(10, 2)
+  unit      String?        @db.VarChar(50)
+  booking   PackageBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@map("package_booking_addons")
+}
+
+model PackageGalleryVideo {
+  id        Int      @id @default(autoincrement())
+  packageId Int      @map("package_id")
+  videoPath String   @map("video_path") @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  videoType String   @default("file") @map("video_type") @db.VarChar(20)
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "package_gallery_videos_ibfk_1")
+
+  @@index([packageId], map: "idx_package_gallery_videos_package_id")
+  @@map("package_gallery_videos")
+}
+
+model PackageGalleryImage {
+  id        Int      @id @default(autoincrement())
+  packageId Int      @map("package_id")
+  imagePath String   @map("image_path") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "package_gallery_images_ibfk_1")
+
+  @@index([packageId], map: "idx_package_gallery_images_package_id")
+  @@map("package_gallery_images")
+}
+
+model PackageFeature {
+  id          Int     @id @default(autoincrement())
+  packageId   Int     @map("package_id")
+  featureName String  @map("feature_name") @db.VarChar(255)
+  package     Package @relation(fields: [packageId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "package_features_ibfk_1")
+
+  @@index([packageId], map: "idx_package_features_package_id")
+  @@map("package_features")
+}
+
+model PackageSuitability {
+  id        Int     @id @default(autoincrement())
+  packageId Int     @map("package_id")
+  eventType String  @map("event_type") @db.VarChar(255)
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "package_suitability_ibfk_1")
+
+  @@index([packageId], map: "idx_package_suitability_package_id")
+  @@map("package_suitability")
+}
+
+model PackageAddOn {
+  id        Int      @id @default(autoincrement())
+  packageId Int      @map("package_id")
+  name      String   @db.VarChar(255)
+  price     String   @db.VarChar(100)
+  unit      String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "package_addons_ibfk_1")
+
+  @@index([packageId], map: "idx_package_addons_package_id")
+  @@map("package_addons")
+}
+
+model HallBooking {
+  id              Int          @id @default(autoincrement())
+  reference       String       @unique @db.VarChar(50)
+  eventType       String       @map("event_type") @db.VarChar(100)
+  eventName       String?      @map("event_name") @db.VarChar(255)
+  eventDate       DateTime     @map("event_date") @db.Date
+  startTime       String       @map("start_time") @db.VarChar(20)
+  duration        String       @db.VarChar(50)
+  firstName       String       @map("first_name") @db.VarChar(100)
+  lastName        String       @map("last_name") @db.VarChar(100)
+  email           String       @db.VarChar(255)
+  phone           String       @db.VarChar(50)
+  organization    String?      @db.VarChar(255)
+  message         String?
+  totalAmount     Decimal      @map("total_amount") @db.Decimal(10, 2)
+  paymentMethod   String       @map("payment_method") @db.VarChar(50)
+  paymentStatus   String       @default("pending") @map("payment_status") @db.VarChar(20)
+  paymentIntentId String?      @map("payment_intent_id") @db.VarChar(255)
+  receiptPath     String?      @map("receipt_path") @db.VarChar(500)
+  staffMember     String?      @map("staff_member") @db.VarChar(100)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  bookedHalls     BookedHall[]
+
+  @@map("hall_bookings")
+}
+
+model BookedHall {
+  id        Int                @id @default(autoincrement())
+  bookingId Int                @map("booking_id")
+  hallId    Int                @map("hall_id")
+  amount    Decimal            @db.Decimal(10, 2)
+  booking   HallBooking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  hall      Hall               @relation(fields: [hallId], references: [id], onDelete: Cascade)
+  addOns    HallBookingAddOn[]
+
+  @@index([bookingId])
+  @@index([hallId])
+  @@map("booked_halls")
+}
+
+model HallBookingAddOn {
+  id           Int        @id @default(autoincrement())
+  bookedHallId Int        @map("booked_hall_id")
+  name         String     @db.VarChar(255)
+  price        Decimal    @db.Decimal(10, 2)
+  unit         String?    @db.VarChar(50)
+  bookedHall   BookedHall @relation(fields: [bookedHallId], references: [id], onDelete: Cascade)
+
+  @@index([bookedHallId])
+  @@map("hall_booking_addons")
+}
+
+model HostelBooking {
+  id              Int                  @id @default(autoincrement())
+  reference       String               @unique @db.VarChar(50)
+  hostelId        Int                  @map("hostel_id")
+  checkInDate     DateTime             @map("check_in_date") @db.Date
+  checkInTime     String?              @map("check_in_time") @db.VarChar(20)
+  duration        String               @db.VarChar(50)
+  guests          Int                  @default(1)
+  firstName       String               @map("first_name") @db.VarChar(100)
+  lastName        String               @map("last_name") @db.VarChar(100)
+  email           String               @db.VarChar(255)
+  phone           String               @db.VarChar(50)
+  institution     String?              @db.VarChar(255)
+  specialRequests String?              @map("special_requests")
+  totalAmount     Decimal              @map("total_amount") @db.Decimal(10, 2)
+  paymentMethod   String               @map("payment_method") @db.VarChar(50)
+  paymentStatus   String               @default("pending") @map("payment_status") @db.VarChar(20)
+  staffMember     String?              @map("staff_member") @db.VarChar(100)
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+  receiptPath     String?              @map("receipt_path") @db.VarChar(500)
+  numberOfRooms   Int                  @default(1) @map("number_of_rooms")
+  numberOfDays    Int                  @default(1) @map("number_of_days_booked")
+  addOns          HostelBookingAddOn[]
+  hostel          Hostel               @relation(fields: [hostelId], references: [id])
+
+  @@index([hostelId])
+  @@map("hostel_bookings")
+}
+
+model HostelBookingAddOn {
+  id        Int           @id @default(autoincrement())
+  bookingId Int           @map("booking_id")
+  name      String        @db.VarChar(255)
+  price     Decimal       @db.Decimal(10, 2)
+  unit      String?       @db.VarChar(50)
+  booking   HostelBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@map("hostel_booking_addons")
+}
+
+model Admin {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(255)
+  password     String    @db.VarChar(255)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  name         String    @db.VarChar(255)
+  lastActiveAt DateTime? @map("last_active_at")
+  lastLoginAt  DateTime? @map("last_login_at")
+  totpSecret   String?   @map("totp_secret") @db.VarChar(255)
+  totpEnabled  Boolean   @default(false) @map("totp_enabled")
+
+  @@map("admins")
+}
+
+model ClientTeam {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("client_team")
+}
+
+model Client {
+  id             Int      @id @default(autoincrement())
+  googleId       String   @unique @map("google_id") @db.VarChar(255)
+  email          String   @unique @db.VarChar(255)
+  name           String?  @db.VarChar(255)
+  phoneNumber    String?  @map("phone_number") @db.VarChar(50)
+  profilePicture String?  @map("profile_picture") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("clients")
+}
+
+model Event {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(255)
+  description   String?
+  eventType     String   @map("event_type") @db.VarChar(100)
+  status        String   @default("upcoming") @db.VarChar(50)
+  startDate     DateTime @map("start_date")
+  endDate       DateTime @map("end_date")
+  venue         String?  @db.VarChar(255)
+  capacity      Int?
+  registrations Int      @default(0)
+  price         Decimal? @db.Decimal(10, 2)
+  mainImagePath String?  @map("main_image_path")
+  organizer     String?  @db.VarChar(255)
+  contactEmail  String?  @map("contact_email") @db.VarChar(255)
+  contactPhone  String?  @map("contact_phone") @db.VarChar(50)
+  isPublic      Boolean  @default(true) @map("is_public")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("events")
+}

@@ -1,0 +1,116 @@
+/* Combined Global CSS */
+
+:root {
+    --primary-olive: #7c8c74;
+    --nav-text: #000000;
+    --hero-overlay: rgba(0, 0, 0, 0.4);
+    --white: #ffffff;
+    --dark-btn: #4a4a4a;
+    --whatsapp-green: #25d366;
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+html,
+body {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* Admin uses Inter, Website uses Poppins - handled in layouts */
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Utilities */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.grid {
+    display: grid;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.p-6 {
+    padding: 1.5rem;
+}
+
+.rounded-lg {
+    border-radius: 12px;
+}
+
+.bg-white {
+    background-color: #FFFFFF;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.text-gray-500 {
+    color: #6B7280;
+}
+
+.text-green-500 {
+    color: #10B981;
+}
+
+.text-red-500 {
+    color: #EF4444;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #111827;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 4px;
+}
+/* Prevent auto-zoom on iOS for all inputs */
+@media screen and (max-width: 768px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}

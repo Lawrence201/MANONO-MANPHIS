@@ -1,0 +1,7 @@
+1: Agape Gathering Hall - Basic
+5: Evangel Lecture Hall
+3: Clement Open Hall
+6: Bethel Seminar Room
+8: Agape Gathering Hall  (Full House)
+4: Ecclesia Concert Hall - Basic
+7: Ecclesia Concert Hall (Full House)

@@ -1,0 +1,260 @@
+.section {
+    padding: 4rem 1rem;
+    width: 100%;
+    max-width: none;
+    /* remove limit */
+    margin: 10px;
+    /* remove centering */
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 900px) {
+    .section {
+        grid-template-columns: 0.8fr 1.2fr;
+        padding: 6rem 2rem;
+        gap: 4rem;
+    }
+}
+
+/* Left Side */
+.leftColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.verticalImageContainer {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    /* Adjust as needed */
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.verticalImage {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.quote {
+    font-family: 'Brush Script MT', 'Lucida Console', cursive;
+    /* Fallback for script */
+    font-size: 1.8rem;
+    color: #555;
+    text-align: center;
+    line-height: 1.4;
+    margin-top: 1rem;
+}
+
+/* Right Side */
+.rightColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #888;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.title {
+    font-family: 'Times New Roman', serif;
+    /* Or a specific serif font if available */
+    font-size: 2.5rem;
+    line-height: 1.2;
+    color: #222;
+    margin-bottom: 3rem;
+    font-weight: 400;
+}
+
+.servicesGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 600px) {
+    .servicesGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.serviceItem {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.iconWrapper {
+    font-size: 2rem;
+    flex-shrink: 0;
+    margin-top: -4px;
+}
+
+.serviceContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.serviceTitle {
+    font-size: 1.1rem;
+    color: #444;
+    font-weight: 500;
+}
+
+.serviceDescription {
+    font-size: 0.9rem;
+    color: #777;
+    line-height: 1.5;
+}
+
+.bottomImageContainer {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-top: auto;
+}
+
+.bottomImage {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+/* ===== ≥ 360px ===== */
+@media (min-width: 360px) {
+    .verticalImageContainer {
+        height: 200px;
+    }
+
+    .bottomImageContainer {
+        height: 140px;
+    }
+
+    .title {
+        font-size: 1.7rem;
+    }
+
+    .serviceTitle {
+        font-size: 1rem;
+    }
+
+    .serviceDescription {
+        font-size: 0.9rem;
+    }
+}
+
+/* ===== ≥ 420px ===== */
+@media (min-width: 420px) {
+    .verticalImageContainer {
+        height: 220px;
+    }
+
+    .bottomImageContainer {
+        height: 160px;
+    }
+
+    .title {
+        font-size: 1.9rem;
+    }
+
+    .serviceTitle {
+        font-size: 1.05rem;
+    }
+
+    .serviceDescription {
+        font-size: 0.9rem;
+    }
+}
+
+/* ===== ≥ 480px ===== */
+@media (min-width: 480px) {
+    .verticalImageContainer {
+        height: 250px;
+    }
+
+    .bottomImageContainer {
+        height: 200px;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .serviceTitle {
+        font-size: 1.1rem;
+    }
+
+    .serviceDescription {
+        font-size: 0.95rem;
+    }
+}
+
+/* ===== ≥ 768px ===== */
+@media (min-width: 768px) {
+    .section {
+        grid-template-columns: 1fr 1fr;
+        padding: 4.5rem 2rem;
+        gap: 2.5rem;
+    }
+
+    .verticalImageContainer {
+        height: 350px;
+    }
+
+    .bottomImageContainer {
+        height: 250px;
+    }
+
+    .title {
+        font-size: 2.3rem;
+    }
+
+    .serviceTitle {
+        font-size: 1.15rem;
+    }
+
+    .serviceDescription {
+        font-size: 1rem;
+    }
+}
+
+/* ===== ≥ 1024px ===== */
+@media (min-width: 1024px) {
+    .section {
+        grid-template-columns: 0.8fr 1.2fr;
+        padding: 5rem 2rem;
+        gap: 3rem;
+    }
+
+    .verticalImageContainer {
+        height: 400px;
+    }
+
+    .bottomImageContainer {
+        height: 300px;
+    }
+
+    .title {
+        font-size: 2.5rem;
+    }
+
+    .serviceTitle {
+        font-size: 1.2rem;
+    }
+
+    .serviceDescription {
+        font-size: 1rem;
+    }
+}

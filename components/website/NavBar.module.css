@@ -1,0 +1,678 @@
+.navPlaceholder {
+    --nav-height: 90px;
+}
+
+.navBar {
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 6%;
+    height: var(--nav-height);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    /* Softer shadow */
+    width: 100%;
+    z-index: 1000;
+    transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1), background-color 0.4s ease, height 0.4s ease, box-shadow 0.4s ease;
+    position: relative;
+    transform: translateY(0);
+}
+
+.navPlaceholder {
+    height: var(--nav-height);
+    width: 100%;
+}
+
+.scrolled {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 80px;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+    transform: translateY(-120%);
+    box-shadow: none !important;
+}
+
+.logoContainer {
+    width: 320px;
+    /* increased from 200px */
+    height: 120px;
+    /* increased from 60px */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    flex-shrink: 0;
+    z-index: 1003;
+    position: relative;
+}
+
+.logoImage {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.links {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    margin-left: auto;
+    /* Push to right */
+    height: 100%;
+}
+
+/* Initially hide mobile elements on desktop */
+.mobileLogoContainer,
+.mobileAuthFooter {
+    display: none;
+}
+
+/* Wrapper for links needs to flow horizontally on desktop */
+.mobileMenuContent {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.navItem {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.link {
+    font-family: 'Trueno', sans-serif;
+    font-weight: 600;
+    /* Slightly bolder for readability */
+    color: #333333;
+    font-size: 1.2rem;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s ease;
+}
+
+.link:hover,
+.navItem:hover>.link {
+    color: var(--primary-olive);
+}
+
+.active {
+    color: var(--primary-olive);
+    font-weight: 600;
+}
+
+/* Dropdown Menu Styles */
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    /* transform: translateX(-50%) translateY(20px); removed by user */
+    background-color: white;
+    min-width: 220px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    /* More rounded */
+    padding: 12px 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    z-index: 1001;
+    border-top: 3px solid var(--primary-olive);
+    display: flex;
+    flex-direction: column;
+}
+
+.navItem:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    /* transform: translateX(-50%) translateY(0); removed by user */
+}
+
+.dropdownItem {
+    display: block;
+    padding: 12px 24px;
+    color: #444;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.dropdownItem:hover {
+    background-color: #f8f9fa;
+    color: var(--primary-olive);
+}
+
+.bookBtn {
+    background-color: var(--dark-btn);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+    font-size: 0.95rem;
+}
+
+.bookBtn:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+}
+
+/* Hamburger Icon */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    width: 52px;
+    /* wider = rectangle */
+    height: 44px;
+
+    background-color: transparent;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    /* tighter corners for rectangle look */
+
+    cursor: pointer;
+    z-index: 2002;
+    padding: 0;
+    gap: 6px;
+
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        border-color 0.25s ease,
+        background-color 0.25s ease,
+        transform 0.2s ease;
+}
+
+.bar {
+    height: 2px;
+    width: 28px;
+    background-color: #1a1a1a;
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+    position: relative;
+    left: 0;
+}
+
+/* Transform to "X" when active */
+.hamburger.open .bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.open .bar:nth-child(2) {
+    opacity: 0;
+    transform: translateX(-10px);
+    /* Clean fade out */
+}
+
+.hamburger.open .bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+
+/* ==========================
+   MOBILE MENU & RESPONSIVE STYLES
+   ========================== */
+
+/* 1. Mobile Menu & General Mobile Styles (≤1024px) */
+@media (max-width: 1024px) {
+
+    /* Navbar */
+    .navBar {
+        padding: 0 5%;
+        height: 80px;
+        --nav-height: 80px;
+        /* Restore default navbar styles */
+        background-color: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    .navPlaceholder {
+        height: 80px;
+        --nav-height: 80px;
+    }
+
+    /* Restore logo on mobile navbar */
+    .logoContainer {
+        display: flex;
+    }
+
+    /* Hamburger */
+    .hamburger {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 44px;
+        height: 40px;
+        background-color: transparent;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        cursor: pointer;
+        z-index: 2002;
+        padding: 0;
+        gap: 5px;
+        /* Restore default hamburger positioning */
+        position: static;
+        /* Or remove if it inherits from global */
+        top: auto;
+        right: auto;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+            border-color 0.25s ease,
+            background-color 0.25s ease,
+            transform 0.2s ease;
+        box-shadow: none;
+        /* Or remove if it inherits from global */
+    }
+
+    .bar {
+        height: 2px;
+        width: 24px;
+        background-color: #1a1a1a;
+        border-radius: 4px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: center;
+        position: relative;
+        left: 0;
+    }
+
+    /* Hamburger open "X" animation */
+    .hamburger.open .bar:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .hamburger.open .bar:nth-child(2) {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    .hamburger.open .bar:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* Logo */
+    .logoContainer {
+        width: auto;
+        max-width: 60%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        overflow: hidden;
+        flex-shrink: 1;
+        z-index: 1003;
+        position: relative;
+    }
+
+    .logoImage {
+        height: 80%;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    /* Links - Mobile Menu Slider (completely hidden when closed) */
+    .links {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 100vw;
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 0;
+        padding-top: 40px;
+        padding-left: 5%;
+        transform: translateX(-101%);
+        transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+        z-index: 2001;
+        box-shadow: none;
+    }
+
+    .links.mobileOpen {
+        transform: translateX(0);
+        box-shadow: none;
+    }
+
+    /* Mobile logo inside menu */
+    .mobileLogoContainer {
+        display: flex;
+        width: 100%;
+        margin-bottom: 20px;
+        padding-right: 20px;
+    }
+
+    .mobileLogo {
+        height: 140px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    /* Nav items & links */
+    .navItem,
+    .link,
+    .bookBtn {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        text-align: left;
+    }
+
+    .link {
+        font-size: 1.3rem;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .navItem {
+        flex-direction: column;
+        height: auto;
+    }
+
+    /* .navItem .link {
+        border-bottom: none;
+    } Removed to allow divider lines */
+
+    .navItem .dropdown {
+        position: static;
+        width: 100%;
+        transform: none;
+        box-shadow: none;
+        border-top: none;
+        border-radius: 0;
+        background-color: transparent;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        /* Accordion Animation Properties */
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        visibility: visible;
+        transition:
+            max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 0.3s ease,
+            margin 0.3s ease,
+            padding 0.3s ease;
+    }
+
+    .navItem .dropdown.open {
+        max-height: 500px;
+        opacity: 1;
+        margin-bottom: 15px;
+        padding-left: 5%;
+    }
+
+    .dropdownItem {
+        padding: 10px 0;
+        font-size: 1.1rem;
+        color: #666;
+        text-align: left;
+        width: 100%;
+    }
+
+    .dropdownItem:hover {
+        padding-left: 0;
+        background-color: transparent;
+        color: var(--primary-olive);
+    }
+
+    /* Book button hidden in mobile menu */
+    .bookBtn {
+        display: none;
+    }
+
+    /* Mobile Menu Layout */
+    .mobileMenuContent {
+        flex: 1;
+        width: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        /* Force column on mobile */
+        gap: 0;
+        /* Remove desktop gap */
+        padding-bottom: 20px;
+        align-items: flex-start;
+        /* Left align items */
+        height: auto;
+        /* Reset height */
+    }
+
+    /* Mobile Auth Footer */
+    .mobileAuthFooter {
+        display: flex;
+        /* Override display: none */
+        flex-direction: column;
+        width: 100%;
+        padding: 0 0 150px 0;
+        /* Lift up more and align left (0 trim) */
+        /* border-top removed */
+        margin-top: auto;
+    }
+
+    .mobileAuthLinks,
+    .mobileAuthUser {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .mobileAuthLink {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.1rem;
+        color: #333;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .mobileAuthIconWrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobileAuthDivider {
+        margin: 0 15px;
+        color: #ccc;
+    }
+
+    .mobileUserImage {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+
+    .mobileUserName {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .mobileLogoutBtn {
+        background: none;
+        border: none;
+        font-family: inherit;
+        font-size: 1.1rem;
+        color: #333;
+        cursor: pointer;
+        padding: 0;
+    }
+}
+
+/* ==========================
+   SMALLER MOBILE SCREENS
+   ========================== */
+
+/* 480px and below */
+@media (max-width: 480px) {
+
+    .navBar,
+    .navPlaceholder {
+        height: 85px;
+        --nav-height: 85px;
+    }
+
+    .links {
+        padding-top: 30px;
+        padding-left: 4%;
+    }
+
+    .mobileLogo {
+        height: 130px;
+    }
+
+    .link {
+        font-size: 1.2rem;
+        padding: 12px 0;
+    }
+
+    .dropdownItem {
+        font-size: 1rem;
+        padding: 8px 0;
+    }
+
+    .logoContainer {
+        /* width: 330px; removed */
+        height: 100%;
+    }
+
+    .logoImage {
+        height: 100%;
+    }
+
+    .hamburger {
+        width: 48px;
+        height: 40px;
+        gap: 5px;
+    }
+
+    .bar {
+        width: 24px;
+        height: 2px;
+    }
+}
+
+/* 420px and below */
+@media (max-width: 420px) {
+    .mobileLogo {
+        height: 120px;
+    }
+
+    .link {
+        font-size: 1.2rem;
+        padding: 10px 0;
+    }
+
+    .dropdownItem {
+        font-size: 1.0rem;
+        padding: 6px 0;
+    }
+
+    .logoContainer {
+        height: 100%;
+    }
+
+    .hamburger {
+        width: 44px;
+        height: 36px;
+        gap: 4px;
+    }
+
+    .bar {
+        width: 22px;
+        height: 2px;
+    }
+}
+
+/* 380px and below */
+@media (max-width: 380px) {
+    .mobileLogo {
+        height: 100px;
+    }
+
+    .link {
+        font-size: 1rem;
+        padding: 8px 0;
+    }
+
+    .dropdownItem {
+        font-size: 0.9rem;
+        padding: 5px 0;
+    }
+}
+
+/* 360px and below */
+@media (max-width: 360px) {
+    .mobileLogo {
+        height: 90px;
+    }
+
+    .link {
+        font-size: 0.95rem;
+        padding: 6px 0;
+    }
+
+    .dropdownItem {
+        font-size: 0.85rem;
+        padding: 4px 0;
+    }
+
+    .links {
+        padding-left: 3%;
+    }
+
+    .logoContainer {
+        height: 100%;
+    }
+
+    .hamburger {
+        width: 40px;
+        height: 32px;
+        gap: 3px;
+    }
+
+    .bar {
+        width: 20px;
+        height: 2px;
+    }
+
+    .logoImage {
+        height: 100%;
+    }
+}

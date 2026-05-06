@@ -1,0 +1,227 @@
+
+
+=== PAGE 1 ===
+
+    
+SYSTEM & INFORMATION TECHNOLOGY  
+DEPARTMENT   
+DEVELOPMENT AND INNOVATION UNIT   
+  
+GCB BANK LTD  –   PAYMENT  
+GATEWAY API DOCUMENTATION   
+        
+  
+
+=== PAGE 2 ===
+
+  
+TABLE OF CONTENTS   
+  
+Overview   ................................ ................................ ................................ ................................ .......................   2   
+Authentication and Security   ................................ ................................ ................................ ........................   2   
+Payment Gateway Transaction Flow   ................................ ................................ ................................ ...........   3   
+Checkout Endpoint   ................................ ................................ ................................ ................................ .......   4   
+Status Check Endpoint   ................................ ................................ ................................ ................................ .   5   
+Callback Service   ................................ ................................ ................................ ................................ ............   5   
+Appendix   ................................ ................................ ................................ ................................ .......................   6   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+P a g e   |  1   
+
+=== PAGE 3 ===
+
+Overview   
+  
+The  GCB  Payment Gateway enables seamless and secure payment processing for digital transactions   fo r our  
+customers. The gateway consists of REST APIS and a n online Checkout page  that customers can leverage in the  
+Web and Mobile Apps in taking payments.  This  R EST  API provides two primary endpoints :    
+  
+1. Checkout Endpoint  -   Initiates a payment transaction.   
+2. Status Check Endpoint  -   Verifies the status of a payment transaction.   
+  
+  
+Authentication   and Security   
+  
+GCB Payment Gateway provides a simple yet secure way of taking payments from customers. The gateway is  
+secured by the following measures.    
+1.   GCB provides the caller with an X - Api - Key. This key should be passed in the header for all requests to the  
+Payment Gateway REST APIs   
+  
+2.   GCB will need to whitelist the IP of the caller before the caller application can access the REST API.    
+(This requirement is relaxed in the UAT/TEST environment)   
+  
+3.   GCB does not keep any  sen s itive  card information about the customer   
+  
+4.   Checkout Page generated expires after 5 minutes. (This requirement is relaxed in the UAT/TEST  
+environment)   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+P a g e   |  2   
+
+=== PAGE 4 ===
+
+P ayment Gateway Transaction Flow   
+  
+  
+  
+1.   Merchant Calls Checkout API: Merchant calls Checkout API. The response to the API includes a URL to  
+which customers must be redirected to.   
+  
+2.   Merchant redirects Customer to the URL from the response to the Checkout API. Merchant keeps track of  
+the  CheckOutId   and  MerchantRef .    
+  
+  
+3.   The Customer proceeds to make payment on the CheckOut Page. Once payment is completed, customer is  
+redirected back to merchant’s platform. The URL to which the customer is redirected is the one included in  
+the original Checkout API call. The merchant’s  MerchantRef   is appended to the URL when customer is  
+redirected back to the Merchant’s platform.    
+  
+4.   Once Customer is back on Merchant’s platform, merchant extracts the  MerchantRef   from the URL and calls  
+the  Transaction  Status  Check  API  using  the  corresponding  CheckOutId ,  which  should  be  stored  in  
+Merchant’s System.   
+  
+  
+  
+  
+P a g e   |  3   
+
+=== PAGE 5 ===
+
+Ch e ckout Endpoint   
+The Checkout Endpoint is  called by the   initiating platform  to   initiate a payment request by submitting  
+transaction details.    
+  
+Method:  POST   
+URL:  /checkout   
+  
+Sample  Request   
+{   
+        "merchantRef" :  "   AA000000000001 " ,   
+        "amount" :  10 ,   
+        "currency" :  " GHS " ,   
+        "description" :  " Fee Payment " ,   
+        "paymentOption" :  null ,   
+        "callbackUrl" :  "   http s ://example - callback.com "   
+}   
+  
+REQUEST DEFINITIONS   
+META   DEFINITION    Required   COMMENTS   
+merchantRef   A unique reference provided by  caller   to  YES   Alphanume ric   
+uniquely identify transaction   Max Length (20)   
+amount   Amount to debit from customer    YES   Two decimal places   
+currency   Currency   of checkout transaction   YES      Max Length (3)   
+d escription   Description  of transaction   YES   Max Length (500)   
+paymentOption   Specify which payment option should be  NO   See Appendix for options   
+available to payer   
+callBackUrl   Url to redirect customer after payment is  YES   Max Length (500)   
+completed   
+Sample Response   
+{   
+" checkOutUrl " :   " https://epayuat.gcbltd.com:98/paymentgateway/checkout?id=afc44af7 - a4b0 - 4c52 - ba9f - a3af1792d4c2 " ,   
+" checkOutId " :   "afc44af7 - a4b0 - 4c52 - ba9f - a3af1792d4c2"   
+}   
+  
+RESPONSE DEFINITIONS   ( NE GIP )   
+META   DEFINITION   
+checkOurUrl   Url of  c heckout page to redirect customer   where they can complete payment    
+checkOutId   Unique Id to identity transaction provided by GCB   
+    
+P a g e   |  4   
+
+=== PAGE 6 ===
+
+Status Check   Endpoint   
+The status check endpoint allows the consumer to confirm the status of the checkout transaction. The  
+endpoint also provides additional information on when the payment was completed and what payment  
+method  the payer   used to complete the payment process.   
+Method:  GET   
+URL:  transactions/ { checkOutId } /status   
+  
+Sample  Response   
+{   
+     "   merchantRef " :   " AA000000000001 " ,   
+     "   status " :   " 00 " ,   
+     "   bankRef " :   " 999EPAY0000001 " ,   
+     "   timeCompleted " :   " 2025 - 03 - 03 19:00:00 " ,   
+     "   paymentOption " :   " card "   
+}   
+  
+RESPONSE   DEFINITIONS   
+KEY   DEFINITION    
+merchantRef   A unique reference provided by caller to uniquely identify transaction   
+status   Status code of transaction . See below for codes and descriptions.   
+bankref   Reference for transaction statement entry that is credited to caller’s bank account   
+timeCompleted   Time payer completed payment   
+paymentOption   The payment option that was used by payer for completing payment   
+  
+Callback Service   
+The GCB Payment Gateway features an optional callback service  that is availabl e for merchants to ensure timely  
+system updates when transactions are processed. The Gateway pushes a REST call (details below) to a Callback  
+Service URL provided by the Merchant during setup.  GCB will provide IPs for your whitelisting to ensure callback  
+requests only come from GCB   
+Request   
+{   
+    "merchantRef" : "A0000000000001" ,   
+    "statusCode" : "00" ,   
+    "timeCompleted" : "2025 - 03 - 01 13:05:00" ,   
+    "bankRef" : "139EPAY0000025" ,   
+    "paymentOption" : "card"   
+}   
+  
+Expected  Result:   HTTP Status Code: 200   
+N.B. Payment Gateway will continue to send the Callback in 5 - minute intervals for about 30 minutes if any other  
+HTTP Status Code is received.   
+P a g e   |  5   
+
+=== PAGE 7 ===
+
+Appendix   
+  
+  
+Payment Options   
+OPTION   DEFINITION    
+momo   Mobile money services e.g. MTN Mobile Money, Vodafone Cash   
+card   Card Payments, e.g. VISA, MASTERCARD   
+gcb   Payment with GCB Account   
+mtn   MTN  Mobile   M oney service   
+vodafone   Telecel Cash Service   
+airteltigo   AT Cash Service   
+  
+  
+Transaction Status Codes   
+CODE   DEFINITION    
+00   Payment Successful   
+01   Payment Pending   
+02   Payment Failed   
+03   Checkout Url Expired   
+04   Checkout Id not found or  any other caller error   
+05   Internal Error   
+  
+P a g e   |  6   
