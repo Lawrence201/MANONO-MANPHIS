@@ -255,7 +255,7 @@ export async function POST(request: Request) {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Camp Elim Africa</h1>
+            <h1>Monophis</h1>
             <p>Booking Amendment Invoice</p>
         </div>
         
@@ -289,7 +289,7 @@ export async function POST(request: Request) {
                 <p style="color: #4b5563; font-size: 14px; margin-bottom: 16px;">
                     Please complete the payment to confirm your amended booking.
                 </p>
-                <a href="${process.env.NEXTAUTH_URL || 'https://campelim.org'}/hall-booking?ref=${booking.reference}" class="pay-btn">
+                <a href="${process.env.NEXTAUTH_URL || 'https://monophis.com'}/hall-booking?ref=${booking.reference}" class="pay-btn">
                     Pay Now
                 </a>
             </div>
@@ -332,11 +332,11 @@ export async function POST(request: Request) {
         </div>
         
         <div class="footer">
-            <p><strong>Camp Elim Africa</strong></p>
+            <p><strong>Monophis</strong></p>
             <p>Accra, Ghana</p>
             <p>
                 <a href="tel:+233539770722">+233 539 770 722</a> &nbsp;|&nbsp; 
-                <a href="mailto:emily@campelimafrica.org">emily@campelimafrica.org</a>
+                <a href="mailto:lawrenceantwi63@gmail.com">lawrenceantwi63@gmail.com</a>
             </p>
             <p style="margin-top: 16px; font-size: 11px; color: #9ca3af;">
                 This is an automated invoice. Please do not reply directly to this email.
@@ -349,7 +349,7 @@ export async function POST(request: Request) {
 
         // Send invoice email
         await transporter.sendMail({
-            from: `"Camp Elim Africa" <${process.env.SMTP_USER}>`,
+            from: `"Monophis" <${process.env.SMTP_USER}>`,
             to: booking.email,
             subject: `Invoice for Amended Booking - ${booking.reference}`,
             html: invoiceHtml

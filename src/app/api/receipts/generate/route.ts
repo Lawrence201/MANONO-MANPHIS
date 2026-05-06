@@ -51,7 +51,7 @@ async function loadImageAsBase64(imagePath: string): Promise<string | null> {
         // Try the original path first, then try uppercase PNG
         const pathsToTry = [imagePath];
         if (imagePath.toLowerCase().endsWith('.png')) {
-            pathsToTry.push(imagePath.replace(/\.png$/i, '.PNG'));
+            pathsToTry.push(imagePath.replace(/\.png$/i, '.png'));
         }
 
         for (const tryPath of pathsToTry) {
@@ -96,7 +96,7 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Buffer> {
     const borderGray: [number, number, number] = [229, 231, 235];
 
     // ============ HEADER ============
-    const logoBase64 = await loadImageAsBase64('/logo.PNG');
+    const logoBase64 = await loadImageAsBase64('/logo.png');
     if (logoBase64) {
         try {
             doc.addImage(logoBase64, 'PNG', margin, y, 40, 16, undefined, 'FAST');
@@ -104,13 +104,13 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Buffer> {
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(37, 99, 235);
-            doc.text('Camp Elim Africa', margin, y + 10);
+            doc.text('Monophis', margin, y + 10);
         }
     } else {
         doc.setFontSize(18);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(37, 99, 235);
-        doc.text('Camp Elim Africa', margin, y + 10);
+        doc.text('Monophis', margin, y + 10);
     }
 
     doc.setFontSize(11);
@@ -125,11 +125,11 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Buffer> {
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...grayText);
-    doc.text('CampElimAfrica, Ghana', margin, y);
+    doc.text('Monophis, Ghana', margin, y);
     doc.text(`Receipt #: ${data.reference}`, pageWidth - margin, y, { align: 'right' });
 
     y += 4;
-    doc.text('emily@campelimafrica.org     +233 539770722', margin, y);
+    doc.text('emily@Monophis.org     +233 539770722', margin, y);
     doc.text(`Date: ${data.paymentDate}`, pageWidth - margin, y, { align: 'right' });
 
     y += 8;
@@ -308,7 +308,7 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Buffer> {
     y += 4;
 
     // ============ STAMP ============
-    const stampBase64 = await loadImageAsBase64('/stamp.PNG');
+    const stampBase64 = await loadImageAsBase64('/stamp.png');
     console.log('Stamp loaded:', stampBase64 ? 'SUCCESS' : 'FAILED');
     if (stampBase64) {
         try {
@@ -389,7 +389,7 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Buffer> {
     doc.setFont('helvetica', 'normal');
 
     const centerX = pageWidth / 2;
-    doc.text('Thank you for choosing Camp Elim Africa!', centerX, footerY, { align: 'center' });
+    doc.text('Thank you for choosing Monophis!', centerX, footerY, { align: 'center' });
     doc.text('This is an electronically generated receipt and does not require a signature.', centerX, footerY + 4, { align: 'center' });
 
     const now = new Date();

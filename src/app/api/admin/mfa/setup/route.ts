@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
         }
 
         const secret = generateSecret();
-        const appName = "CampElimAfrica Admin";
+        const appName = "Monophis Admin";
 
         const otpAuthUrl = generateURI({
             secret,

@@ -180,7 +180,7 @@ export async function sendBookingNotification(booking: BookingDetails) {
             </div>
         </div>
         <div class="footer">
-            <p>Camp Elim Africa Booking System</p>
+            <p>Monophis Booking System</p>
             <p>This is an automated notification. Please do not reply to this email.</p>
         </div>
     </div>
@@ -195,7 +195,7 @@ export async function sendBookingNotification(booking: BookingDetails) {
         }
         const transporter = getTransporter();
         const info = await transporter.sendMail({
-            from: `"Camp Elim Africa" <${process.env.SMTP_USER}>`,
+            from: `"Monophis" <${process.env.SMTP_USER}>`,
             to: allRecipients.join(', '),
             subject: subject,
             html: htmlContent,
@@ -253,7 +253,7 @@ export async function sendReceiptToClient(details: ClientReceiptDetails) {
         const pdfBuffer = details.pdfBuffer;
         console.log('[Email] Using provided PDF buffer, size:', pdfBuffer.length, 'bytes');
 
-        const subject = `Your Camp Elim Africa Booking Receipt - ${details.reference}`;
+        const subject = `Your Monophis Booking Receipt - ${details.reference}`;
         const facilityList = details.facilityNames.join(', ');
 
         const htmlContent = `
@@ -291,7 +291,7 @@ export async function sendReceiptToClient(details: ClientReceiptDetails) {
     <div class="container">
         <div class="header">
             <h1>Booking Confirmed!</h1>
-            <p>Thank you for choosing Camp Elim Africa</p>
+            <p>Thank you for choosing Monophis</p>
         </div>
         <div class="content">
             <p class="greeting">Dear ${details.customerName},</p>
@@ -323,10 +323,10 @@ export async function sendReceiptToClient(details: ClientReceiptDetails) {
             </div>
         </div>
         <div class="footer">
-            <p><strong>Camp Elim Africa</strong></p>
+            <p><strong>Monophis</strong></p>
             <p>Your Premier Conference & Retreat Destination</p>
             <div class="contact">
-                <p><a href="mailto:emily@campelimafrica.org">emily@campelimafrica.org</a> | +233 539 770 722</p>
+                <p><a href="mailto:lawrenceantwi63@gmail.com">lawrenceantwi63@gmail.com</a> | +233 539 770 722</p>
             </div>
         </div>
     </div>
@@ -336,13 +336,13 @@ export async function sendReceiptToClient(details: ClientReceiptDetails) {
 
         // Build email options with PDF always attached
         const mailOptions: any = {
-            from: `"Camp Elim Africa" <${process.env.SMTP_USER}>`,
+            from: `"Monophis" <${process.env.SMTP_USER}>`,
             to: details.email,
             subject: subject,
             html: htmlContent,
             attachments: [
                 {
-                    filename: `CampElim-Receipt-${details.reference}.pdf`,
+                    filename: `Monophis-Receipt-${details.reference}.pdf`,
                     content: pdfBuffer,
                     contentType: 'application/pdf'
                 }

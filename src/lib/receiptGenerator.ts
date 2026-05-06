@@ -118,8 +118,8 @@ export async function generateBookingReceipt(data: BookingReceiptData): Promise<
 
     // Load images
     const [logoBase64, stampBase64] = await Promise.all([
-        loadImageAsBase64('/logo.PNG'),
-        loadImageAsBase64('/stamp.PNG')
+        loadImageAsBase64('/logo.png'),
+        loadImageAsBase64('/stamp.png')
     ]);
 
     // ============ HEADER ============
@@ -130,7 +130,7 @@ export async function generateBookingReceipt(data: BookingReceiptData): Promise<
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(37, 99, 235);
-            doc.text('Camp Elim Africa', margin, y + 10);
+            doc.text('Monophis', margin, y + 10);
         }
     }
 
@@ -146,11 +146,11 @@ export async function generateBookingReceipt(data: BookingReceiptData): Promise<
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...grayText);
-    doc.text('CampElimAfrica, Ghana', margin, y);
+    doc.text('Monophis, Ghana', margin, y);
     doc.text(`Receipt #: ${data.reference}`, pageWidth - margin, y, { align: 'right' });
 
     y += 4;
-    doc.text('emily@campelimafrica.org     +233 539770722', margin, y);
+    doc.text('emily@Monophis.org     +233 539770722', margin, y);
     doc.text(`Date: ${data.paymentDate}`, pageWidth - margin, y, { align: 'right' });
 
     y += 8;
@@ -397,7 +397,7 @@ export async function generateBookingReceipt(data: BookingReceiptData): Promise<
     doc.setFont('helvetica', 'normal');
 
     const centerX = pageWidth / 2;
-    doc.text('Thank you for choosing Camp Elim Africa!', centerX, footerY, { align: 'center' });
+    doc.text('Thank you for choosing Monophis!', centerX, footerY, { align: 'center' });
     doc.text('This is an electronically generated receipt and does not require a signature.', centerX, footerY + 4, { align: 'center' });
 
     const now = new Date();
@@ -431,7 +431,7 @@ export async function generatePendingRequestPDF(data: PendingRequestData): Promi
     const borderGray: [number, number, number] = [229, 231, 235];
 
     // Load logo
-    const logoBase64 = await loadImageAsBase64('/logo.PNG');
+    const logoBase64 = await loadImageAsBase64('/logo.png');
 
     // ============ HEADER ============
     if (logoBase64) {
@@ -441,7 +441,7 @@ export async function generatePendingRequestPDF(data: PendingRequestData): Promi
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(37, 99, 235);
-            doc.text('Camp Elim Africa', margin, y + 10);
+            doc.text('Monophis', margin, y + 10);
         }
     }
 
@@ -455,11 +455,11 @@ export async function generatePendingRequestPDF(data: PendingRequestData): Promi
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...grayText);
-    doc.text('CampElimAfrica, Ghana', margin, y);
+    doc.text('Monophis, Ghana', margin, y);
     doc.text(`Request #: ${data.reference}`, pageWidth - margin, y, { align: 'right' });
 
     y += 4;
-    doc.text('emily@campelimafrica.org     +233 539770722', margin, y);
+    doc.text('emily@Monophis.org     +233 539770722', margin, y);
     doc.text(`Date: ${data.requestDate}`, pageWidth - margin, y, { align: 'right' });
 
     y += 8;
@@ -670,7 +670,7 @@ export async function generatePendingRequestPDF(data: PendingRequestData): Promi
     doc.setFont('helvetica', 'normal');
 
     const centerX = pageWidth / 2;
-    doc.text('Thank you for choosing Camp Elim Africa!', centerX, footerY, { align: 'center' });
+    doc.text('Thank you for choosing Monophis!', centerX, footerY, { align: 'center' });
     doc.text('This is a formal request document and NOT a payment receipt or invoice.', centerX, footerY + 4, { align: 'center' });
 
     const generatedText = `Generated on ${new Date().toLocaleDateString('en-GB')} at ${new Date().toLocaleTimeString('en-US')}`;
@@ -703,7 +703,7 @@ export async function generateInternalInvoiceData(data: BookingReceiptData): Pro
     const borderGray: [number, number, number] = [229, 231, 235];
 
     // Load images
-    const logoBase64 = await loadImageAsBase64('/logo.PNG');
+    const logoBase64 = await loadImageAsBase64('/logo.png');
 
     // ============ HEADER ============
     if (logoBase64) {
@@ -713,7 +713,7 @@ export async function generateInternalInvoiceData(data: BookingReceiptData): Pro
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(37, 99, 235);
-            doc.text('Camp Elim Africa', margin, y + 10);
+            doc.text('Monophis', margin, y + 10);
         }
     }
 
@@ -727,11 +727,11 @@ export async function generateInternalInvoiceData(data: BookingReceiptData): Pro
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...grayText);
-    doc.text('CampElimAfrica, Ghana', margin, y);
+    doc.text('Monophis, Ghana', margin, y);
     doc.text(`Reference #: ${data.reference}`, pageWidth - margin, y, { align: 'right' });
 
     y += 4;
-    doc.text('emily@campelimafrica.org     +233 539770722', margin, y);
+    doc.text('emily@Monophis.org     +233 539770722', margin, y);
     doc.text(`Generated: ${data.paymentDate}`, pageWidth - margin, y, { align: 'right' });
 
     y += 8;
@@ -929,7 +929,7 @@ export async function generateInternalInvoiceData(data: BookingReceiptData): Pro
     doc.setTextColor(...grayText);
     doc.setFont('helvetica', 'normal');
     const centerX = pageWidth / 2;
-    doc.text(`Camp Elim Africa - Internal ${data.facilityType || 'Hall'} Invoice`, centerX, footerY, { align: 'center' });
+    doc.text(`Monophis - Internal ${data.facilityType || 'Hall'} Invoice`, centerX, footerY, { align: 'center' });
     doc.setFontSize(7);
     doc.text('Internal Copy', centerX, footerY + 4, { align: 'center' });
 
@@ -953,7 +953,7 @@ export const generateInternalInvoicePDF = async (data: BookingReceiptData) => {
     const borderGray: [number, number, number] = [229, 231, 235];
 
     // Load images
-    const logoBase64 = await loadImageAsBase64('/logo.PNG');
+    const logoBase64 = await loadImageAsBase64('/logo.png');
 
     // ============ HEADER ============
     if (logoBase64) {
@@ -963,7 +963,7 @@ export const generateInternalInvoicePDF = async (data: BookingReceiptData) => {
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(37, 99, 235);
-            doc.text('Camp Elim Africa', margin, y + 10);
+            doc.text('Monophis', margin, y + 10);
         }
     }
 
@@ -977,11 +977,11 @@ export const generateInternalInvoicePDF = async (data: BookingReceiptData) => {
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...grayText);
-    doc.text('CampElimAfrica, Ghana', margin, y);
+    doc.text('Monophis, Ghana', margin, y);
     doc.text(`Reference #: ${data.reference}`, pageWidth - margin, y, { align: 'right' });
 
     y += 4;
-    doc.text('emily@campelimafrica.org     +233 539770722', margin, y);
+    doc.text('emily@Monophis.org     +233 539770722', margin, y);
     doc.text(`Generated: ${data.paymentDate || formatReceiptDate(new Date())}`, pageWidth - margin, y, { align: 'right' });
 
     y += 8;
@@ -1179,7 +1179,7 @@ export const generateInternalInvoicePDF = async (data: BookingReceiptData) => {
     doc.setTextColor(...grayText);
     doc.setFont('helvetica', 'normal');
     const centerX = pageWidth / 2;
-    doc.text(`Camp Elim Africa - Internal ${data.facilityType || 'Hall'} Invoice`, centerX, footerY, { align: 'center' });
+    doc.text(`Monophis - Internal ${data.facilityType || 'Hall'} Invoice`, centerX, footerY, { align: 'center' });
     doc.setFontSize(7);
     doc.text('Internal Copy', centerX, footerY + 4, { align: 'center' });
 

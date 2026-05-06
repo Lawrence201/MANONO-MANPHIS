@@ -11,7 +11,7 @@ export function WebsiteFooter() {
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center gap-0 mb-6">
               <Image 
-                src="/logo.PNG" 
+                src="/logo.png" 
                 alt="Logo" 
                 width={100} 
                 height={100} 

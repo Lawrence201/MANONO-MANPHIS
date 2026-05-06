@@ -22,44 +22,44 @@ interface SendEmailRequest {
 // Email templates
 const templates: Record<string, { subject: string; body: string }> = {
     welcome: {
-        subject: 'Welcome to Camp Elim Africa!',
+        subject: 'Welcome to Monophis!',
         body: `
             <p>Dear {{name}},</p>
-            <p>Welcome to Camp Elim Africa! We are thrilled to have you as part of our community.</p>
+            <p>Welcome to Monophis! We are thrilled to have you as part of our community.</p>
             <p>Whether you're planning a retreat, conference, wedding, or any special event, we're here to make your experience unforgettable.</p>
             <p>Feel free to explore our facilities and book your next event with us.</p>
-            <p>Warm regards,<br>Camp Elim Africa Team</p>
+            <p>Warm regards,<br>Monophis Team</p>
         `
     },
     reminder: {
-        subject: 'Reminder: Your Upcoming Event at Camp Elim Africa',
+        subject: 'Reminder: Your Upcoming Event at Monophis',
         body: `
             <p>Dear {{name}},</p>
-            <p>This is a friendly reminder about your upcoming event at Camp Elim Africa.</p>
+            <p>This is a friendly reminder about your upcoming event at Monophis.</p>
             <p>We're looking forward to hosting you and ensuring your event is a success!</p>
             <p>If you have any questions or need to make changes, please don't hesitate to contact us.</p>
-            <p>See you soon!<br>Camp Elim Africa Team</p>
+            <p>See you soon!<br>Monophis Team</p>
         `
     },
     promotion: {
-        subject: 'Special Offer Just for You - Camp Elim Africa',
+        subject: 'Special Offer Just for You - Monophis',
         body: `
             <p>Dear {{name}},</p>
             <p>We have an exciting offer just for you!</p>
-            <p>Book your next event at Camp Elim Africa and enjoy special discounts on our premium facilities.</p>
+            <p>Book your next event at Monophis and enjoy special discounts on our premium facilities.</p>
             <p>Don't miss out on this limited-time opportunity!</p>
             <p>Book now at <a href="https://campelim.africa">campelim.africa</a></p>
-            <p>Best regards,<br>Camp Elim Africa Team</p>
+            <p>Best regards,<br>Monophis Team</p>
         `
     },
     thankyou: {
-        subject: 'Thank You for Choosing Camp Elim Africa!',
+        subject: 'Thank You for Choosing Monophis!',
         body: `
             <p>Dear {{name}},</p>
-            <p>Thank you for choosing Camp Elim Africa for your event!</p>
+            <p>Thank you for choosing Monophis for your event!</p>
             <p>We hope you had a wonderful experience with us. Your satisfaction is our top priority.</p>
             <p>We would love to host you again in the future. Feel free to share your experience with friends and family!</p>
-            <p>With gratitude,<br>Camp Elim Africa Team</p>
+            <p>With gratitude,<br>Monophis Team</p>
         `
     }
 };
@@ -89,14 +89,14 @@ function wrapEmailHtml(content: string): string {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Camp Elim Africa</h1>
+            <h1>Monophis</h1>
             <p>Your Premier Event & Retreat Destination</p>
         </div>
         <div class="content">
             ${content}
         </div>
         <div class="footer">
-            <p>Camp Elim Africa | Ghana</p>
+            <p>Monophis | Ghana</p>
             <p style="display: flex; align-items: center; justify-content: center; gap: 20px;">
                 <span style="display: flex; align-items: center; gap: 5px;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
                     .replace(/\{\{name\}\}/g, recipient.name);
 
                 await transporter.sendMail({
-                    from: `"Camp Elim Africa" <${process.env.SMTP_USER}>`,
+                    from: `"Monophis" <${process.env.SMTP_USER}>`,
                     to: recipient.email,
                     subject: personalizedSubject,
                     html: wrapEmailHtml(personalizedBody),

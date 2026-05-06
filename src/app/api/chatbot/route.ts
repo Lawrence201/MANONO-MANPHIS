@@ -9,7 +9,7 @@ const genAI = process.env.GEMINI_API_KEY
 
 // Static knowledge base for general info (kept for context building)
 const staticKnowledge = {
-    about: `Camp Elim Africa is a premier Christian retreat and community center dedicated to serving faith, learning, and charity. We offer world-class facilities including event halls, comfortable hostels, and comprehensive event packages for retreats, conferences, weddings, and more.`,
+    about: `Monophis is a premier Christian retreat and community center dedicated to serving faith, learning, and charity. We offer world-class facilities including event halls, comfortable hostels, and comprehensive event packages for retreats, conferences, weddings, and more.`,
 
     booking: `To book a facility:
 1. Browse available halls/hostels/packages on the website
@@ -20,7 +20,7 @@ const staticKnowledge = {
 URLs: /services/halls, /services/hostels, /services/packages`,
 
     contact: `Phone/WhatsApp: +233 27 993 1941
-Email: info@campelimafrica.com
+Email: info@Monophis.com
 Location: Fourth St, Accra, Ghana`,
 
     location: `Fourth St, Accra, Ghana. Easily accessible by road, offering a peaceful environment away from city noise.`,
@@ -90,9 +90,9 @@ function formatContext(data: any) {
 // Kept for robustness if AI service fails
 
 const greetings = [
-    "Hello! 👋 I'm Emily, your Camp Elim Africa assistant. What are you looking for today?",
+    "Hello! 👋 I'm Emily, your Monophis assistant. What are you looking for today?",
     "Hi there! I'm Emily. I can help you with halls, hostels, or packages. What do you need?",
-    "Welcome! I'm Emily. How can I help you plan your event at Camp Elim Africa?"
+    "Welcome! I'm Emily. How can I help you plan your event at Monophis?"
 ];
 
 async function getFallbackResponse(message: string): Promise<string> {
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
                 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
                 const systemPrompt = `
-You are Emily, the professional, friendly, and helpful AI assistant for Camp Elim Africa.
+You are Emily, the professional, friendly, and helpful AI assistant for Monophis.
 Your goal is to assist users by answering questions about facilities, booking, and services based strictly on the provided context.
 
 CONTEXT:
