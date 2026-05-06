@@ -54,6 +54,9 @@
   --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-antonio: "Antonio", sans-serif;
+  --font-anton: "Anton", sans-serif;
+  --font-bebas-neue: "Bebas Neue", sans-serif;
 }
 
 :root {
