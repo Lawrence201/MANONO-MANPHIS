@@ -15,7 +15,7 @@ const navGroups = [
   {
     label: "Core",
     items: [
-      { title: "Dashboard", url: "/", icon: LayoutDashboard },
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
       { title: "Analytics", url: "/analytics", icon: BarChart3 },
       { title: "Reports", url: "/reports", icon: FileBarChart },
     ],
@@ -86,7 +86,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
       )}
     >
       {/* Logo */}
-      <div className="h-16 flex items-center gap-2 px-4 border-b border-sidebar-border shrink-0">
+      <div className={cn("h-16 flex items-center border-b border-sidebar-border shrink-0 transition-all", collapsed ? "justify-center px-0" : "gap-2 px-4")}>
         <Image 
           src="/logo.PNG" 
           alt="Logo" 
@@ -94,25 +94,27 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
           height={40} 
           className="object-contain h-10 w-auto"
         />
-        {!collapsed && (
-          <div className="overflow-hidden">
-            <div className="font-display font-black text-sm tracking-tight text-white uppercase leading-none">
-              MANONO <span className="text-[#eea000]">MANPHIS</span>
-            </div>
-            <div className="text-[9px] text-sidebar-foreground/60 uppercase tracking-[0.2em] mt-1">Export OS</div>
+        <div className={cn(
+          "transition-all duration-300 overflow-hidden whitespace-nowrap ml-2",
+          collapsed ? "w-0 opacity-0 ml-0" : "w-full opacity-100"
+        )}>
+          <div className="font-display font-black text-sm tracking-tight text-white uppercase leading-none">
+            MANONO <span className="text-[#eea000]">MANPHIS</span>
           </div>
-        )}
+          <div className="text-[9px] text-sidebar-foreground/60 uppercase tracking-[0.2em] mt-1">Export OS</div>
+        </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-very-thin">
         {navGroups.map((group) => (
           <div key={group.label} className="mb-5">
-            {!collapsed && (
-              <div className="px-3 pb-2 text-[10px] uppercase tracking-widest text-sidebar-foreground/40 font-semibold">
-                {group.label}
-              </div>
-            )}
+            <div className={cn(
+              "px-3 pb-2 text-[10px] uppercase tracking-widest text-sidebar-foreground/40 font-semibold transition-all duration-300 overflow-hidden whitespace-nowrap",
+              collapsed ? "h-0 opacity-0 pb-0" : "h-auto opacity-100"
+            )}>
+              {group.label}
+            </div>
             <ul className="space-y-0.5">
               {group.items.map((item) => {
                 const isActive =
@@ -123,26 +125,26 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                     <Link
                       href={item.url}
                       className={cn(
-                        "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all relative",
+                        "group flex items-center rounded-lg py-2.5 text-sm font-medium transition-all relative",
+                        collapsed ? "justify-center px-0 mx-2" : "gap-3 px-3",
                         isActive
-                          ? "bg-sidebar-accent text-white shadow-sm"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-white"
+                          ? "text-[#f5f5f5]"
+                          : "text-[#a1a1a1] hover:text-white"
                       )}
                     >
-                      {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-accent" />
-                      )}
-                      <Icon className={cn("w-[18px] h-[18px] shrink-0", isActive && "text-accent")} />
-                      {!collapsed && (
-                        <>
-                          <span className="flex-1 truncate">{item.title}</span>
-                          {"badge" in item && item.badge && (
-                            <span className="text-[10px] font-semibold bg-accent/20 text-accent px-1.5 py-0.5 rounded-md">
-                              {item.badge}
-                            </span>
-                          )}
-                        </>
-                      )}
+
+                      <Icon className={cn(collapsed ? "w-[22px] h-[22px]" : "w-[18px] h-[18px]", "shrink-0 transition-all duration-300", isActive ? "text-[#f5f5f5]" : "text-[#a1a1a1] group-hover:text-white")} />
+                      <div className={cn(
+                        "flex-1 flex items-center justify-between transition-all duration-300 overflow-hidden whitespace-nowrap ml-3",
+                        collapsed ? "w-0 opacity-0 ml-0" : "w-full opacity-100"
+                      )}>
+                        <span className="truncate">{item.title}</span>
+                        {"badge" in item && item.badge && (
+                          <span className="text-[10px] font-semibold bg-accent/20 text-accent px-1.5 py-0.5 rounded-md ml-2">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
                     </Link>
                   </li>
                 );

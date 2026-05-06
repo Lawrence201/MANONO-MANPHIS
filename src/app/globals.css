@@ -239,6 +239,13 @@
   }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 
+  .scrollbar-very-thin::-webkit-scrollbar { width: 2px; height: 2px; }
+  .scrollbar-very-thin::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 1px;
+  }
+  .scrollbar-very-thin::-webkit-scrollbar-track { background: transparent; }
+
   @keyframes fade-in-up {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
@@ -259,4 +266,3 @@
     scrollbar-width: none;
   }
 }
-

@@ -2,7 +2,11 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import { AppSidebar } from "./app-sidebar";
-import { Search, Bell, Menu, Moon, Sun, ChevronDown, Plus, Clock } from "lucide-react";
+import { 
+  Search, Bell, Menu, Moon, Sun, ChevronDown, Plus, Clock, LayoutGrid, X, 
+  Building2, LayoutDashboard, Sparkles, TrendingUp, CreditCard, FileText, 
+  BarChart3, ShieldCheck, Monitor, Droplets, Nut, Leaf, PlusCircle, Settings
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -36,8 +40,9 @@ export function AppLayout({ children, title, subtitle, actions }: {
   subtitle?: string;
   actions?: ReactNode;
 }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [dark, setDark] = useState(false);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
 
   const toggleTheme = () => {
     const next = !dark;
@@ -47,7 +52,13 @@ export function AppLayout({ children, title, subtitle, actions }: {
 
   return (
     <div className={cn("h-screen w-full flex bg-background text-foreground overflow-hidden", dark && "dark")}>
-      <AppSidebar collapsed={collapsed} />
+      <div 
+        onMouseEnter={() => setCollapsed(false)}
+        onMouseLeave={() => setCollapsed(true)}
+        className="h-full flex shrink-0 transition-all duration-300 ease-in-out"
+      >
+        <AppSidebar collapsed={collapsed} />
+      </div>
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <header className="h-16 border-b border-border bg-white dark:bg-[#181818] flex items-center px-4 gap-4 sticky top-0 z-30 shadow-sm transition-colors shrink-0">
@@ -89,6 +100,26 @@ export function AppLayout({ children, title, subtitle, actions }: {
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
+
+          <div className="h-8 w-px bg-border ml-2" />
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+            className={cn(
+              "h-10 w-10 transition-all group/menu rounded-lg border shadow-sm",
+              rightSidebarOpen 
+                ? "bg-accent text-white border-accent hover:bg-accent/90" 
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary dark:hover:bg-white/5 border-[#68a9fb]"
+            )}
+          >
+            {rightSidebarOpen ? (
+              <X className="w-5 h-5 animate-in spin-in-90 duration-300" />
+            ) : (
+              <LayoutGrid className="w-5 h-5 group-hover/menu:scale-110 transition-transform" />
+            )}
+          </Button>
         </header>
 
         {/* Scrollable Area */}
@@ -108,6 +139,122 @@ export function AppLayout({ children, title, subtitle, actions }: {
           <main className="px-8 py-6 animate-fade-in-up">
             {children}
           </main>
+        </div>
+      </div>
+      {rightSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-500" 
+          onClick={() => setRightSidebarOpen(false)}
+        />
+      )}
+      <RightSidebar open={rightSidebarOpen} onClose={() => setRightSidebarOpen(false)} dark={dark} />
+    </div>
+  );
+}
+
+function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => void, dark: boolean }) {
+  return (
+    <div 
+      className={cn(
+        "fixed top-0 right-0 h-full border-l transition-all duration-500 ease-in-out overflow-hidden shrink-0 z-50",
+        dark ? "bg-[#19191b] border-white/5 shadow-2xl" : "bg-white border-border shadow-lg",
+        open ? "w-[300px]" : "w-0 border-l-0"
+      )}
+    >
+      <div className={cn(
+        "w-[300px] h-full flex flex-col",
+        dark ? "text-white" : "text-foreground"
+      )}>
+        {/* Sidebar Header from Image */}
+        <div className="p-6 flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-[#3b82f6] rounded-xl flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg leading-tight">Website Control</h3>
+              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#a1a1a1] mt-0.5">Administration Console</p>
+            </div>
+          </div>
+          
+          <button 
+            onClick={onClose}
+            className={cn(
+              "w-10 h-10 rounded-full border flex items-center justify-center transition-all group",
+              dark ? "border-white/10 hover:bg-white/5" : "border-border hover:bg-secondary"
+            )}
+          >
+            <X className={cn("w-5 h-5 transition-colors", dark ? "text-white/70 group-hover:text-white" : "text-muted-foreground group-hover:text-foreground")} />
+          </button>
+        </div>
+
+        <div className={cn("h-px mx-6 mb-6", dark ? "bg-white/5" : "bg-border")} />
+
+        <div className="flex-1 overflow-y-auto px-6 pb-6 scrollbar-very-thin">
+          <div className="space-y-8">
+            {/* Products Group */}
+            <div>
+              <div className={cn(
+                "text-[10px] uppercase tracking-widest font-semibold mb-4 px-4",
+                dark ? "text-[#a1a1a1]/40" : "text-muted-foreground/60"
+              )}>
+                Products
+              </div>
+              <nav className="space-y-1">
+                {[
+                  { label: 'Digital Billboards', icon: Monitor },
+                  { label: 'Honey', icon: Droplets },
+                  { label: 'Cashew', icon: Nut },
+                  { label: 'Sheabutter', icon: Leaf },
+                ].map((item, idx) => (
+                  <button 
+                    key={idx} 
+                    className={cn(
+                      "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all group",
+                      dark ? "text-[#a1a1a1] hover:text-white" : "text-slate-600 hover:text-foreground hover:bg-secondary/50"
+                    )}
+                  >
+                    <item.icon className={cn("w-5 h-5 transition-colors", dark ? "text-[#a1a1a1] group-hover:text-white" : "text-slate-500 group-hover:text-foreground")} />
+                    <span className="text-sm font-medium tracking-tight">{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+            {/* Management Group */}
+            <div>
+              <div className={cn(
+                "text-[10px] uppercase tracking-widest font-semibold mb-4 px-4",
+                dark ? "text-[#a1a1a1]/40" : "text-muted-foreground/60"
+              )}>
+                Management
+              </div>
+              <nav className="space-y-1">
+                {[
+                  { label: 'Add Digital Billboards', icon: Monitor },
+                  { label: 'Add Honey', icon: Droplets },
+                  { label: 'Add Cashew', icon: Nut },
+                  { label: 'Add Sheabutter', icon: Leaf },
+                ].map((item, idx) => (
+                  <button 
+                    key={idx} 
+                    className={cn(
+                      "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all group",
+                      dark ? "text-[#a1a1a1] hover:text-white" : "text-slate-600 hover:text-foreground hover:bg-secondary/50"
+                    )}
+                  >
+                    <div className="relative">
+                      <item.icon className={cn("w-5 h-5 transition-colors", dark ? "text-[#a1a1a1]/60 group-hover:text-white" : "text-slate-500 group-hover:text-foreground")} />
+                      <Plus className={cn(
+                        "absolute -top-1 -right-1 w-2.5 h-2.5 stroke-[4px] transition-all",
+                        dark ? "text-[#a1a1a1] opacity-70 group-hover:opacity-100 group-hover:text-white" : "text-slate-500 group-hover:text-foreground"
+                      )} />
+                    </div>
+                    <span className="text-sm font-medium tracking-tight">{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+          </div>
         </div>
       </div>
     </div>
