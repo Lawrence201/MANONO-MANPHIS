@@ -45,7 +45,7 @@ export default function PaymentsPage() {
               <Pie data={methods} dataKey="value" innerRadius={45} outerRadius={75} paddingAngle={3} stroke="var(--color-card)" strokeWidth={2}>
                 {methods.map((m, i) => <Cell key={i} fill={m.fill} />)}
               </Pie>
-              <Tooltip contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px", fontSize: "12px" }} formatter={(v: number) => `$${fmt.format(v)}`} />
+              <Tooltip contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px", fontSize: "12px" }} formatter={(v: any) => `$${fmt.format(v)}`} />
             </PieChart>
           </ResponsiveContainer>
           <div className="space-y-2 mt-4">

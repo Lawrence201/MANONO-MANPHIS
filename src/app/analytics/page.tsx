@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
               <XAxis dataKey="x" name="Orders" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} label={{ value: "Orders", position: "bottom", offset: -5, fontSize: 10, fill: "var(--color-muted-foreground)" }} />
               <YAxis dataKey="y" name="Revenue ($k)" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} label={{ value: "Revenue ($k)", angle: -90, position: "insideLeft", fontSize: 10, fill: "var(--color-muted-foreground)" }} />
               <ZAxis dataKey="z" range={[80, 600]} />
-              <Tooltip contentStyle={tooltipStyle} cursor={{ strokeDasharray: "3 3" }} formatter={(v: number, n: string) => n === "Revenue ($k)" ? `$${v}k` : v} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ strokeDasharray: "3 3" }} formatter={(v: any, n: any) => n === "Revenue ($k)" ? `$${v}k` : v} />
               <Scatter data={scatterData} fill="var(--color-chart-2)" fillOpacity={0.7} stroke="var(--color-chart-2)" />
             </ScatterChart>
           </ResponsiveContainer>

@@ -46,7 +46,7 @@ export default function InventoryPage() {
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
             <XAxis dataKey="name" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
             <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-            <Tooltip contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px", fontSize: "12px" }} formatter={(v: number) => `${fmt.format(v)} kg`} />
+            <Tooltip contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px", fontSize: "12px" }} formatter={(v: any) => `${fmt.format(v)} kg`} />
             <Bar dataKey="available" stackId="a" fill="var(--color-chart-2)" radius={[0, 0, 4, 4]} />
             <Bar dataKey="reserved" stackId="a" fill="var(--color-chart-3)" radius={[4, 4, 0, 0]} />
           </BarChart>

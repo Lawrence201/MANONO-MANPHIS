@@ -52,7 +52,7 @@ export function RevenueChart() {
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
           <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
           <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={formatCurrency} />
-          <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n) => n === "revenue" ? [`$${v.toLocaleString()}`, "Revenue"] : [v, n]} />
+          <Tooltip contentStyle={tooltipStyle} formatter={(v: any, n) => n === "revenue" ? [`$${v.toLocaleString()}`, "Revenue"] : [v, n]} />
           <Area type="monotone" dataKey="revenue" stroke="var(--color-chart-1)" strokeWidth={2.5} fill="url(#rev)" />
           <Area type="monotone" dataKey="orders" stroke="var(--color-chart-2)" strokeWidth={2} fill="url(#ord)" yAxisId={0} />
         </AreaChart>
@@ -73,7 +73,7 @@ export function ProductPerformanceChart() {
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-chart-grid)" horizontal={false} />
           <XAxis type="number" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={formatCurrency} />
           <YAxis dataKey="product" type="category" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={110} />
-          <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} cursor={{ fill: "var(--color-secondary)" }} />
+          <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`$${v.toLocaleString()}`, "Revenue"]} cursor={{ fill: "var(--color-secondary)" }} />
           <Bar dataKey="revenue" fill="var(--color-chart-2)" radius={[0, 6, 6, 0]} barSize={22} />
         </BarChart>
       </ResponsiveContainer>
@@ -104,7 +104,7 @@ export function CountryDistributionChart() {
             >
               {countryData.map((_, i) => <Cell key={i} fill={palette[i % palette.length]} />)}
             </Pie>
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => `$${v.toLocaleString()}`} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => `$${v.toLocaleString()}`} />
           </PieChart>
         </ResponsiveContainer>
         <div className="flex-1 space-y-2">

@@ -71,13 +71,13 @@ function generateReceiptPDF(data) {
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(37, 99, 235);
-            doc.text('Camp Elim Africa', margin, y + 10);
+            doc.text('Monophis', margin, y + 10);
         }
     } else {
         doc.setFontSize(18);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(37, 99, 235);
-        doc.text('Camp Elim Africa', margin, y + 10);
+        doc.text('Monophis', margin, y + 10);
     }
 
     doc.setFontSize(11);
@@ -296,7 +296,7 @@ function generateReceiptPDF(data) {
     doc.setFont('helvetica', 'normal');
 
     const centerX = pageWidth / 2;
-    doc.text('Thank you for choosing Camp Elim Africa!', centerX, footerY, { align: 'center' });
+    doc.text('Thank you for choosing Monophis!', centerX, footerY, { align: 'center' });
     doc.text('This is an electronically generated receipt and does not require a signature.', centerX, footerY + 4, { align: 'center' });
 
     const now = new Date();
