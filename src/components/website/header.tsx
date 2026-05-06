@@ -55,7 +55,7 @@ export function WebsiteHeader() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-0 z-50">
           <Image 
-            src="/logo.png" 
+            src="/logo.PNG" 
             alt="Logo" 
             width={80} 
             height={80} 
@@ -146,7 +146,7 @@ export function WebsiteHeader() {
         <div className="flex items-center justify-between h-20 px-4 border-b border-gray-200/50">
           <Link href="/" className="flex items-center gap-0">
             <Image 
-              src="/logo.png" 
+              src="/logo.PNG" 
               alt="Logo" 
               width={80} 
               height={80} 

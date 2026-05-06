@@ -325,7 +325,7 @@ export default function ProductDetailsPage() {
                 {product.isService && (
                   <div className="mt-8 py-6 flex items-center gap-6 border-t border-gray-100">
                     <div className="w-20 h-20 bg-white flex items-center justify-center">
-                      <Image src="/logo.png" alt="Supplier" width={80} height={80} className="object-contain" />
+                      <Image src="/logo.PNG" alt="Supplier" width={80} height={80} className="object-contain" />
                     </div>
                     <div className="flex-1">
                       <h4 className="text-[16px] font-black text-gray-900">Manono Export Materials Co., Ltd.</h4>
