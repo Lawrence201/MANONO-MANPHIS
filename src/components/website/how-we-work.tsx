@@ -41,9 +41,9 @@ export function HowWeWork() {
                     className="text-white text-[46px] md:text-[62px] font-bold leading-[1.05] tracking-[-0.04em] uppercase text-right md:scale-x-[0.85] transform origin-right"
                     style={{ fontFamily: "var(--font-antonio)" }}
                   >
-                    THE DIGITAL<br />
-                    CYBSECURE THE<br />
-                    TRANSFOR
+                    DIGITAL<br />
+                    BILLBOARD<br />
+                    ADVERTISING
                   </h2>
 
                   <div className="pt-6">
@@ -70,9 +70,9 @@ export function HowWeWork() {
                 className="text-white text-[42px] font-bold leading-[1.05] tracking-[-0.04em] uppercase mb-8 scale-x-95 transform origin-right"
                 style={{ fontFamily: "var(--font-antonio)" }}
               >
-                THE DIGITAL<br />
-                CYBSECURE THE<br />
-                TRANSFOR
+                DIGITAL<br />
+                BILLBOARD<br />
+                ADVERTISING
               </h2>
               <Link 
                 href="/about" 
@@ -89,11 +89,7 @@ export function HowWeWork() {
                 className="text-gray-400 text-[13px] md:text-[14px] leading-[1.6] tracking-tight opacity-80"
                 style={{ fontFamily: "var(--font-jetbrains-mono)" }}
               >
-                Billboard advertising is a highly effective marketing tool that helps 
-                businesses boost visibility and connect with their target audience, making 
-                it an essential strategy for impactful promotion. Billboard advertising is a 
-                powerful marketing tool that helps businesses gain visibility and 
-                effectively reach their target audience.
+                Our digital billboard advertising services help businesses increase brand visibility, attract wider audiences, and promote products or campaigns through high-impact outdoor media placements.
               </p>
             </div>
           </div>

@@ -3,17 +3,17 @@ import Image from "next/image";
 
 export function OutdoorSolution() {
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section className="py-24 bg-white overflow-hidden mt-[-40px] md:mt-[-80px] relative z-10">
       <div className="container mx-auto px-4 max-w-7xl">
         
         {/* Top Section: Image + Title */}
-        <div className="flex flex-col lg:flex-row items-center gap-12 mb-24">
+        <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 mb-12 md:mb-24">
           {/* Left: Billboard Image */}
           <div className="w-full lg:w-1/2">
             <div className="relative aspect-[4/3] rounded-sm overflow-hidden shadow-2xl">
               <Image 
                 src="/work9.webp" 
-                alt="Outdoor Advertising Example" 
+                alt="Outdoor Advertising Solutions" 
                 fill
                 className="object-cover"
               />
@@ -28,7 +28,7 @@ export function OutdoorSolution() {
             >
               OUTDOOR<br />
               ADVERTISING<br />
-              SOLUTION
+              SOLUTIONS
             </h2>
             
             <div className="flex items-center gap-6 mb-8 w-full">
@@ -37,22 +37,22 @@ export function OutdoorSolution() {
                 className="text-[#94a3b8] text-sm max-w-sm leading-relaxed"
                 style={{ fontFamily: "var(--font-jetbrains-mono)" }}
               >
-                We are a value-driven organization. Our core values inspire us to push our boundaries.
+                We provide modern digital billboard advertising services designed to help businesses increase visibility, strengthen brand awareness, and reach wider audiences through strategic outdoor media placements.
               </p>
             </div>
           </div>
         </div>
 
         {/* Bottom Section: Three Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mt-[-10px] md:mt-[-40px]">
           {/* Column 1 */}
           <div className="space-y-4">
             <div className="text-[#eea000]">
               <Layers className="w-10 h-10" />
             </div>
-            <h3 className="text-sm font-black text-[#1a1a1a] uppercase tracking-wider">MULTI FORMAT MEDIA</h3>
+            <h3 className="text-sm font-black text-[#1a1a1a] uppercase tracking-wider">HIGH-VISIBILITY DISPLAY</h3>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Billboards capture repeat exposure business message more effectively than almost any other marketing channel..
+              Our digital billboards deliver impactful advertising exposure across strategic locations with consistent audience engagement.
             </p>
           </div>
 
@@ -61,9 +61,9 @@ export function OutdoorSolution() {
             <div className="text-[#eea000]">
               <Star className="w-10 h-10" />
             </div>
-            <h3 className="text-sm font-black text-[#1a1a1a] uppercase tracking-wider">SMARTLY PLANNED</h3>
+            <h3 className="text-sm font-black text-[#1a1a1a] uppercase tracking-wider">STRATEGIC CAMPAIGNS</h3>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Start building your brand with the strategic one. an industry that your brand with the strategic one industry expertise.
+              Promote your business through carefully planned advertising schedules tailored to maximize reach and effectiveness.
             </p>
           </div>
 
@@ -72,9 +72,9 @@ export function OutdoorSolution() {
             <div className="text-[#eea000]">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h3 className="text-sm font-black text-[#1a1a1a] uppercase tracking-wider">BUILD BRANDS</h3>
+            <h3 className="text-sm font-black text-[#1a1a1a] uppercase tracking-wider">BRAND PROMOTION</h3>
             <p className="text-gray-400 text-sm leading-relaxed">
-              A business is only as good as its strategic process, and that's what contributes to expectations with the one industry.
+              Build stronger brand recognition through premium outdoor advertising solutions designed for businesses, events, and campaigns.
             </p>
           </div>
         </div>
