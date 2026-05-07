@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
+import Link from "next/link";
 import { AppSidebar } from "./app-sidebar";
 import { 
   Search, Bell, Menu, Moon, Sun, ChevronDown, Plus, Clock, LayoutGrid, X, 
@@ -230,13 +231,14 @@ function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => v
               </div>
               <nav className="space-y-1">
                 {[
-                  { label: 'Add Digital Billboards', icon: Monitor },
-                  { label: 'Add Honey', icon: Droplets },
-                  { label: 'Add Cashew', icon: Nut },
-                  { label: 'Add Sheabutter', icon: Leaf },
+                  { label: 'Add Digital Billboards', icon: Monitor, url: '/inventory/billboards/add' },
+                  { label: 'Add Honey', icon: Droplets, url: '#' },
+                  { label: 'Add Cashew', icon: Nut, url: '#' },
+                  { label: 'Add Sheabutter', icon: Leaf, url: '#' },
                 ].map((item, idx) => (
-                  <button 
+                  <Link 
                     key={idx} 
+                    href={item.url}
                     className={cn(
                       "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all group",
                       dark ? "text-[#a1a1a1] hover:text-white" : "text-slate-600 hover:text-foreground hover:bg-secondary/50"
@@ -250,7 +252,7 @@ function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => v
                       )} />
                     </div>
                     <span className="text-sm font-medium tracking-tight">{item.label}</span>
-                  </button>
+                  </Link>
                 ))}
               </nav>
             </div>
