@@ -471,3 +471,76 @@ model Event {
 
   @@map("events")
 }
+
+model Billboard {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(255)
+  assetCode     String   @unique @map("asset_code") @db.VarChar(50)
+  category      String   @db.VarChar(100)
+  description   String?
+  city          String   @db.VarChar(100)
+  address       String   @db.VarChar(255)
+  latitude      String?  @default("0") @db.VarChar(100)
+  longitude     String?  @default("0") @db.VarChar(100)
+  screenType    String?  @map("screen_type") @db.VarChar(100)
+  resolution    String?  @db.VarChar(100)
+  dimensions    String?  @db.VarChar(100)
+  brightness    String?  @db.VarChar(100)
+  aspectRatio   String?  @map("aspect_ratio") @db.VarChar(50)
+  wakeTime      String?  @map("wake_time") @db.VarChar(20)
+  sleepTime     String?  @map("sleep_time") @db.VarChar(20)
+  maxSlots      Int?     @default(12) @map("max_slots")
+  slotDuration  Int?     @default(10) @map("slot_duration")
+  weeklyRate    Decimal  @default(0) @map("weekly_rate") @db.Decimal(10, 2)
+  taxRate       Decimal  @default(0) @map("tax_rate") @db.Decimal(5, 2)
+  minDuration   String?  @map("min_duration") @db.VarChar(50)
+  trafficVolume String?  @map("traffic_volume") @db.VarChar(100)
+  audienceTags  String[] @map("audience_tags")
+  featureImage  String?  @map("feature_image") @db.VarChar(500)
+  videoShowcase String?  @map("video_showcase") @db.VarChar(500)
+  galleryImages BillboardGalleryImage[]
+  bookings      BillboardBooking[]
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("billboards")
+}
+
+model BillboardBooking {
+  id               Int       @id @default(autoincrement())
+  billboardId      Int       @map("billboard_id")
+  fullName         String    @map("full_name") @db.VarChar(255)
+  email            String    @db.VarChar(255)
+  phone            String?   @db.VarChar(50)
+  companyName      String?   @map("company_name") @db.VarChar(255)
+  clientType       String?   @map("client_type") @db.VarChar(50)
+  campaignTitle    String    @map("campaign_title") @db.VarChar(255)
+  campaignType     String    @map("campaign_type") @db.VarChar(100)
+  campaignDuration Int?      @map("campaign_duration")
+  startDate        DateTime  @map("start_date")
+  endDate          DateTime  @map("end_date")
+  slotsRequested   Int       @map("slots_requested")
+  description      String?
+  advertFile       String?   @map("advert_file_path") @db.VarChar(500)
+  totalPrice       Decimal   @map("total_price") @db.Decimal(10, 2)
+  taxRate          Decimal?  @map("tax_rate") @db.Decimal(5, 2)
+  paymentMethod    String?   @map("payment_method") @db.VarChar(50)
+  status           String    @default("pending") @db.VarChar(20)
+  paymentStatus    String    @default("pending") @map("payment_status") @db.VarChar(20)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  billboard        Billboard @relation(fields: [billboardId], references: [id])
+
+  @@index([billboardId])
+  @@map("billboard_bookings")
+}
+
+model BillboardGalleryImage {
+  id          Int       @id @default(autoincrement())
+  billboardId Int       @map("billboard_id")
+  imagePath   String    @map("image_path") @db.VarChar(500)
+  billboard   Billboard @relation(fields: [billboardId], references: [id], onDelete: Cascade)
+
+  @@index([billboardId])
+  @@map("billboard_gallery_images")
+}

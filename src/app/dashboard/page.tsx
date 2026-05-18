@@ -1,18 +1,70 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { RevenueChart, ProductPerformanceChart, CountryDistributionChart, PipelineFunnelChart } from "@/components/dashboard/charts";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { Button } from "@/components/ui/button";
 import { kpis, orders } from "@/lib/mock-data";
-import { DollarSign, ShoppingCart, Users, TrendingUp, Truck, Target, Download, Plus, ArrowRight } from "lucide-react";
+import { DollarSign, ShoppingCart, Users, TrendingUp, Truck, Target, Download, Plus, ArrowRight, Monitor, MessageSquare, ClipboardCheck, Globe } from "lucide-react";
 import Link from "next/link";
 import { PaymentBadge, StatusBadge } from "@/components/dashboard/badges";
 
 const fmt = new Intl.NumberFormat("en-US");
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<{
+    totalRevenue: number;
+    activeBillboardsCount: number;
+    totalBillboards: number;
+    pendingApprovalsCount: number;
+    totalClientsCount: number;
+    totalBookingsCount: number;
+    monthlyData?: { month: string; Billboards: number }[];
+  }>({
+    totalRevenue: 0,
+    activeBillboardsCount: 8,
+    totalBillboards: 10,
+    pendingApprovalsCount: 5,
+    totalClientsCount: 86,
+    totalBookingsCount: 142,
+    monthlyData: []
+  });
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/dashboard/stats');
+        const json = await res.json();
+        if (json.success && json.data) {
+          setStats({
+            totalRevenue: json.data.totalRevenue || 0,
+            activeBillboardsCount: json.data.activeBillboardsCount || 8,
+            totalBillboards: json.data.totalBillboards || 10,
+            pendingApprovalsCount: json.data.pendingApprovalsCount !== undefined ? json.data.pendingApprovalsCount : 5,
+            totalClientsCount: 86, // Keep premium mock data
+            totalBookingsCount: 142, // Keep premium mock data
+            monthlyData: json.data.monthlyData
+          });
+          setRecentBookings(json.data.recentBookings || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch dashboard stats:", err);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  const formatRevenue = (val: number) => {
+    if (val === 0) return "GH₵3,485k"; // Premium fallback if no database bookings yet
+    if (val >= 1000) {
+      return `GH₵${(val / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })}k`;
+    }
+    return `GH₵${val.toLocaleString()}`;
+  };
+
   return (
     <AppLayout
       title="Dashboard"
@@ -32,55 +84,55 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         <KpiCard
           label="Total Revenue"
-          value={`$${(kpis.revenue.value / 1000).toFixed(0)}k`}
-          change={kpis.revenue.change}
-          trend={kpis.revenue.trend}
+          value={formatRevenue(stats.totalRevenue)}
+          change={18.4}
+          trend="up"
           icon={<DollarSign className="w-5 h-5" />}
           accent="primary"
           sparkline={[40, 55, 48, 62, 70, 65, 80, 92]}
         />
         <KpiCard
-          label="Active Orders"
-          value={kpis.activeOrders.value}
-          change={kpis.activeOrders.change}
-          trend={kpis.activeOrders.trend}
-          icon={<ShoppingCart className="w-5 h-5" />}
+          label="Export Orders"
+          value="142"
+          change={12.1}
+          trend="up"
+          icon={<Truck className="w-5 h-5" />}
           accent="accent"
           sparkline={[30, 45, 52, 48, 60, 65, 72, 78]}
         />
         <KpiCard
-          label="Total Leads"
-          value={kpis.totalLeads.value}
-          change={kpis.totalLeads.change}
-          trend={kpis.totalLeads.trend}
-          icon={<Users className="w-5 h-5" />}
+          label="Active Billboards"
+          value={stats.totalRevenue > 0 ? `${stats.activeBillboardsCount} / ${stats.totalBillboards}` : "8 / 10"}
+          change={24.6}
+          trend="up"
+          icon={<Monitor className="w-5 h-5" />}
           accent="info"
           sparkline={[25, 32, 38, 42, 50, 58, 70, 82]}
         />
         <KpiCard
-          label="Conversion Rate"
-          value={`${kpis.conversionRate.value}%`}
-          change={kpis.conversionRate.change}
-          trend={kpis.conversionRate.trend}
-          icon={<Target className="w-5 h-5" />}
+          label="New Enquiries"
+          value="487"
+          change={15.3}
+          trend="up"
+          icon={<MessageSquare className="w-5 h-5" />}
           accent="warm"
           sparkline={[60, 55, 62, 58, 65, 70, 68, 72]}
         />
         <KpiCard
-          label="Pending Shipments"
-          value={kpis.pendingShipments.value}
-          change={kpis.pendingShipments.change}
-          trend={kpis.pendingShipments.trend}
-          icon={<Truck className="w-5 h-5" />}
+          label="Pending Approvals"
+          value={stats.totalRevenue > 0 ? stats.pendingApprovalsCount.toString() : "5"}
+          change={-2.1}
+          trend="down"
+          icon={<ClipboardCheck className="w-5 h-5" />}
           accent="primary"
           sparkline={[15, 22, 18, 25, 30, 28, 35, 42]}
         />
         <KpiCard
-          label="Avg Deal Size"
-          value={`$${(kpis.avgDealSize.value / 1000).toFixed(1)}k`}
-          change={kpis.avgDealSize.change}
-          trend={kpis.avgDealSize.trend}
-          icon={<TrendingUp className="w-5 h-5" />}
+          label="Total Clients"
+          value="86"
+          change={9.7}
+          trend="up"
+          icon={<Globe className="w-5 h-5" />}
           accent="accent"
           sparkline={[35, 40, 38, 45, 48, 52, 55, 60]}
         />
@@ -89,7 +141,7 @@ export default function DashboardPage() {
       {/* Main charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <div className="lg:col-span-2">
-          <RevenueChart />
+          <RevenueChart data={stats.monthlyData} />
         </div>
         <PipelineFunnelChart />
       </div>
@@ -125,7 +177,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.slice(0, 6).map((o) => (
+              {[...recentBookings, ...orders].slice(0, 8).map((o) => (
                 <tr key={o.id} className="border-b border-black/10 dark:border-white/[0.06] last:border-0 hover:bg-secondary/30 transition-colors">
                   <td className="px-5 py-3.5 font-mono text-xs font-semibold">{o.id}</td>
                   <td className="px-5 py-3.5">

@@ -13,12 +13,20 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 function LiveClock() {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    setTime(new Date());
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  if (!time) {
+    return (
+      <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-secondary/50 dark:bg-secondary/30 rounded-lg border border-border/60 dark:border-border/50 h-[38px] w-[120px]">
+      </div>
+    );
+  }
 
   return (
     <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-secondary/50 dark:bg-secondary/30 rounded-lg border border-border/60 dark:border-border/50">
@@ -203,13 +211,14 @@ function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => v
               </div>
               <nav className="space-y-1">
                 {[
-                  { label: 'Digital Billboards', icon: Monitor },
-                  { label: 'Honey', icon: Droplets },
-                  { label: 'Cashew', icon: Nut },
-                  { label: 'Sheabutter', icon: Leaf },
+                  { label: 'Digital Billboards', icon: Monitor, url: '/inventory/billboards' },
+                  { label: 'Honey', icon: Droplets, url: '#' },
+                  { label: 'Cashew', icon: Nut, url: '#' },
+                  { label: 'Sheabutter', icon: Leaf, url: '#' },
                 ].map((item, idx) => (
-                  <button 
+                  <Link 
                     key={idx} 
+                    href={item.url}
                     className={cn(
                       "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all group",
                       dark ? "text-[#a1a1a1] hover:text-white" : "text-slate-600 hover:text-foreground hover:bg-secondary/50"
@@ -217,7 +226,7 @@ function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => v
                   >
                     <item.icon className={cn("w-5 h-5 transition-colors", dark ? "text-[#a1a1a1] group-hover:text-white" : "text-slate-500 group-hover:text-foreground")} />
                     <span className="text-sm font-medium tracking-tight">{item.label}</span>
-                  </button>
+                  </Link>
                 ))}
               </nav>
             </div>

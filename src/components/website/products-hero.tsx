@@ -39,7 +39,7 @@ export function ProductsHero({
           <h1
             className="text-white uppercase font-black mb-4"
             style={{ 
-              fontSize: "clamp(60px, 10vw, 110px)", 
+              fontSize: "clamp(40px, 7vw, 75px)", 
               fontFamily: "var(--font-bebas-neue), sans-serif",
               letterSpacing: "0.02em"
             }}

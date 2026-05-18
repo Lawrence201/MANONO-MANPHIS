@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, FileText, ShoppingCart, CreditCard,
   Receipt, Package, Truck, BarChart3, Globe2, Settings,
   Sparkles, FileBarChart, ShieldCheck, Map, Ship, UserCog,
-  ScrollText, Bell, Workflow, Factory, MessageSquare,
+  ScrollText, Bell, Workflow, Factory, MessageSquare, Monitor, Layers, Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,10 +30,18 @@ const navGroups = [
     ],
   },
   {
-    label: "Operations",
+    label: "Advertising Services",
+    items: [
+      { title: "Digital Billboards", url: "/inventory/billboards", icon: Monitor },
+      { title: "Ad Bookings", url: "/inventory/bookings", icon: Sparkles, badge: "5" },
+      { title: "Campaign Calendar", url: "/campaign-calendar", icon: Calendar },
+    ],
+  },
+  {
+    label: "Trade Operations",
     items: [
       { title: "Orders", url: "/orders", icon: ShoppingCart, badge: "8" },
-      { title: "Inventory", url: "/inventory", icon: Package },
+      { title: "Inventory", url: "/inventory", icon: Layers },
       { title: "Logistics", url: "/logistics", icon: Truck },
       { title: "Production", url: "/production", icon: Factory },
     ],
@@ -52,18 +60,17 @@ const navGroups = [
     ],
   },
   {
-    label: "Trade Management",
+    label: "Website Control",
     items: [
-      { title: "Countries & Regions", url: "/regions", icon: Map },
-      { title: "Shipping Rules", url: "/shipping-rules", icon: Ship },
+      { title: "Public Products", url: "/services/billboards", icon: Globe2 },
+      { title: "Content Manager", url: "/settings/content", icon: FileText },
     ],
   },
   {
-    label: "Administration",
+    label: "Administration Console",
     items: [
-      { title: "Users & Roles", url: "/users", icon: UserCog },
-      { title: "Activity Logs", url: "/activity", icon: ScrollText },
-      { title: "Settings", url: "/settings", icon: Settings },
+      { title: "User Management", url: "/users", icon: UserCog },
+      { title: "System Settings", url: "/settings", icon: Settings },
     ],
   },
   {

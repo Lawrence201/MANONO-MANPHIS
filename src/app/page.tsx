@@ -4,7 +4,7 @@ import { HoneyHero } from "@/components/website/honey-hero";
 import { FeaturesBanner } from "@/components/website/features-banner";
 import { ServicesSection } from "@/components/website/services-section";
 import { AboutUsSection } from "@/components/website/about-us-section";
-import { ProductsGrid } from "@/components/website/products-grid";
+import { ProductsGrid, BillboardCatalog } from "@/components/website/products-grid";
 import { FeaturedProducts } from "@/components/website/featured-products";
 import { HowWeWork } from "@/components/website/how-we-work";
 import { TestimonialsSection } from "@/components/website/testimonials-section";
@@ -27,7 +27,7 @@ export default function LandingPage() {
         <ProductsGrid />
         <FeaturedProducts />
         <HowWeWork />
-        <ProductsGrid type="billboards" />
+        <BillboardCatalog />
         <OutdoorSolution />
         <TestimonialsSection />
         <ContactSection />

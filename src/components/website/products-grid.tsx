@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, CheckCircle2, Clock, Star, ArrowRight, MapPin, Monitor, Calendar, DollarSign, MousePointerClick } from "lucide-react";
+import { Phone, Clock, Star, ArrowRight, MapPin, Monitor, Calendar } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { BillboardCatalogCard } from "./billboard-card";
 
 interface ProductSpec {
   label: string;
@@ -12,12 +14,16 @@ interface ProductItem {
   name: string;
   subtitle: string;
   image: string;
+  images?: string[];
   price: string;
   specs: ProductSpec[];
   location: string;
   supplier: string;
   years: string;
   rating: number;
+  latitude?: string;
+  longitude?: string;
+  maxSlots?: number;
 }
 
 interface ProductsGridProps {
@@ -85,60 +91,6 @@ const agriculturalProducts = [
   }
 ];
 
-const billboardSlots = [
-  {
-    id: 1,
-    name: "Main City Center LED",
-    subtitle: "High Visibility Screen",
-    image: "/billboards/bill_boards1.webp",
-    price: "From $1,200",
-    specs: [
-      { label: "Location", value: "Accra Central" },
-      { label: "Duration", value: "1 Week Slot" },
-      { label: "Traffic", value: "50k+ Daily" },
-      { label: "Type", value: "Digital LED" }
-    ],
-    location: "Accra Central, Ghana",
-    supplier: "Media Division",
-    years: "Premium",
-    rating: 5.0
-  },
-  {
-    id: 2,
-    name: "Airport Arrival Digital",
-    subtitle: "Elite Audience Reach",
-    image: "/billboards/bill_boards_2.webp",
-    price: "From $2,500",
-    specs: [
-      { label: "Location", value: "KIA Terminal 3" },
-      { label: "Duration", value: "2 Weeks Slot" },
-      { label: "Traffic", value: "International" },
-      { label: "Type", value: "4K Display" }
-    ],
-    location: "Airport, Accra",
-    supplier: "Media Division",
-    years: "Exclusive",
-    rating: 4.9
-  },
-  {
-    id: 3,
-    name: "Motorway Giant Board",
-    subtitle: "Mass Market Exposure",
-    image: "/billboards/bill_boards 3.webp",
-    price: "From $3,000",
-    specs: [
-      { label: "Location", value: "Tema Motorway" },
-      { label: "Duration", value: "1 Month Slot" },
-      { label: "Traffic", value: "100k+ Daily" },
-      { label: "Type", value: "Portrait LED" }
-    ],
-    location: "Tema Highway, Ghana",
-    supplier: "Media Division",
-    years: "Strategic",
-    rating: 4.8
-  }
-];
-
 export function ProductsGrid({ 
   type = "products", 
   title, 
@@ -146,9 +98,8 @@ export function ProductsGrid({
   showViewMore = true, 
   items: customItems 
 }: ProductsGridProps) {
-  const defaultItems = type === "products" ? agriculturalProducts : billboardSlots;
+  const defaultItems = type === "products" ? agriculturalProducts : [];
   const items: ProductItem[] = customItems || (defaultItems as ProductItem[]);
-  const currentTitle = title || "Available Product";
 
   return (
     <section className={`py-12 md:py-24 ${type === "products" ? "bg-[#f7f3f0]" : "bg-white"}`}>
@@ -170,25 +121,20 @@ export function ProductsGrid({
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
           {items.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all overflow-hidden border border-gray-100 flex flex-col h-full">
-              {/* Image */}
-              <div className="relative h-56 min-[480px]:h-64 md:h-48 lg:h-52 overflow-hidden group">
-                <Image 
-                  src={item.image} 
-                  alt={item.name} 
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {type === "billboards" && (
-                  <div className="absolute top-4 right-4 bg-[#eea000] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                    Available
-                  </div>
-                )}
-              </div>
+            type === "billboards" ? (
+              <BillboardCatalogCard key={item.id} item={item} />
+            ) : (
+              <div key={item.id} className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all overflow-hidden border border-gray-100 flex flex-col h-full">
+                <div className="relative h-56 min-[480px]:h-64 md:h-48 lg:h-52 overflow-hidden group">
+                  <Image 
+                    src={item.image} 
+                    alt={item.name} 
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
 
-              {/* Content */}
-              <div className="p-5 min-[480px]:p-6 md:p-6 flex-1 flex flex-col">
-                {type === "products" ? (
+                <div className="p-5 min-[480px]:p-6 md:p-6 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <div className="max-w-[70%]">
                       <h3 className="text-[19px] md:text-[20px] font-bold text-[#1a1a1a] leading-tight mb-1">{item.name}</h3>
@@ -196,80 +142,48 @@ export function ProductsGrid({
                     </div>
                     <span className="text-xl md:text-2xl font-black text-[#1a1a1a]">{item.price}</span>
                   </div>
-                ) : (
-                  <>
-                    <div className="mb-4">
-                      <h3 className="text-[19px] md:text-[20px] font-bold text-[#1a1a1a] leading-tight mb-1">{item.name}</h3>
-                      <p className="text-gray-400 font-medium text-[10px] md:text-[11px] uppercase tracking-wider">{item.subtitle}</p>
-                    </div>
-                    <div className="mb-5">
-                      <span className="text-[17px] md:text-[19px] font-black text-[#1a1a1a]">{item.price}</span>
-                    </div>
-                  </>
-                )}
 
-                {type === "billboards" ? (
-                  <Link href="/products/13" className="block w-full">
-                    <button className="w-full bg-[#cbc9c5] text-[#1a1a1a] py-3.5 font-bold text-[11px] md:text-[12px] uppercase hover:bg-[#eea000] hover:text-white transition-all rounded-md mb-5 shadow-sm flex items-center justify-center gap-2">
-                      Advertising this request slot
-                      <MousePointerClick className="w-4 h-4" />
-                    </button>
-                  </Link>
-                ) : (
                   <button className="w-full bg-[#eea000] text-white py-3.5 font-bold text-[11px] md:text-[12px] uppercase hover:bg-[#1a1a1a] transition-all rounded-md mb-5 shadow-sm flex items-center justify-center gap-2">
                     Add to Cart
                   </button>
-                )}
 
-                {/* Specs Table */}
-                <div className="rounded-md overflow-hidden mb-6 border border-gray-100 text-[11px] md:text-[12px]">
-                  {item.specs.map((spec, i) => (
-                    <div key={i} className={`flex justify-between items-center px-4 py-2 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                      <div className="flex items-center gap-2">
-                        {type === "billboards" && (
-                          spec.label === "Location" ? <MapPin className="w-3.5 h-3.5 text-[#eea000]" /> :
-                          spec.label === "Duration" ? <Calendar className="w-3.5 h-3.5 text-[#eea000]" /> :
-                          spec.label === "Traffic" ? <Monitor className="w-3.5 h-3.5 text-[#eea000]" /> :
-                          <Clock className="w-3.5 h-3.5 text-[#eea000]" />
-                        )}
-                        <span className="text-gray-400 font-medium">{spec.label}</span>
+                  <div className="rounded-md overflow-hidden mb-6 border border-gray-100 text-[11px] md:text-[12px]">
+                    {item.specs.map((spec, i) => (
+                      <div key={i} className={`flex justify-between items-center px-4 py-2 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 font-medium">{spec.label}</span>
+                        </div>
+                        <span className="text-[#1a1a1a] font-bold text-right">{spec.value}</span>
                       </div>
-                      <span className="text-[#1a1a1a] font-bold text-right">{spec.value}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Footer */}
-                <div className="space-y-4 pt-2 mt-auto border-t border-gray-50">
-                  <div className="flex items-center gap-2 pt-4">
-                    <MapPin className="w-3.5 h-3.5 text-[#eea000] shrink-0" />
-                    <span className="text-[#1a1a1a] font-bold text-[12px] md:text-[13px] truncate">{item.location}</span>
+                    ))}
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <Phone className="w-3 h-3 text-[#66a7fb]" />
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Verified</span>
+                  <div className="space-y-4 pt-2 mt-auto border-t border-gray-50">
+                    <div className="flex items-center gap-2 pt-4">
+                      <MapPin className="w-3.5 h-3.5 text-[#eea000] shrink-0" />
+                      <span className="text-[#1a1a1a] font-bold text-[12px] md:text-[13px] truncate">{item.location}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 ml-auto">
-                      <Star className="w-3.5 h-3.5 text-[#fbbf24] fill-[#fbbf24]" />
-                      <span className="text-[11px] font-black text-[#1a1a1a]">{item.rating}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{item.years}</span>
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <Star className="w-3.5 h-3.5 text-[#fbbf24] fill-[#fbbf24]" />
+                        <span className="text-[11px] font-black text-[#1a1a1a]">{item.rating}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{item.years}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )
           ))}
         </div>
 
-        {/* View All */}
         {showViewMore && (
           <div className="mt-20 text-center">
             <Link 
-              href="#" 
+              href={type === "products" ? "/products" : "/services/billboards"} 
               className="inline-flex items-center gap-3 border-2 border-[#1a1a1a] text-[#1a1a1a] px-10 py-4 rounded-full font-bold text-[14px] uppercase hover:bg-[#1a1a1a] hover:text-white transition-all group"
             >
               {type === "products" ? "Discover More Products" : "Explore More Slots"}
@@ -279,5 +193,53 @@ export function ProductsGrid({
         )}
       </div>
     </section>
+  );
+}
+
+export async function BillboardCatalog() {
+  const billboards = await prisma.billboard.findMany({
+    take: 3,
+    include: { galleryImages: true, bookings: true },
+    orderBy: { createdAt: 'desc' }
+  });
+  
+  const items: ProductItem[] = billboards.map(b => {
+    const city = b.city.charAt(0).toUpperCase() + b.city.slice(1).toLowerCase();
+    const address = b.address.split(',')[0].charAt(0).toUpperCase() + b.address.split(',')[0].slice(1).toLowerCase();
+
+    const bookedSlots = (b as any).bookings?.reduce((sum: number, bk: any) => {
+      if (bk.status === 'cancelled') return sum;
+      return sum + bk.slotsRequested;
+    }, 0) || 0;
+    const remainingSlots = Math.max(0, (b.maxSlots || 12) - bookedSlots);
+
+    return {
+      id: b.id,
+      name: b.name,
+      subtitle: b.assetCode,
+      image: b.featureImage || "/billboards/bill_boards1.webp",
+      images: [b.featureImage, ...(b.galleryImages?.map((g: any) => g.imagePath) || [])].filter(Boolean),
+      price: `GH₵${Number(b.weeklyRate).toLocaleString()}`,
+      specs: [
+        { label: "Location", value: city },
+        { label: "Duration", value: b.minDuration?.replace(/m$/, " Month").replace(/w$/, " Week") || "1 Week" },
+        { label: "Dimension", value: b.dimensions || "N/A" },
+        { label: "Type", value: (b.screenType?.toUpperCase()) || "DIGITAL LED" }
+      ],
+      location: `${city}, ${address}`,
+      supplier: "Media Division",
+      years: b.aspectRatio ? (b.aspectRatio.charAt(0).toUpperCase() + b.aspectRatio.slice(1)) : (b.category?.toLowerCase() === "standard" || b.category?.toLowerCase() === "landscape") ? "Landscape" : b.category?.toLowerCase() === "premium" ? "Portrait" : b.category || "Standard",
+      rating: 5.0,
+      latitude: b.latitude || "5.603",
+      longitude: b.longitude || "-0.186",
+      maxSlots: remainingSlots
+    };
+  });
+
+  return (
+    <ProductsGrid 
+      type="billboards" 
+      items={items} 
+    />
   );
 }
