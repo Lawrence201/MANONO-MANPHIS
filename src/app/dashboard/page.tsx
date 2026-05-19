@@ -361,7 +361,7 @@ export default function DashboardPage() {
                     fill: #55b2b9 !important;
                   }
                   .dark path[data-code] {
-                    fill: ${mapTab === "world" ? "#303235" : "#e1e7e7"} !important;
+                    fill: #303235 !important;
                     stroke: #282828 !important;
                   }
                   .dark path[data-code]:hover {
