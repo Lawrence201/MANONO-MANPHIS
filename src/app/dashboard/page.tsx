@@ -22,6 +22,14 @@ const countriesData = [
   { name: "Germany", percentage: 70, units: 350, x: 447.17, y: 144.54, color: "#8b5cf6" },
 ];
 
+const ghanaData = [
+  { name: "Greater Accra", percentage: 95, units: 1200, color: "#0ea5e9" },
+  { name: "Ashanti", percentage: 85, units: 950, color: "#f97316" },
+  { name: "Western", percentage: 75, units: 600, color: "#eab308" },
+  { name: "Northern", percentage: 70, units: 450, color: "#ef4444" },
+  { name: "Central", percentage: 90, units: 800, color: "#8b5cf6" },
+];
+
 
 
 const reviews = [
@@ -71,6 +79,17 @@ const renderStars = (rating: number) => {
 };
 
 const countryNames: Record<string, string> = {
+  "GH.UW": "Upper West",
+  "GH.UE": "Upper East",
+  "GH.NP": "Northern",
+  "GH.BA": "Brong Ahafo",
+  "GH.TV": "Volta",
+  "GH.AH": "Ashanti",
+  "GH.EP": "Eastern",
+  "GH.GP": "Greater Accra",
+  "GH.CP": "Central",
+  "GH.WP": "Western",
+  GH: "Ghana",
   BD: "Bangladesh", BE: "Belgium", BF: "Burkina Faso", BG: "Bulgaria", BI: "Burundi",
   BJ: "Benin", BN: "Brunei", BO: "Bolivia", BR: "Brazil", BS: "Bahamas",
   BT: "Bhutan", BW: "Botswana", BY: "Belarus", BZ: "Belize", CA: "Canada",
@@ -81,7 +100,7 @@ const countryNames: Record<string, string> = {
   DO: "Dominican Republic", DZ: "Algeria", EC: "Ecuador", EE: "Estonia",
   EG: "Egypt", EH: "Western Sahara", ER: "Eritrea", ES: "Spain", ET: "Ethiopia",
   FI: "Finland", FJ: "Fiji", FK: "Falkland Islands", FR: "France", GA: "Gabon",
-  GB: "United Kingdom", GE: "Georgia", GH: "Ghana", GL: "Greenland", GM: "Gambia",
+  GB: "United Kingdom", GE: "Georgia", GL: "Greenland", GM: "Gambia",
   GN: "Guinea", GQ: "Equatorial Guinea", GR: "Greece", GT: "Guatemala",
   GW: "Guinea-Bissau", GY: "Guyana", HN: "Honduras", HR: "Croatia", HT: "Haiti",
   HU: "Hungary", ID: "Indonesia", IE: "Ireland", IL: "Israel", IN: "India",
@@ -116,6 +135,8 @@ export default function DashboardPage() {
     y: number;
   } | null>(null);
 
+  const [mapTab, setMapTab] = useState<"world" | "ghana">("world");
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as SVGElement;
     const path = target.closest('path');
@@ -129,6 +150,8 @@ export default function DashboardPage() {
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
         });
+      } else {
+        setTooltip(null);
       }
     } else {
       setTooltip(null);
@@ -183,17 +206,18 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/map.svg?v=" + Date.now())
+    const filename = mapTab === "world" ? "map.svg" : "ghana_map.svg";
+    fetch(`/${filename}?v=` + Date.now())
       .then((res) => res.text())
       .then((text) => {
         let adjustedText = text;
-        if (!text.includes("viewBox")) {
+        if (mapTab === "world" && !text.includes("viewBox")) {
           adjustedText = text.replace("<svg", '<svg viewBox="0 0 678 350"');
         }
         setSvgHtml(adjustedText);
       })
       .catch((err) => console.error("Error loading map SVG:", err));
-  }, []);
+  }, [mapTab]);
 
   const formatRevenue = (val: number) => {
     if (val === 0) return "GH₵3,485k"; // Premium fallback if no database bookings yet
@@ -202,6 +226,8 @@ export default function DashboardPage() {
     }
     return `GH₵${val.toLocaleString()}`;
   };
+
+  const activeSidebarData = mapTab === "world" ? countriesData : ghanaData;
 
   return (
     <AppLayout
@@ -293,6 +319,28 @@ export default function DashboardPage() {
           <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden flex flex-col h-full">
             <div className="p-5 pb-0 flex items-center justify-between">
               <h3 className="font-display font-semibold text-base text-foreground">Most Sales Location</h3>
+              <div className="flex bg-secondary p-1 rounded-lg border border-border shrink-0 select-none">
+                <button
+                  onClick={() => setMapTab("world")}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
+                    mapTab === "world"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  World Map
+                </button>
+                <button
+                  onClick={() => setMapTab("ghana")}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
+                    mapTab === "ghana"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Ghana Map
+                </button>
+              </div>
             </div>
             <div className="p-5 flex-1 flex flex-col lg:flex-row gap-6 justify-between items-center">
               {/* Map Container */}
@@ -301,9 +349,23 @@ export default function DashboardPage() {
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
               >
+                <style dangerouslySetInnerHTML={{ __html: `
+                  path[data-code] {
+                    fill: #e1e7e7 !important;
+                    transition: fill 0.2s ease;
+                    cursor: pointer;
+                    stroke: #FFFFFF !important;
+                    stroke-width: 0.5px !important;
+                  }
+                  path[data-code]:hover {
+                    fill: #55b2b9 !important;
+                  }
+                `}} />
                 {/* Dynamic inline map rendering */}
                 <div
-                  className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:scale-[1.15] [&>svg_path]:fill-[#e1e7e7] [&>svg_path]:hover:fill-[#55b2b9] [&>svg_path]:transition-colors [&>svg_path]:duration-200 [&>svg_path]:cursor-pointer [&>svg_path]:stroke-background [&>svg_path]:stroke-[0.5px]"
+                   className={`w-full h-full [&>svg]:w-full [&>svg]:h-full ${
+                     mapTab === "world" ? "[&>svg]:scale-[1.15]" : "[&>svg]:scale-[1.05]"
+                   }`}
                   dangerouslySetInnerHTML={{ __html: svgHtml }}
                 />
 
@@ -323,7 +385,7 @@ export default function DashboardPage() {
 
               {/* Country List Sidebar */}
               <div className="w-full lg:w-[30%] flex flex-col">
-                {countriesData.map((country, idx) => (
+                {activeSidebarData.map((country, idx) => (
                   <div key={idx} className="flex items-center justify-between p-[10px] mb-[10px] last:mb-0 bg-card border border-border/80 rounded-lg transition-all duration-300 hover:bg-primary/5 hover:border-primary/5">
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold text-foreground">{country.name}</span>
