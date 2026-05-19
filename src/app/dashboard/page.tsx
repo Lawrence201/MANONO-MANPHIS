@@ -361,7 +361,7 @@ export default function DashboardPage() {
                     fill: #55b2b9 !important;
                   }
                   .dark path[data-code] {
-                    fill: #303235 !important;
+                    fill: #3f4145 !important;
                     stroke: #282828 !important;
                   }
                   .dark path[data-code]:hover {
