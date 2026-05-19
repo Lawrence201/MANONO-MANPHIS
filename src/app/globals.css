@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap');
 @import "../../node_modules/tw-animate-css/dist/tw-animate.css";
 @import "tailwindcss";
 @source "..";
@@ -51,9 +52,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-chart-grid: var(--chart-grid);
 
-  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Geist", system-ui, sans-serif;
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
   --font-antonio: "Antonio", sans-serif;
   --font-anton: "Anton", sans-serif;
   --font-bebas-neue: "Bebas Neue", sans-serif;

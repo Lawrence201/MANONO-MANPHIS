@@ -109,7 +109,7 @@ export function RevenueChart({ data }: { data?: { month: string; Billboards: num
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border p-6 shadow-card">
+    <div className="bg-card rounded-xl border border-border p-6 shadow-card h-full flex flex-col justify-between">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h3 className="font-display font-semibold text-base">Revenue Performance</h3>
@@ -134,42 +134,44 @@ export function RevenueChart({ data }: { data?: { month: string; Billboards: num
           </span>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={320}>
-        <AreaChart data={chartData} margin={{ top: 10, right: 5, left: 10, bottom: 0 }}>
-          <defs>
-            <linearGradient id="colorBillboards" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
-            </linearGradient>
-            <linearGradient id="colorHoney" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.02} />
-            </linearGradient>
-            <linearGradient id="colorShea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ea580c" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#ea580c" stopOpacity={0.02} />
-            </linearGradient>
-            <linearGradient id="colorCashew" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-          <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-          <YAxis 
-            stroke="var(--color-muted-foreground)" 
-            fontSize={11} 
-            tickLine={false} 
-            axisLine={false} 
-            tickFormatter={tickFormatter} 
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Area type="monotone" dataKey="Billboards" stackId="1" stroke="#3b82f6" strokeWidth={2.5} fill="url(#colorBillboards)" />
-          <Area type="monotone" dataKey="Honey" stackId="1" stroke="#f59e0b" strokeWidth={2.5} fill="url(#colorHoney)" />
-          <Area type="monotone" dataKey="Shea" stackId="1" stroke="#ea580c" strokeWidth={2.5} fill="url(#colorShea)" />
-          <Area type="monotone" dataKey="Cashew" stackId="1" stroke="#10b981" strokeWidth={2.5} fill="url(#colorCashew)" />
-        </AreaChart>
-      </ResponsiveContainer>
+      <div className="flex-1 min-h-[320px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 10, right: 5, left: 10, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorBillboards" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="colorHoney" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="colorShea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#ea580c" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#ea580c" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="colorCashew" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+            <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis 
+              stroke="var(--color-muted-foreground)" 
+              fontSize={11} 
+              tickLine={false} 
+              axisLine={false} 
+              tickFormatter={tickFormatter} 
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Area type="monotone" dataKey="Billboards" stackId="1" stroke="#3b82f6" strokeWidth={2.5} fill="url(#colorBillboards)" />
+            <Area type="monotone" dataKey="Honey" stackId="1" stroke="#f59e0b" strokeWidth={2.5} fill="url(#colorHoney)" />
+            <Area type="monotone" dataKey="Shea" stackId="1" stroke="#ea580c" strokeWidth={2.5} fill="url(#colorShea)" />
+            <Area type="monotone" dataKey="Cashew" stackId="1" stroke="#10b981" strokeWidth={2.5} fill="url(#colorCashew)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
@@ -395,7 +397,7 @@ export function PipelineFunnelChart() {
   const colors = mode === "trade" ? tradeColors : adColors;
 
   return (
-    <div className="bg-card rounded-xl border border-border p-6 shadow-card flex flex-col justify-between">
+    <div className="bg-card rounded-xl border border-border p-6 shadow-card flex flex-col justify-between h-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
