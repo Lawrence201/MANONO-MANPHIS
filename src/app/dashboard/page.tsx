@@ -393,7 +393,7 @@ export default function DashboardPage() {
               {/* Country List Sidebar */}
               <div className="w-full lg:w-[30%] flex flex-col">
                 {activeSidebarData.map((country, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-[10px] mb-[10px] last:mb-0 bg-card border border-border/80 rounded-lg transition-all duration-300 hover:bg-primary/5 hover:border-primary/5">
+                  <div key={idx} className="flex items-center justify-between p-[10px] mb-[10px] last:mb-0 bg-card border border-border/80 dark:border-[#2b2b2b] rounded-lg transition-all duration-300 hover:bg-primary/5 hover:border-primary/5">
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold text-foreground">{country.name}</span>
                       <span className="text-[11px] text-muted-foreground">{country.units} Unit</span>
