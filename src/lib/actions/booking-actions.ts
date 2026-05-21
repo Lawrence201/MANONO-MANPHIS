@@ -3,6 +3,128 @@
 import { prisma } from "@/lib/prisma";
 import { BookingSchema, type BookingInput } from "@/lib/schemas/booking";
 import { revalidatePath } from "next/cache";
+import { deleteFromCloudinary } from "@/lib/cloudinary";
+
+export async function getBillboardBookings() {
+  try {
+    const bookings = await prisma.billboardBooking.findMany({
+      include: { billboard: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const serialized = bookings.map((b) => ({
+      ...b,
+      totalPrice: Number(b.totalPrice),
+      taxRate: b.taxRate ? Number(b.taxRate) : null,
+      createdAt: b.createdAt.toISOString(),
+      updatedAt: b.updatedAt.toISOString(),
+      startDate: b.startDate.toISOString(),
+      endDate: b.endDate.toISOString(),
+      billboard: {
+        ...b.billboard,
+        weeklyRate: Number(b.billboard.weeklyRate),
+        taxRate: Number(b.billboard.taxRate),
+        createdAt: b.billboard.createdAt.toISOString(),
+        updatedAt: b.billboard.updatedAt.toISOString(),
+      },
+    }));
+
+    return { success: true, data: serialized };
+  } catch (error: any) {
+    console.error("Failed to fetch billboard bookings:", error);
+    return { success: false, error: "Failed to fetch bookings" };
+  }
+}
+
+export async function updateBillboardBookingStatus(id: number, status: string) {
+  try {
+    await prisma.billboardBooking.update({
+      where: { id },
+      data: { status },
+    });
+
+    revalidatePath("/inventory/bookings");
+    revalidatePath("/inventory/schedule");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to update booking status:", error);
+    return { success: false, error: "Failed to update booking status" };
+  }
+}
+
+export async function updateBillboardBookingPaymentStatus(id: number, paymentStatus: string) {
+  try {
+    await prisma.billboardBooking.update({
+      where: { id },
+      data: { paymentStatus },
+    });
+
+    revalidatePath("/inventory/bookings");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to update payment status:", error);
+    return { success: false, error: "Failed to update payment status" };
+  }
+}
+
+export async function extendBillboardBooking(id: number, newEndDate: string) {
+  try {
+    await prisma.billboardBooking.update({
+      where: { id },
+      data: { endDate: new Date(newEndDate) },
+    });
+
+    revalidatePath("/inventory/bookings");
+    revalidatePath("/inventory/billboard-manager");
+    revalidatePath("/inventory/schedule");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to extend booking:", error);
+    return { success: false, error: "Failed to update campaign dates" };
+  }
+}
+
+export async function updateBillboardBookingMedia(id: number, advertFile: string) {
+  try {
+    await prisma.billboardBooking.update({
+      where: { id },
+      data: { advertFile },
+    });
+
+    revalidatePath("/inventory/bookings");
+    revalidatePath("/inventory/billboard-manager");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to update campaign media:", error);
+    return { success: false, error: "Failed to update media" };
+  }
+}
+
+export async function deleteBillboardBooking(id: number) {
+  try {
+    // Fetch first to get the media file URL before deleting
+    const booking = await prisma.billboardBooking.findUnique({ where: { id } });
+
+    await prisma.billboardBooking.delete({ where: { id } });
+
+    // Delete media file from Cloudinary / local storage
+    if (booking?.advertFile) {
+      try {
+        await deleteFromCloudinary(booking.advertFile);
+      } catch (err) {
+        console.error("Failed to delete media file:", err);
+      }
+    }
+
+    revalidatePath("/inventory/bookings");
+    revalidatePath("/inventory/billboard-manager");
+    revalidatePath("/inventory/schedule");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to delete booking:", error);
+    return { success: false, error: "Failed to delete booking" };
+  }
+}
 
 export async function createBillboardBooking(data: BookingInput) {
   try {

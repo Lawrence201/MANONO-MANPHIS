@@ -10,6 +10,7 @@ export function MapSection() {
         loading="lazy" 
         referrerPolicy="no-referrer-when-downgrade"
         title="Manono Manphis Location"
+        suppressHydrationWarning
       ></iframe>
       
       {/* Overlay to catch clicks if needed or for styling */}

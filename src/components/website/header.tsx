@@ -134,6 +134,7 @@ export function WebsiteHeader() {
           <input 
             type="text" 
             placeholder="Search..." 
+            suppressHydrationWarning
             className="w-full bg-white/50 border border-gray-200 rounded-full py-2 pl-8 pr-4 text-[16px] max-[1028px]:text-[15px] font-bold text-[#1a1a1a] outline-none focus:border-[#eea000] transition-all"
             style={{ fontFamily: "var(--font-jetbrains-mono)" }}
           />

@@ -262,6 +262,16 @@
     grid-column: span 2;
 }
 
+.fullWidth {
+    grid-column: span 2;
+}
+
+.summaryItem {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
 .detailsCard {
     width: 100%;
     padding: 20px;
@@ -871,7 +881,7 @@
     .formGrid,
     .stepTwoGrid,
     .stepThreeGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .fullWidth {
@@ -967,7 +977,7 @@
     background: #535353;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1028px) {
     /* --- Hero Section --- */
     .hero {
         height: 35vh;
@@ -985,19 +995,19 @@
 
     /* --- Booking Grid Adjustments --- */
     .bookingGrid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
     }
 
     .formGrid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     /* Step 2 & 3 grids */
     .stepTwoGrid,
     .stepThreeGrid {
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
+        grid-template-columns: 1fr !important;
+        gap: 25px !important;
     }
 
     /* Cards */
@@ -1042,9 +1052,25 @@
 }
 
 @media (max-width: 480px) {
-    /* --- Hide Step Labels on Mobile --- */
+    /* --- Stepper on Mobile --- */
     .stepLabel {
         display: none;
+    }
+
+    .stepperContainer {
+        overflow-x: auto;
+        padding: 0 20px 20px 20px;
+        /* Custom scrollbar hiding for cleaner look */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .stepperContainer::-webkit-scrollbar {
+        display: none;
+    }
+
+    .stepper {
+        width: 200%; /* Stretches the 5 steps so about 2 or 2.5 fit per screen width */
+        padding-right: 20px;
     }
 
     /* --- Hero Section --- */
@@ -1054,7 +1080,7 @@
     }
 
     .heroTitle {
-        font-size: clamp(24px, 7vw, 40px);
+        font-size: clamp(18px, 5vw, 24px);
     }
 
     .heroBreadcrumbs {
@@ -1068,19 +1094,29 @@
     .formGrid,
     .stepTwoGrid,
     .stepThreeGrid {
-        grid-template-columns: 1fr;
-        gap: 15px;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
     }
 
     .fullWidth {
         grid-column: span 1;
     }
 
-    /* Cards */
+    /* --- Container & Cards --- */
+    .bookingContent {
+        padding: 0 10px !important;
+    }
+
     .card,
     .addonsCard,
     .preferencesCard {
-        padding: 20px;
+        padding: 20px !important;
+        border-radius: 12px !important;
+        border-left: 1px solid rgba(0,0,0,0.02) !important;
+        border-right: 1px solid rgba(0,0,0,0.02) !important;
     }
 
     /* Form elements */
@@ -1156,6 +1192,9 @@
     .stepThreeGrid {
         grid-template-columns: 1fr;
         gap: 15px;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
     }
 
     .fullWidth {
@@ -1165,7 +1204,10 @@
     .card,
     .addonsCard,
     .preferencesCard {
-        padding: 20px;
+        padding: 20px !important;
+        border-radius: 12px !important;
+        border-left: 1px solid rgba(0,0,0,0.02) !important;
+        border-right: 1px solid rgba(0,0,0,0.02) !important;
     }
 
     .input,

@@ -32,9 +32,9 @@ const navGroups = [
   {
     label: "Advertising Services",
     items: [
-      { title: "Digital Billboards", url: "/inventory/billboards", icon: Monitor },
+      { title: "Billboard Manager", url: "/inventory/billboard-manager", icon: Monitor },
       { title: "Ad Bookings", url: "/inventory/bookings", icon: Sparkles, badge: "5" },
-      { title: "Campaign Calendar", url: "/campaign-calendar", icon: Calendar },
+      { title: "Campaign Schedule", url: "/inventory/schedule", icon: Calendar },
     ],
   },
   {
@@ -124,8 +124,15 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
             </div>
             <ul className="space-y-0.5">
               {group.items.map((item) => {
-                const isActive =
-                  item.url === "/" ? pathname === "/" : pathname?.startsWith(item.url);
+                const isActive = (() => {
+                  if (item.url === "/") return pathname === "/";
+                  // Inventory should only activate on its own sub-pages, not advertising ones
+                  if (item.url === "/inventory") {
+                    const inventoryPaths = ["/inventory/honey", "/inventory/cashew", "/inventory/sheabutter", "/inventory/billboards"];
+                    return pathname === "/inventory" || inventoryPaths.some(p => pathname?.startsWith(p));
+                  }
+                  return pathname?.startsWith(item.url);
+                })();
                 const Icon = item.icon;
                 return (
                   <li key={item.url}>

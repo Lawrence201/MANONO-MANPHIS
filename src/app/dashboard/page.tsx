@@ -171,11 +171,11 @@ export default function DashboardPage() {
     monthlyData?: { month: string; Billboards: number }[];
   }>({
     totalRevenue: 0,
-    activeBillboardsCount: 8,
-    totalBillboards: 10,
-    pendingApprovalsCount: 5,
-    totalClientsCount: 86,
-    totalBookingsCount: 142,
+    activeBillboardsCount: 0,
+    totalBillboards: 0,
+    pendingApprovalsCount: 0,
+    totalClientsCount: 0,
+    totalBookingsCount: 0,
     monthlyData: []
   });
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
@@ -189,11 +189,11 @@ export default function DashboardPage() {
         if (json.success && json.data) {
           setStats({
             totalRevenue: json.data.totalRevenue || 0,
-            activeBillboardsCount: json.data.activeBillboardsCount || 8,
-            totalBillboards: json.data.totalBillboards || 10,
-            pendingApprovalsCount: json.data.pendingApprovalsCount !== undefined ? json.data.pendingApprovalsCount : 5,
-            totalClientsCount: 86, // Keep premium mock data
-            totalBookingsCount: 142, // Keep premium mock data
+            activeBillboardsCount: json.data.activeBillboardsCount || 0,
+            totalBillboards: json.data.totalBillboards || 0,
+            pendingApprovalsCount: json.data.pendingApprovalsCount !== undefined ? json.data.pendingApprovalsCount : 0,
+            totalClientsCount: 0, // Mock data
+            totalBookingsCount: 0, // Mock data
             monthlyData: json.data.monthlyData
           });
           setRecentBookings(json.data.recentBookings || []);
@@ -220,7 +220,7 @@ export default function DashboardPage() {
   }, [mapTab]);
 
   const formatRevenue = (val: number) => {
-    if (val === 0) return "GH₵3,485k"; // Premium fallback if no database bookings yet
+    if (val === 0) return "GH₵0"; 
     if (val >= 1000) {
       return `GH₵${(val / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })}k`;
     }
@@ -257,7 +257,7 @@ export default function DashboardPage() {
         />
         <KpiCard
           label="Export Orders"
-          value="142"
+          value={stats.totalBookingsCount.toString()}
           change={12.1}
           trend="up"
           icon={<Truck className="w-5 h-5" />}
@@ -266,7 +266,7 @@ export default function DashboardPage() {
         />
         <KpiCard
           label="Active Billboards"
-          value={stats.totalRevenue > 0 ? `${stats.activeBillboardsCount} / ${stats.totalBillboards}` : "8 / 10"}
+          value={`${stats.activeBillboardsCount} / ${stats.totalBillboards}`}
           change={24.6}
           trend="up"
           icon={<Monitor className="w-5 h-5" />}
@@ -275,7 +275,7 @@ export default function DashboardPage() {
         />
         <KpiCard
           label="New Enquiries"
-          value="487"
+          value="0"
           change={15.3}
           trend="up"
           icon={<MessageSquare className="w-5 h-5" />}
@@ -284,7 +284,7 @@ export default function DashboardPage() {
         />
         <KpiCard
           label="Pending Approvals"
-          value={stats.totalRevenue > 0 ? stats.pendingApprovalsCount.toString() : "5"}
+          value={stats.pendingApprovalsCount.toString()}
           change={-2.1}
           trend="down"
           icon={<ClipboardCheck className="w-5 h-5" />}
@@ -293,7 +293,7 @@ export default function DashboardPage() {
         />
         <KpiCard
           label="Total Clients"
-          value="86"
+          value={stats.totalClientsCount.toString()}
           change={9.7}
           trend="up"
           icon={<Globe className="w-5 h-5" />}

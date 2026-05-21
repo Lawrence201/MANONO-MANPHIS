@@ -21,7 +21,7 @@ export function ProductsHero({
 }: ProductsHeroProps) {
   return (
     <section className="relative px-4">
-      <div className="relative w-full h-[450px] flex flex-col items-center justify-center overflow-hidden rounded-b-[60px] shadow-2xl">
+      <div className="relative w-full h-[450px] max-[1028px]:h-[300px] max-[480px]:h-[250px] flex flex-col items-center justify-center overflow-hidden rounded-b-[60px] max-[1028px]:rounded-b-[40px] max-[480px]:rounded-b-[30px] shadow-2xl">
         {/* Background Image */}
         <Image
           src={backgroundImage}

@@ -478,13 +478,14 @@ const HallBookingPageContent = () => {
                                     <p className={styles.cardSubtitle}>Select the perfect digital asset for your brand campaign</p>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                                <div className={styles.formGrid} style={{ gap: '16px', marginBottom: '20px' }}>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.label}>Bill board name *</label>
                                         <select
                                             className={styles.select}
                                             value={selectedHallIds[0] || ''}
                                             onChange={(e) => setSelectedHallIds(e.target.value ? [e.target.value] : [])}
+                                            suppressHydrationWarning
                                         >
                                             <option value="" disabled>Choose a billboard...</option>
                                             {halls.map(hall => (
@@ -503,11 +504,12 @@ const HallBookingPageContent = () => {
                                             placeholder="Billboard Code"
                                             value={(halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.assetCode || ''}
                                             style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+                                            suppressHydrationWarning
                                         />
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                                <div className={styles.formGrid} style={{ gap: '16px', marginBottom: '20px' }}>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.label}>Format</label>
                                         <input
@@ -517,6 +519,7 @@ const HallBookingPageContent = () => {
                                             placeholder="Billboard Format"
                                             value={(halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.format || ''}
                                             style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed', textTransform: 'capitalize' }}
+                                            suppressHydrationWarning
                                         />
                                     </div>
                                     <div className={styles.inputGroup}>
@@ -528,11 +531,12 @@ const HallBookingPageContent = () => {
                                             placeholder="Billboard Dimension"
                                             value={(halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.dimensions || ''}
                                             style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+                                            suppressHydrationWarning
                                         />
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                                <div className={styles.formGrid} style={{ gap: '16px', marginBottom: '20px' }}>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.label}>Display Type</label>
                                         <input
@@ -542,6 +546,7 @@ const HallBookingPageContent = () => {
                                             placeholder="Display Type"
                                             value={((halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.screenType || '').toUpperCase()}
                                             style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed', textTransform: 'uppercase' }}
+                                            suppressHydrationWarning
                                         />
                                     </div>
                                     <div className={styles.inputGroup}>
@@ -553,11 +558,12 @@ const HallBookingPageContent = () => {
                                             placeholder="Display Resolution"
                                             value={((halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.resolution || '').toUpperCase()}
                                             style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+                                            suppressHydrationWarning
                                         />
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '10px' }}>
+                                <div className={styles.formGrid} style={{ gap: '16px', marginBottom: '10px' }}>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.label}>Brightness</label>
                                         <input
@@ -571,6 +577,7 @@ const HallBookingPageContent = () => {
                                                 return String(val).toLowerCase().includes('nits') ? val : `${val} nits`;
                                             })()}
                                             style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+                                            suppressHydrationWarning
                                         />
                                     </div>
                                     <div className={styles.inputGroup}>
@@ -588,6 +595,7 @@ const HallBookingPageContent = () => {
                                                     : ''
                                             }
                                             style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+                                            suppressHydrationWarning
                                         />
                                     </div>
                                 </div>
@@ -613,6 +621,7 @@ const HallBookingPageContent = () => {
                                         loading="lazy"
                                         referrerPolicy="no-referrer-when-downgrade"
                                         title="Billboard Location Map"
+                                        suppressHydrationWarning
                                     ></iframe>
                                 </div>
                             </div>
@@ -629,7 +638,7 @@ const HallBookingPageContent = () => {
                                 </div>
 
                                 <div className={styles.formGrid}>
-                                    <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                                    <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
                                         <label className={styles.label}>Full Name *</label>
                                         <input
                                             type="text"
@@ -660,7 +669,7 @@ const HallBookingPageContent = () => {
                                             inputStyle={{
                                                 width: '100%',
                                                 height: '45px',
-                                                fontSize: '15px',
+                                                fontSize: '16px',
                                                 paddingLeft: '48px',
                                                 borderRadius: '8px',
                                                 border: '1px solid #E5E7EB',
@@ -715,7 +724,7 @@ const HallBookingPageContent = () => {
                                         </select>
                                     </div>
                                     {clientType === 'other' && (
-                                        <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                                        <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
                                             <label className={styles.label}>Specify Client Type *</label>
                                             <input
                                                 type="text"
@@ -727,7 +736,7 @@ const HallBookingPageContent = () => {
                                             />
                                         </div>
                                     )}
-                                    <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                                    <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
                                         <label className={styles.label}>Website (Optional)</label>
                                         <input
                                             type="text"
@@ -796,7 +805,7 @@ const HallBookingPageContent = () => {
                                     <p className={styles.cardSubtitle}>Customize your advertisement scheduling and assets</p>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                                <div className={styles.formGrid} style={{ gap: '16px', marginBottom: '20px' }}>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.label}>Campaign Title *</label>
                                         <input
@@ -1042,7 +1051,7 @@ const HallBookingPageContent = () => {
                                     )}
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                                <div className={styles.formGrid} style={{ gap: '16px', marginBottom: '20px' }}>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.label}>Campaign Duration ({durationUnit}) *</label>
                                         <input
@@ -1087,23 +1096,23 @@ const HallBookingPageContent = () => {
                                         <h3 className={styles.hallSummaryTitle} style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' }}>Campaign Summary</h3>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                                        <div className={styles.summaryItem}>
                                             <span style={{ color: '#64748b' }}>Selected Billboard:</span>
                                             <span style={{ fontWeight: '600', color: '#1e293b' }}>{selectedBillboard ? selectedBillboard.name : 'None'}</span>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                                        <div className={styles.summaryItem}>
                                             <span style={{ color: '#64748b' }}>Campaign Type:</span>
                                             <span style={{ fontWeight: '600', color: '#1e293b', textTransform: 'capitalize' }}>{campaignType}</span>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                                        <div className={styles.summaryItem}>
                                             <span style={{ color: '#64748b' }}>Duration:</span>
                                             <span style={{ fontWeight: '600', color: '#1e293b' }}>{campaignDuration} {durationUnit === 'Weeks' ? 'Week(s)' : durationUnit === 'Days' ? 'Day(s)' : 'Month(s)'}</span>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                                        <div className={styles.summaryItem}>
                                             <span style={{ color: '#64748b' }}>Slots Booked:</span>
                                             <span style={{ fontWeight: '600', color: '#1e293b' }}>{slotsRequested} Slot{slotsRequested > 1 ? 's' : ''}</span>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', fontSize: '14px', gap: '10px' }}>
+                                        <div className={styles.summaryItem} style={{ alignItems: 'flex-start', gap: '10px' }}>
                                             <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>Launch Date:</span>
                                             <span style={{
                                                 fontWeight: '600',
@@ -1115,7 +1124,7 @@ const HallBookingPageContent = () => {
                                             </span>
                                         </div>
                                         {selectedDate && calculatedEndDate && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px' }}>
+                                            <div className={styles.summaryItem} style={{ alignItems: 'center' }}>
                                                 <span style={{ color: '#64748b' }}>End Date:</span>
                                                 <span style={{ fontWeight: '600', color: '#1e293b' }}>
                                                     {calculatedEndDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -1375,7 +1384,7 @@ const HallBookingPageContent = () => {
                                     </div>
 
                                     {/* Choose Payment Method Tabs */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <div className={styles.formGrid} style={{ gap: '12px' }}>
                                         <button
                                             onClick={() => setPaymentMethod('card')}
                                             style={{

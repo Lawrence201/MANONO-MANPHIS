@@ -54,14 +54,15 @@ export function ContactSection() {
 
           {/* Right Column: Contact Form */}
           <div className="lg:w-2/3 bg-[#fcf9f6] p-6 min-[480px]:p-8 md:p-12 rounded-sm shadow-sm border border-gray-50 mt-4 lg:mt-0">
-            <form className="space-y-5 md:space-y-6">
+            <form className="space-y-5 md:space-y-6" suppressHydrationWarning>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
                 <div className="space-y-2">
                   <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#1a1a1a]">Full Name</label>
                   <input 
                     type="text" 
                     placeholder="John Doe"
-                    className="w-full bg-white border border-gray-200 px-4 py-3 md:py-3.5 text-[13px] md:text-[14px] focus:outline-none focus:border-[#eea000] transition-colors rounded-sm shadow-sm"
+                    suppressHydrationWarning
+                    className="w-full bg-white border border-gray-200 px-4 py-3 md:py-3.5 text-[16px] focus:outline-none focus:border-[#eea000] transition-colors rounded-sm shadow-sm"
                   />
                 </div>
                 <div className="space-y-2">
@@ -69,7 +70,8 @@ export function ContactSection() {
                   <input 
                     type="email" 
                     placeholder="john@example.com"
-                    className="w-full bg-white border border-gray-200 px-4 py-3 md:py-3.5 text-[13px] md:text-[14px] focus:outline-none focus:border-[#eea000] transition-colors rounded-sm shadow-sm"
+                    suppressHydrationWarning
+                    className="w-full bg-white border border-gray-200 px-4 py-3 md:py-3.5 text-[16px] focus:outline-none focus:border-[#eea000] transition-colors rounded-sm shadow-sm"
                   />
                 </div>
               </div>
@@ -79,7 +81,8 @@ export function ContactSection() {
                 <input 
                   type="text" 
                   placeholder="Bulk Honey Export Inquiry"
-                  className="w-full bg-white border border-gray-200 px-4 py-3 md:py-3.5 text-[13px] md:text-[14px] focus:outline-none focus:border-[#eea000] transition-colors rounded-sm shadow-sm"
+                  suppressHydrationWarning
+                  className="w-full bg-white border border-gray-200 px-4 py-3 md:py-3.5 text-[16px] focus:outline-none focus:border-[#eea000] transition-colors rounded-sm shadow-sm"
                 />
               </div>
 
@@ -88,7 +91,8 @@ export function ContactSection() {
                 <textarea 
                   rows={5}
                   placeholder="How can we help you?"
-                  className="w-full bg-white border border-gray-200 px-4 py-3 md:py-3.5 text-[13px] md:text-[14px] focus:outline-none focus:border-[#eea000] transition-colors rounded-sm resize-none shadow-sm"
+                  suppressHydrationWarning
+                  className="w-full bg-white border border-gray-200 px-4 py-3 md:py-3.5 text-[16px] focus:outline-none focus:border-[#eea000] transition-colors rounded-sm resize-none shadow-sm"
                 ></textarea>
               </div>
 

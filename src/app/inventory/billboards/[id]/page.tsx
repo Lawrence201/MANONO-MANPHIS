@@ -155,7 +155,7 @@ export default function BillboardDetailsPage({ params }: { params: Promise<{ id:
                 <div className="space-y-1">
                   <p className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground">Display Technology</p>
                   <p className="font-bold flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500" /> {billboard.screenType?.toUpperCase() || "LED"} Digital
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 block" /> {billboard.screenType?.toUpperCase() || "LED"} Digital
                   </p>
                 </div>
                 <div className="space-y-1">

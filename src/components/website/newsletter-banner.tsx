@@ -19,7 +19,8 @@ export function NewsletterBanner() {
             <input 
               type="email" 
               placeholder="Enter Your Email Address..." 
-              className="flex-1 min-w-0 px-4 md:px-5 py-3 md:py-3.5 text-[13px] md:text-[14px] focus:outline-none text-[#1a1a1a] placeholder:text-gray-300"
+              suppressHydrationWarning
+              className="flex-1 min-w-0 px-4 md:px-5 py-3 md:py-3.5 text-[16px] focus:outline-none text-[#1a1a1a] placeholder:text-gray-300"
             />
             <button className="bg-[#1a1a1a] text-white px-6 md:px-10 py-3 md:py-3.5 font-black text-[10px] md:text-[11px] tracking-[0.15em] uppercase hover:bg-gray-800 transition-all rounded-sm shrink-0">
               Subscribe
