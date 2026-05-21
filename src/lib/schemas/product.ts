@@ -1,0 +1,38 @@
+import { z } from "zod";
+
+export const ProductSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  category: z.string().min(1, "Category is required"),
+  description: z.string().nullish(),
+  packagingType: z.string().min(1, "Packaging type is required"),
+  packagingSize: z.string().min(1, "Packaging size is required"),
+  moqValue: z.union([z.string(), z.number()]).transform(v => Number(v) || 0),
+  moqUnit: z.string().min(1, "MOQ unit is required"),
+  stockQuantity: z.union([z.string(), z.number()]).transform(v => Number(v) || 0),
+  stockUnit: z.string().min(1, "Stock unit is required"),
+  stockStatus: z.string().default("in_stock"),
+  pricePerUnit: z.union([z.string(), z.number()]).transform(v => Number(v) || 0),
+  priceUnitType: z.string().min(1, "Price unit type is required"),
+  isExportReady: z.boolean().default(true),
+  exportCountries: z.array(z.string()).default([]),
+  shippingMethods: z.array(z.string()).default([]),
+  isOrganic: z.boolean().default(false),
+  certificates: z.array(z.string()).default([]),
+  featureImage: z.string().nullish(),
+  videoShowcase: z.string().nullish(),
+  galleryImages: z.array(z.string()).default([]),
+  processingTime: z.string().nullish(),
+  warehouse: z.string().nullish(),
+  status: z.string().default("published"),
+  cashewGrade: z.string().nullish(),
+  moistureContent: z.union([z.string(), z.number()]).transform(v => (v === "" || v === null || v === undefined) ? null : Number(v)).nullish(),
+  kernelCount: z.union([z.string(), z.number()]).transform(v => (v === "" || v === null || v === undefined) ? null : Number(v)).nullish(),
+  defectRate: z.union([z.string(), z.number()]).transform(v => (v === "" || v === null || v === undefined) ? null : Number(v)).nullish(),
+  seasonality: z.string().nullish(),
+  sheaGrade: z.string().nullish(),
+  sheaFatContent: z.union([z.string(), z.number()]).transform(v => (v === "" || v === null || v === undefined) ? null : Number(v)).nullish(),
+  purityLevel: z.string().nullish(),
+  usageType: z.array(z.string()).optional().default([]),
+});
+
+export type ProductInput = z.input<typeof ProductSchema>;

@@ -212,9 +212,9 @@ function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => v
               <nav className="space-y-1">
                 {[
                   { label: 'Digital Billboards', icon: Monitor, url: '/inventory/billboards' },
-                  { label: 'Honey', icon: Droplets, url: '#' },
-                  { label: 'Cashew', icon: Nut, url: '#' },
-                  { label: 'Sheabutter', icon: Leaf, url: '#' },
+                  { label: 'Honey', icon: Droplets, url: '/inventory/honey' },
+                  { label: 'Cashew', icon: Nut, url: '/inventory' },
+                  { label: 'Sheabutter', icon: Leaf, url: '/inventory' },
                 ].map((item, idx) => (
                   <Link 
                     key={idx} 
@@ -241,9 +241,9 @@ function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => v
               <nav className="space-y-1">
                 {[
                   { label: 'Add Digital Billboards', icon: Monitor, url: '/inventory/billboards/add' },
-                  { label: 'Add Honey', icon: Droplets, url: '#' },
-                  { label: 'Add Cashew', icon: Nut, url: '#' },
-                  { label: 'Add Sheabutter', icon: Leaf, url: '#' },
+                  { label: 'Add Honey', icon: Droplets, url: '/inventory/honey/add' },
+                  { label: 'Add Cashew', icon: Nut, url: '/inventory/cashew/add' },
+                  { label: 'Add Sheabutter', icon: Leaf, url: '/inventory/sheabutter/add' },
                 ].map((item, idx) => (
                   <Link 
                     key={idx} 

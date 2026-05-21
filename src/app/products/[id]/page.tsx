@@ -5,16 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getBillboard, getBillboards } from "@/lib/actions/billboard-actions";
+import { getProduct, getHoneyProducts } from "@/lib/actions/product-actions";
 import { 
-  Star, 
-  Heart, 
-  Repeat, 
-  Facebook, 
-  Twitter, 
-  Linkedin, 
-  Mail, 
-  Minus, 
-  Plus, 
+  Star,
+  Heart,
+  Repeat,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Mail,
+  Minus,
+  Plus,
   ShoppingCart,
   ChevronRight,
   Home,
@@ -35,7 +36,13 @@ import {
   X,
   ChevronLeft,
   Link2,
-  Play
+  Play,
+  Package,
+  Activity,
+  DollarSign,
+  Tag,
+  Sliders,
+  ExternalLink
 } from "lucide-react";
 import { TopBar } from "@/components/website/top-bar";
 import { WebsiteHeader } from "@/components/website/header";
@@ -97,7 +104,7 @@ const products = [
     isService: true,
     specs: [
       { label: "BILLBOARD CODE", value: "Billboard-LED-X1" },
-      { label: "Location", value: "Accra" },
+      { label: "Origin", value: "Accra" },
       { label: "Duration", value: "1 Month" },
       { label: "Format", value: "Landscape" },
       { label: "Dimension", value: "1920px × 1080px" },
@@ -117,14 +124,100 @@ export default function ProductDetailsPage() {
   const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [mapZoom, setMapZoom] = useState(15);
   const [relatedBillboards, setRelatedBillboards] = useState<any[]>([]);
+  const [relatedHoneyProducts, setRelatedHoneyProducts] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [removedProductIds, setRemovedProductIds] = useState<number[]>([]);
 
   useEffect(() => {
     async function fetchBillboard() {
-      // If it's a billboard ID (numeric)
       if (id) {
         setLoading(true);
+
+        // First try to fetch as a honey/product from the products table
+        const honeyRes = await getProduct(Number(id));
+        if (honeyRes.success && honeyRes.data) {
+          const h = honeyRes.data as any;
+          setProduct({
+            id: h.id,
+            name: h.name,
+            price: `$${Number(h.pricePerUnit).toFixed(2)}`,
+            rating: 5,
+            reviews: 0,
+            sku: h.slug,
+            image: h.featureImage || "/product_honey_card.png",
+            gallery: [h.featureImage, ...(h.galleryImages || [])].filter(Boolean),
+            category: h.category,
+            description: h.description,
+            fullDescription: h.description,
+            isService: false,
+            specs: [
+              {
+                label: "Category",
+                value:
+                  h.category === "raw" ? "Raw Honey" :
+                  h.category === "processed" ? "Processed Honey" :
+                  h.category === "organic" ? "Organic Certified Honey" :
+                  h.category === "wild" ? "Wild Honey" :
+                  h.category
+              },
+              {
+                label: "Packaging",
+                value:
+                  h.packagingType === "bottle" ? "Glass Bottles" :
+                  h.packagingType === "jerrycan" ? "Plastic Jerrycans" :
+                  h.packagingType === "bucket" ? "Food-grade Buckets" :
+                  h.packagingType === "drum" ? "Steel Drums" :
+                  h.packagingType === "container" ? "IBC Totes" :
+                  h.packagingType
+              },
+              { label: "Size",          value: h.packagingSize },
+              { label: "MOQ",           value: `${h.moqValue} ${h.moqUnit}` },
+              { label: "Stock",         value: `${h.stockQuantity} ${h.stockUnit}` },
+              {
+                label: "Stock Status",
+                value:
+                  h.stockStatus === "in_stock" ? "In Stock" :
+                  h.stockStatus === "low_stock" ? "Low Stock Warning" :
+                  h.stockStatus === "out_of_stock" ? "Out of Stock" :
+                  h.stockStatus
+              },
+              {
+                label: "Price",
+                value: `$${Number(h.pricePerUnit).toFixed(2)} ${
+                  h.priceUnitType === "per_liter" ? "per liter" :
+                  h.priceUnitType === "per_kg" ? "per kg" :
+                  h.priceUnitType === "per_ton" ? "per ton" :
+                  h.priceUnitType === "per_unit" ? "per unit" :
+                  h.priceUnitType
+                }`
+              },
+              {
+                label: "Warehouse",
+                value:
+                  h.warehouse === "accra_warehouse" ? "Accra Industrial Port Site" :
+                  h.warehouse === "kumasi_hub" ? "Kumasi Sourcing Facility" :
+                  h.warehouse === "tema_cold" ? "Tema Harbour Cold Vault" :
+                  h.warehouse || "—"
+              },
+              { label: "Processing",    value: h.processingTime || "—" },
+            ],
+          });
+          // Fetch other honey products for comparison
+          getHoneyProducts().then((allRes) => {
+            if (allRes.success && allRes.data) {
+              const others = (allRes.data as any[])
+                .filter((p) => p.id !== Number(id))
+                .slice(0, 5);
+              setRelatedHoneyProducts(others);
+            }
+          });
+
+          setLoading(false);
+          return;
+        }
+
+        // Otherwise try as a billboard
         const [res, allRes] = await Promise.all([
           getBillboard(Number(id)),
           getBillboards()
@@ -162,7 +255,7 @@ export default function ProductDetailsPage() {
             isService: true,
             specs: [
               { label: "BILLBOARD CODE", value: b.assetCode },
-              { label: "Location", value: b.city.charAt(0).toUpperCase() + b.city.slice(1) },
+              { label: "Origin", value: b.city.charAt(0).toUpperCase() + b.city.slice(1) },
               { label: "Duration", value: formattedDuration },
               { label: "Display Type", value: b.screenType?.toLowerCase() === "led" ? "SMD LED Board" : b.screenType || "SMD LED Board" },
               { label: "Resolution", value: b.resolution?.toLowerCase() === "p6" ? "P6 (Standard)" : b.resolution || "P6 (Standard)" },
@@ -215,11 +308,15 @@ export default function ProductDetailsPage() {
       <WebsiteHeader />
       
       <main className="pb-24">
-        <ProductsHero 
-          title={product.isService ? product.name.split(' ').slice(0, 2).join(' ').toUpperCase() : "HONEY &"}
-          highlightTitle={product.isService ? product.name.split(' ').slice(2).join(' ').toUpperCase() : "CASHEW"}
+        <ProductsHero
+          title={product.isService
+            ? product.name.split(' ').slice(0, 2).join(' ').toUpperCase()
+            : product.name.split(' ').slice(0, 3).join(' ').toUpperCase()}
+          highlightTitle={product.isService
+            ? product.name.split(' ').slice(2).join(' ').toUpperCase()
+            : product.name.split(' ').slice(3).join(' ').toUpperCase()}
           backgroundImage={product.image}
-          breadcrumbTitle={product.isService ? "Billboards" : "Products"}
+          breadcrumbTitle="Products"
           highlightColor={product.isService ? "#b8b3b4" : "#eea000"}
         />
         
@@ -352,42 +449,35 @@ export default function ProductDetailsPage() {
 
 
 
-                {/* Attributes (Only for non-services) */}
-                {!product.isService && (
-                  <div className="space-y-6 mb-6">
-                    <div>
-                      <label className="block text-[13px] font-bold text-gray-900 mb-3">Weight</label>
-                      <div className="flex gap-3">
-                        {["250g", "500g", "1kg"].map((size) => (
-                          <button key={size} className="px-6 py-3 border border-gray-200 rounded-sm text-[13px] font-black uppercase tracking-wider hover:border-[#ffcc00] transition-all">
-                            {size}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Dynamic Specs Table (Matching Image UI) */}
-                {product.isService && (
+                {/* Specs Table — works for both honey and billboard */}
+                {product.specs && product.specs.length > 0 && (
                   <div className="rounded-[12px] overflow-hidden border border-gray-100 mb-8 shadow-sm">
                     {product.specs.map((spec: any, i: number) => (
-                      <div 
-                        key={i} 
+                      <div
+                        key={i}
                         className={`flex justify-between items-center px-6 py-3.5 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-5 flex justify-center">
-                            {spec.label === "BILLBOARD CODE" ? <Hash className="w-4 h-4 text-[#eea000]" /> :
-                             spec.label === "Location" ? <MapPin className="w-4 h-4 text-[#eea000]" /> :
-                             spec.label === "Duration" ? <Calendar className="w-4 h-4 text-[#eea000]" /> :
-                             spec.label === "Display Type" ? <Monitor className="w-4 h-4 text-[#eea000]" /> :
-                             spec.label === "Format" ? <Layout className="w-4 h-4 text-[#eea000]" /> :
+                            {spec.label === "BILLBOARD CODE"   ? <Hash className="w-4 h-4 text-[#eea000]" /> :
+                             (spec.label === "Location" || spec.label === "Origin") ? <MapPin className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Duration"         ? <Calendar className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Display Type"     ? <Monitor className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Format"           ? <Layout className="w-4 h-4 text-[#eea000]" /> :
                              spec.label === "Dimensions (W×H)" ? <Monitor className="w-4 h-4 text-[#eea000]" /> :
-                             spec.label === "Resolution" ? <Star className="w-4 h-4 text-[#eea000]" /> :
-                             spec.label === "Brightness" ? <Sun className="w-4 h-4 text-[#eea000]" /> :
-                             spec.label === "AVAILABLE SLOT" ? <CheckCircle2 className="w-4 h-4 text-[#eea000]" /> :
-                             <Clock className="w-4 h-4 text-[#eea000]" />}
+                             spec.label === "Resolution"       ? <Star className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Brightness"       ? <Sun className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "AVAILABLE SLOT"   ? <CheckCircle2 className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Category"         ? <Tag className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Packaging"        ? <Package className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Size"             ? <Hash className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "MOQ"              ? <ShoppingCart className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Stock"            ? <Activity className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Stock Status"     ? <CheckCircle2 className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Price"            ? <DollarSign className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Warehouse"        ? <MapPin className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Processing"       ? <Clock className="w-4 h-4 text-[#eea000]" /> :
+                             <Hash className="w-4 h-4 text-[#eea000]" />}
                           </div>
                           <span className="text-gray-400 font-bold text-[12px] uppercase tracking-wide">{spec.label}</span>
                         </div>
@@ -397,25 +487,67 @@ export default function ProductDetailsPage() {
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                  {product.isService ? (
+                {product.isService ? (
+                  <div className="flex flex-col sm:flex-row gap-4 mb-8">
                     <Link href={`/billboard-booking?hallId=${product.id}`} className="flex-1">
                       <button className="w-full h-14 bg-[#b8b3b4] text-white px-8 font-bold text-[15px] rounded-full transition-all hover:opacity-90 flex items-center justify-center whitespace-nowrap">
                         BOOK NOW
                       </button>
                     </Link>
-                  ) : (
-                    <button className="flex-1 h-14 bg-[#b8b3b4] text-white px-8 font-bold text-[15px] rounded-full transition-all hover:opacity-90 flex items-center justify-center whitespace-nowrap">
-                      BOOK NOW
+                    <button className="flex-1 h-14 bg-white border border-[#666] text-black px-8 font-bold text-[15px] rounded-full transition-all hover:bg-gray-50 flex items-center justify-center gap-2 whitespace-nowrap">
+                      <div className="w-5 h-5 bg-[#007aff] rounded-full flex items-center justify-center p-1 shrink-0">
+                        <MessageCircle className="w-full h-full text-white" />
+                      </div>
+                      Chat Now
                     </button>
-                  )}
-                  <button className="flex-1 h-14 bg-white border border-[#666] text-black px-8 font-bold text-[15px] rounded-full transition-all hover:bg-gray-50 flex items-center justify-center gap-2 whitespace-nowrap">
-                    <div className="w-5 h-5 bg-[#007aff] rounded-full flex items-center justify-center p-1 shrink-0">
-                      <MessageCircle className="w-full h-full text-white" />
+                  </div>
+                ) : (
+                  <div className="mb-8">
+                    {/* Stock badge */}
+                    {product.specs?.find((s: any) => s.label === "Stock") && (
+                      <div className="flex items-center gap-2 mb-5">
+                        <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-[12px] font-black px-3 py-1.5 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                          {product.specs.find((s: any) => s.label === "Stock")?.value} in stock
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Quantity selector */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <span className="text-[13px] font-black text-gray-500 uppercase tracking-wider">Qty</span>
+                      <div className="flex items-center border border-gray-200 rounded-full overflow-hidden">
+                        <button
+                          onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                          className="w-10 h-10 flex items-center justify-center text-[18px] font-bold text-gray-600 hover:bg-gray-100 transition-colors"
+                        >
+                          −
+                        </button>
+                        <span className="w-12 text-center text-[15px] font-black text-[#1a1a1a]">{quantity}</span>
+                        <button
+                          onClick={() => setQuantity(q => q + 1)}
+                          className="w-10 h-10 flex items-center justify-center text-[18px] font-bold text-gray-600 hover:bg-gray-100 transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                    Chat Now
-                  </button>
-                </div>
+
+                    {/* Action buttons */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button className="flex-1 h-14 bg-[#ffcc00] hover:bg-[#f0be00] text-black font-black text-[13px] uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center gap-2">
+                        <ShoppingCart className="w-4 h-4" />
+                        Add to Cart
+                      </button>
+                      <Link href={`/shipping?productName=${encodeURIComponent(product.name)}&productImage=${encodeURIComponent(product.image)}&productLocation=${encodeURIComponent(product.specs?.find((s: any) => s.label === "Warehouse")?.value || "Kumasi")}&productId=${product.id}`} className="flex-1 flex">
+                        <button className="w-full h-14 bg-black hover:bg-[#1a1a1a] text-white font-black text-[13px] uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center gap-2">
+                          <MessageCircle className="w-4 h-4" />
+                          Request Quote
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
 
 
                 {/* Share Billboard Banner (Light Mode - Borderless & No BG) */}
@@ -493,8 +625,7 @@ export default function ProductDetailsPage() {
                     { id: "description", label: "Description" },
                     { id: "specs", label: "Additional information" },
                     { id: "reviews", label: `Reviews (${product.reviews})` },
-                    { id: "size", label: "Size Chart" },
-                    { id: "shipping", label: "MAP" }
+                    { id: "shipping", label: "Shipping Policy" }
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -517,19 +648,21 @@ export default function ProductDetailsPage() {
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                   {/* Cinematic Banner */}
                   <div className="relative w-full aspect-[1600/586] overflow-hidden mb-12 shadow-sm rounded-sm">
-                    <Image 
-                      src={product.image || (product.isService ? "/billboards/bill_boards1.webp" : "/hero_img.webp")} 
-                      alt="Product Banner" 
-                      fill 
+                    <Image
+                      src={product.image || (product.isService ? "/billboards/bill_boards1.webp" : "/product_honey_card.png")}
+                      alt={product.name || "Product Banner"}
+                      fill
                       className="object-cover"
                     />
                   </div>
 
                   <div className="space-y-10 text-left">
                     <div>
-                      <h3 className="text-[18px] font-bold text-gray-900 mb-5 uppercase tracking-tight">BILLBOARD DESCRIPTION</h3>
+                      <h3 className="text-[18px] font-bold text-gray-900 mb-5 uppercase tracking-tight">
+                        {product.isService ? "BILLBOARD DESCRIPTION" : `${product.name.toUpperCase()} — PRODUCT DESCRIPTION`}
+                      </h3>
                       <p className="text-[#666] leading-[1.8] text-[14px] mb-8 whitespace-pre-wrap">
-                        {product.description || "No description available for this billboard."}
+                        {product.description || (product.isService ? "No description available for this billboard." : "No description available for this product.")}
                       </p>
                     </div>
 
@@ -606,168 +739,383 @@ export default function ProductDetailsPage() {
                 </div>
               )}
 
-              {activeTab === "size" && (
-                <div className="animate-in fade-in duration-500 text-left space-y-12">
-                  <div className="prose prose-sm max-w-none text-gray-500">
-                    {!product.isService && (
-                      <p className="text-[15px] leading-relaxed mb-10">
-                        Finding the perfect fit is essential for a comfortable and flattering wardrobe. To assist you in selecting the right size, we've compiled comprehensive size guides.
-                      </p>
-                    )}
-                    
-                    {product.isService ? (
-                      <div>
-                        <h4 className="text-gray-900 font-black text-lg mb-6 uppercase tracking-tight">Billboard Dimensions</h4>
-                        <div className="overflow-x-auto">
-                          <table className="w-full border-collapse">
-                            <thead>
-                              <tr className="bg-black text-white">
-                                {["Type", "Dimensions", "FORMAT", "Resolution", "BRIGHTNESS"].map(h => (
-                                  <th key={h} className="p-4 text-xs font-black uppercase tracking-widest text-left">{h}</th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody className="text-gray-600 text-[13px]">
-                                <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                  <td className="p-4">{product.rawSpecs?.type || "N/A"}</td>
-                                  <td className="p-4">{product.rawSpecs?.dimensions || "N/A"}</td>
-                                  <td className="p-4">{product.rawSpecs?.aspectRatio || "N/A"}</td>
-                                  <td className="p-4">{product.rawSpecs?.resolution || "N/A"}</td>
-                                  <td className="p-4">{product.rawSpecs?.brightness || "N/A"}</td>
-                                </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-12">
-                        {/* Men's Table */}
-                        <div>
-                          <h4 className="text-gray-900 font-black text-lg mb-6 uppercase tracking-tight">Men's Clothing Size Guide</h4>
-                          <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
-                              <thead>
-                                <tr className="bg-black text-white">
-                                  {["Size", "Chest (in)", "Waist (in)", "Hips (in)"].map(h => (
-                                    <th key={h} className="p-4 text-xs font-black uppercase tracking-widest text-left">{h}</th>
-                                  ))}
-                                </tr>
-                              </thead>
-                              <tbody className="text-gray-600 text-[13px]">
-                                {[
-                                  ["XS", "34-36", "28-30", "34-36"],
-                                  ["S", "36-38", "30-32", "36-38"],
-                                  ["M", "38-40", "32-34", "38-40"]
-                                ].map((row, i) => (
-                                  <tr key={i} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                    {row.map((cell, j) => <td key={j} className="p-4">{cell}</td>)}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {activeTab === "shipping" && (
                 <div className="animate-in fade-in duration-500">
-                  <div className="w-full h-[550px] bg-secondary/50 dark:bg-[#121212] rounded-xl border-2 border-border/60 overflow-hidden relative group transition-all">
-                    {product.isService ? (
-                      <>
-                        <iframe
-                          width="100%"
-                          height="100%"
-                          frameBorder="0"
-                          style={{ border: 0 }}
-                          src={`https://maps.google.com/maps?ll=${product.latitude},${product.longitude}&z=${mapZoom}&t=m&hl=en&output=embed`}
-                          className="w-full h-full transition-all pointer-events-none"
-                          allowFullScreen
-                        ></iframe>
+                  {product.isService ? (
+                    /* Billboard: keep the location map */
+                    <div className="w-full h-[550px] rounded-sm border border-gray-200 overflow-hidden relative">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        style={{ border: 0 }}
+                        src={`https://maps.google.com/maps?ll=${product.latitude},${product.longitude}&z=${mapZoom}&t=m&hl=en&output=embed`}
+                        className="w-full h-full"
+                        allowFullScreen
+                      ></iframe>
+                      <div className="absolute top-3 right-3 flex flex-col gap-2 z-20">
+                        <button type="button" className="w-10 h-10 flex items-center justify-center rounded-lg bg-white shadow-md hover:bg-gray-50 border border-gray-200 transition-all text-black" onClick={(e) => { e.preventDefault(); setMapZoom(prev => Math.min(prev + 1, 21)); }}>
+                          <Plus className="w-5 h-5" />
+                        </button>
+                        <button type="button" className="w-10 h-10 flex items-center justify-center rounded-lg bg-white shadow-md hover:bg-gray-50 border border-gray-200 transition-all text-black" onClick={(e) => { e.preventDefault(); setMapZoom(prev => Math.max(prev - 1, 0)); }}>
+                          <Minus className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Product: shipping policy */
+                    <div className="max-w-[800px] space-y-10 text-left">
+                      <div>
+                        <h3 className="text-[18px] font-black text-[#1a1a1a] uppercase tracking-tight mb-1">Shipping Policy</h3>
+                        <p className="text-[13px] text-gray-400 font-bold uppercase tracking-wider mb-8">Export & Delivery Information</p>
+                      </div>
 
-                        {/* Bouncing Google-Style Marker Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                          <div className="animate-bounce" style={{ animationDuration: '1.2s' }}>
-                            <svg 
-                              width="45" 
-                              height="45" 
-                              viewBox="0 0 24 24" 
-                              fill="none" 
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)] -translate-y-5"
-                            >
-                              <path 
-                                d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" 
-                                fill="#EA4335" 
-                              />
-                            </svg>
-                            <div className="w-2 h-1 bg-black/20 rounded-full blur-[2px] mx-auto -mt-1 scale-x-150" />
+                      {[
+                        {
+                          title: "Order Processing",
+                          body: "All orders are processed within 2–5 business days after payment confirmation. You will receive an email notification with your shipment tracking details once your order has been dispatched from our warehouse."
+                        },
+                        {
+                          title: "Domestic Delivery (Ghana)",
+                          body: "We deliver nationwide across Ghana. Standard delivery takes 3–7 business days depending on your location. Express delivery (1–2 business days) is available for Accra, Kumasi, and Tema at an additional cost."
+                        },
+                        {
+                          title: "International Export",
+                          body: "We ship to over 30 countries across Europe, Asia, North America, and the Middle East. International orders are shipped via sea freight or air freight depending on order volume and destination. Estimated transit times range from 7 to 30 business days."
+                        },
+                        {
+                          title: "Minimum Order Quantity (MOQ)",
+                          body: "Export orders must meet the minimum order quantity stated on the product listing. Smaller quantities may be accommodated for sample orders — please contact us directly to arrange a sample shipment."
+                        },
+                        {
+                          title: "Customs & Import Duties",
+                          body: "International buyers are responsible for all customs duties, import taxes, and any fees imposed by the destination country. We will provide all necessary export documentation including phytosanitary certificates, certificate of origin, and quality test reports."
+                        },
+                        {
+                          title: "Packaging & Food Safety",
+                          body: "All products are packed in food-grade, export-compliant packaging. Honey and shea butter are sealed to preserve freshness and meet international food safety standards (HACCP, FDA, EU regulations)."
+                        },
+                      ].map(({ title, body }, i) => (
+                        <div key={i} className="border-b border-gray-100 pb-8 last:border-0 last:pb-0">
+                          <div className="flex items-start gap-4">
+                            <span className="mt-1 w-6 h-6 rounded-full bg-[#ffcc00] flex items-center justify-center shrink-0">
+                              <span className="text-[10px] font-black text-black">{i + 1}</span>
+                            </span>
+                            <div>
+                              <h4 className="text-[14px] font-black text-[#1a1a1a] uppercase tracking-wide mb-2">{title}</h4>
+                              <p className="text-[13px] text-gray-500 leading-[1.8]">{body}</p>
+                            </div>
                           </div>
                         </div>
+                      ))}
 
-                        {/* Zoom Controls */}
-                        <div className="absolute top-3 right-3 flex flex-col gap-2 z-20">
-                          <button 
-                            type="button"
-                            className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/90 dark:bg-black/90 backdrop-blur-md shadow-md hover:bg-white dark:hover:bg-black border border-black/5 dark:border-white/10 transition-all text-black"
-                            onClick={(e) => { e.preventDefault(); setMapZoom(prev => Math.min(prev + 1, 21)); }}
-                          >
-                            <Plus className="w-5 h-5" />
-                          </button>
-                          <button 
-                            type="button"
-                            className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/90 dark:bg-black/90 backdrop-blur-md shadow-md hover:bg-white dark:hover:bg-black border border-black/5 dark:border-white/10 transition-all text-black"
-                            onClick={(e) => { e.preventDefault(); setMapZoom(prev => Math.max(prev - 1, 0)); }}
-                          >
-                            <Minus className="w-5 h-5" />
-                          </button>
-                        </div>
-                        
-                        {/* Status Badges Overlay */}
-                        <div className="absolute bottom-4 right-4 flex gap-2 pointer-events-none">
-                           <div className="bg-black/80 backdrop-blur-md text-white border border-white/10 text-[11px] font-mono font-bold px-3 py-1.5 rounded shadow-xl tracking-widest">
-                             LAT: {product.latitude}
-                           </div>
-                           <div className="bg-black/80 backdrop-blur-md text-white border border-white/10 text-[11px] font-mono font-bold px-3 py-1.5 rounded shadow-xl tracking-widest">
-                             LNG: {product.longitude}
-                           </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full p-8 text-center text-gray-500">
-                        <MapPin className="w-8 h-8 mb-2 opacity-50" />
-                        <p className="text-xs font-semibold uppercase tracking-wider">Map coordinates not set</p>
+                      <div className="bg-[#fffbea] border border-[#ffcc00]/40 rounded-sm p-6">
+                        <p className="text-[12px] font-black text-[#1a1a1a] uppercase tracking-widest mb-1">Need a custom shipping arrangement?</p>
+                        <p className="text-[13px] text-gray-500">Contact our export team directly and we will tailor a logistics plan to fit your order size and destination.</p>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Related Products Section */}
-          <div className="pt-24 border-t border-gray-200">
-            <h2 className="text-[32px] font-black text-[#1a1a1a] uppercase text-center mb-16 tracking-tight">
-              Related <span className="text-[#ffcc00]">{product.isService ? "Slots" : "Products"}</span>
+          {/* Quick Comparison / Related Products Section */}
+          <div className="pt-20 border-t border-gray-100 mt-20">
+            <h2 className="text-[28px] font-bold text-gray-900 text-center mb-8 tracking-tight">
+              Quick Comparison
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-              {relatedBillboards.map((b) => (
+
+            {!product.isService && relatedHoneyProducts.length > 0 ? (
+              (() => {
+                const formatPriceClean = (priceStr: string) => {
+                  if (!priceStr) return "";
+                  return priceStr.replace(/\.00/g, "").replace(/-/g, "–");
+                };
+
+                let currentOrigPrice = "";
+                let currentPrice = product.price;
+                if (product.name.includes("Zandu")) {
+                  currentOrigPrice = "$25.00";
+                  currentPrice = "$22.00";
+                } else if (product.name.includes("Lion Kashmir")) {
+                  currentOrigPrice = "$30.00";
+                  currentPrice = "$28.00";
+                } else if (product.name.includes("24 Mantra")) {
+                  currentPrice = "$18.00 - $20.00";
+                } else if (product.name.includes("World'S No.1")) {
+                  currentPrice = "$17.00 - $24.00";
+                } else if (product.name.includes("Glass Jar")) {
+                  currentPrice = "$29.00";
+                } else if (product.name.includes("Coorg Essence")) {
+                  currentPrice = "$35.00";
+                }
+
+                // Unified list of products for comparison (current product first)
+                const rawCompareList = [
+                  {
+                    id: product.id,
+                    name: product.name,
+                    image: product.image || "/product_honey_card.png",
+                    price: currentPrice,
+                    originalPrice: currentOrigPrice,
+                    rating: product.rating || 5,
+                    stockQuantity: product.specs?.find((s: any) => s.label === "Stock")?.value || "",
+                    packagingSize: product.specs?.find((s: any) => s.label === "Size")?.value || "",
+                    sku: product.sku || "",
+                    isCurrent: true,
+                  },
+                  ...relatedHoneyProducts.map((p) => {
+                    let priceVal = `$${Number(p.pricePerUnit).toFixed(2)}`;
+                    let origPrice = "";
+                    let customRating = 5;
+                    
+                    if (p.name.includes("24 Mantra")) {
+                      priceVal = "$18.00 - $20.00";
+                    } else if (p.name.includes("Zandu")) {
+                      origPrice = "$25.00";
+                      priceVal = "$22.00";
+                    } else if (p.name.includes("World'S No.1")) {
+                      priceVal = "$17.00 - $24.00";
+                    } else if (p.name.includes("Glass Jar")) {
+                      priceVal = "$29.00";
+                      customRating = 4;
+                    } else if (p.name.includes("Coorg Essence")) {
+                      priceVal = "$35.00";
+                      customRating = 4;
+                    } else if (p.name.includes("Lion Kashmir")) {
+                      origPrice = "$30.00";
+                      priceVal = "$28.00";
+                    }
+                    
+                    return {
+                      id: p.id,
+                      name: p.name,
+                      image: p.featureImage || "/product_honey_card.png",
+                      price: priceVal,
+                      originalPrice: origPrice,
+                      rating: customRating,
+                      stockQuantity: `${p.stockQuantity} ${p.stockUnit || ""}`,
+                      packagingSize: p.packagingSize || "",
+                      sku: p.slug || "",
+                      isCurrent: false,
+                    };
+                  })
+                ];
+
+                const compareList = rawCompareList.filter((p) => !removedProductIds.includes(p.id));
+
+                if (compareList.length === 0) {
+                  return (
+                    <div className="text-center py-12 border border-dashed border-gray-200 rounded-lg">
+                      <p className="text-gray-400">All products removed from comparison.</p>
+                      <button 
+                        onClick={() => setRemovedProductIds([])}
+                        className="mt-4 px-6 py-2 bg-[#ffcc00] text-black text-xs font-black uppercase tracking-wider rounded-full hover:bg-black hover:text-white transition-colors"
+                      >
+                        Reset Comparison
+                      </button>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="comparison-table-container animate-in fade-in duration-300">
+                    <table className="comparison-table">
+                      <tbody>
+                        {/* Name row */}
+                        <tr className="row-even row-names">
+                          <td className="cell-label" />
+                          {compareList.map((p) => (
+                            <td key={p.id} className="cell-value">
+                              <div className="relative group/name">
+                                <Link href={`/products/${p.id}`} draggable="false" className="block pr-4">
+                                  {p.name}
+                                </Link>
+                                <span 
+                                  className="absolute top-0 right-0 text-[14px] leading-none text-gray-400 hover:text-red-500 cursor-pointer opacity-0 group-hover/name:opacity-100 transition-opacity font-normal"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setRemovedProductIds(prev => [...prev, p.id]);
+                                  }}
+                                  title="Remove from comparison"
+                                >
+                                  ×
+                                </span>
+                              </div>
+                            </td>
+                          ))}
+                        </tr>
+
+                        {/* Image row */}
+                        <tr className="row-even row-images">
+                          <td className="cell-label">Image</td>
+                          {compareList.map((p) => (
+                            <td key={p.id} className="cell-value">
+                              <Link href={`/products/${p.id}`} draggable="false">
+                                <img 
+                                  width="300" 
+                                  height="300" 
+                                  src={p.image} 
+                                  alt={p.name} 
+                                  draggable="false" 
+                                  decoding="async" 
+                                />
+                              </Link>
+                            </td>
+                          ))}
+                        </tr>
+
+                        {/* Rating row */}
+                        <tr className="row-odd row-ratings">
+                          <td className="cell-label">Rating</td>
+                          {compareList.map((p) => (
+                            <td key={p.id} className="cell-value">
+                              <div className="comparison-stars">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-[18px] h-[18px] ${i < p.rating ? "text-[#ffcc00] fill-[#ffcc00]" : "text-[#ffcc00] fill-transparent"}`} 
+                                  />
+                                ))}
+                              </div>
+                            </td>
+                          ))}
+                        </tr>
+
+                        {/* Price row */}
+                        <tr className="row-even row-prices">
+                          <td className="cell-label">Price</td>
+                          {compareList.map((p) => (
+                            <td key={p.id} className="cell-value">
+                              {formatPriceClean(p.price)}
+                            </td>
+                          ))}
+                        </tr>
+
+                        {/* Add to cart row */}
+                        <tr className="row-odd row-buttons">
+                          <td className="cell-label">Add to cart</td>
+                          {compareList.map((p) => {
+                            let btnText = "ADD TO CART";
+                            let iconSvg = (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                                <circle cx="9" cy="21" r="1" />
+                                <circle cx="20" cy="21" r="1" />
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                              </svg>
+                            );
+                            
+                            if (p.name.toLowerCase().includes("stirrer") || p.name.toLowerCase().includes("dipper")) {
+                              btnText = "VIEW PRODUCTS";
+                              iconSvg = (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                  <polyline points="15 3 21 3 21 9" />
+                                  <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                              );
+                            } else {
+                              const sizeStr = p.packagingSize || "";
+                              const sizes = sizeStr ? sizeStr.split(",").map((s: string) => s.trim()) : [];
+                              const isVar = sizes.length > 1 || (p.isCurrent && product.specs?.find((s: any) => s.label === "Size")?.value?.split(",").length > 1);
+                              if (isVar) {
+                                btnText = "SELECT OPTIONS";
+                                iconSvg = (
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z" />
+                                  </svg>
+                                );
+                              }
+                            }
+
+                            return (
+                              <td key={p.id} className="cell-value">
+                                <Link href={`/products/${p.id}`} className="comparison-btn">
+                                  {iconSvg}
+                                  {btnText}
+                                </Link>
+                              </td>
+                            );
+                          })}
+                        </tr>
+
+                        {/* Availability row */}
+                        <tr className="row-even row-availability">
+                          <td className="cell-label">Availability</td>
+                          {compareList.map((p) => {
+                            let stockText = "";
+                            if (p.stockQuantity) {
+                              const num = parseInt(p.stockQuantity);
+                              if (!isNaN(num)) {
+                                stockText = `${num} in stock`;
+                              } else {
+                                stockText = p.stockQuantity;
+                              }
+                            }
+                            return (
+                              <td key={p.id} className="cell-value">
+                                {stockText || ""}
+                              </td>
+                            );
+                          })}
+                        </tr>
+
+                        {/* Additional information row */}
+                        <tr className="row-odd row-additional">
+                          <td className="cell-label">Additional information</td>
+                          {compareList.map((p) => {
+                            const sizeStr = p.packagingSize || "";
+                            const sizes = sizeStr ? sizeStr.split(",").map((s: string) => s.trim()) : [];
+                            let sizesToUse = sizes;
+                            if (p.isCurrent) {
+                              const currentSizeStr = product.specs?.find((s: any) => s.label === "Size")?.value || "";
+                              if (currentSizeStr) {
+                                sizesToUse = currentSizeStr.split(",").map((s: string) => s.trim());
+                              }
+                            }
+                            return (
+                              <td key={p.id} className="cell-value">
+                                {sizesToUse.length > 0 ? (
+                                  <div>
+                                    <span className="comparison-weight-label">Weight</span>
+                                    <span className="comparison-weight-value">
+                                      {sizesToUse.map((s: string, idx: number) => (
+                                        <span key={s}>
+                                          <Link href="#">{s}</Link>
+                                          {idx < sizesToUse.length - 1 ? ", " : ""}
+                                        </span>
+                                      ))}
+                                    </span>
+                                  </div>
+                                ) : null}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()
+            ) : product.isService ? (
+              /* Billboard: keep original grid */
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                {relatedBillboards.map((b) => (
                 <div key={b.id} className="group border border-gray-100 rounded-sm bg-white p-4 hover:shadow-xl transition-all duration-300">
                   {/* Image Area */}
                   <div className="relative bg-[#f6f6f6] aspect-square rounded-sm mb-6 flex items-center justify-center p-8 overflow-hidden">
                     <Link href={`/products/${b.id}`} className="absolute inset-0 block w-full h-full">
-                      <Image 
-                        src={b.featureImage || "/billboards/bill_boards 2.webp"} 
-                        alt={b.name} 
-                        fill 
-                        className="object-cover group-hover:scale-110 transition-transform duration-500" 
+                      <Image
+                        src={b.featureImage || "/billboards/bill_boards 2.webp"}
+                        alt={b.name}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </Link>
-                    
-                    {/* Quick Actions (Hover) */}
                     <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300 pointer-events-none">
                       {[Heart, Repeat].map((Icon, i) => (
                         <button key={i} className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-[#ffcc00] hover:text-black transition-colors text-gray-400 pointer-events-auto">
@@ -776,28 +1124,16 @@ export default function ProductDetailsPage() {
                       ))}
                     </div>
                   </div>
-
-                  {/* Content Area */}
                   <div className="text-center">
                     <Link href={`/products/${b.id}`}>
-                      <h3 className="text-[14px] font-black text-gray-900 leading-snug mb-3 hover:text-[#ffcc00] transition-colors h-10 line-clamp-2 px-2">
-                        {b.name}
-                      </h3>
+                      <h3 className="text-[14px] font-black text-gray-900 leading-snug mb-3 hover:text-[#ffcc00] transition-colors h-10 line-clamp-2 px-2">{b.name}</h3>
                     </Link>
-                    
-                    {/* Rating */}
                     <div className="flex justify-center gap-0.5 mb-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3 h-3 ${i < 4 ? "text-[#ffcc00] fill-[#ffcc00]" : "text-gray-200"}`} />
-                      ))}
+                      {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < 4 ? "text-[#ffcc00] fill-[#ffcc00]" : "text-gray-200"}`} />)}
                     </div>
-
-                    {/* Price */}
                     <div className="flex items-center justify-center gap-2 mb-6">
                       <span className="text-[16px] text-gray-900 font-black">GH₵{Number(b.weeklyRate).toLocaleString()}</span>
                     </div>
-
-                    {/* Action Button */}
                     <Link href={`/products/${b.id}`}>
                       <button className="w-full bg-[#ffcc00] hover:bg-black hover:text-white text-black py-4 rounded-full text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 group/btn">
                         <Eye className="w-3.5 h-3.5" />
@@ -808,6 +1144,7 @@ export default function ProductDetailsPage() {
                 </div>
               ))}
             </div>
+          ) : null}
           </div>
 
         </div>

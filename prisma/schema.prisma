@@ -544,3 +544,106 @@ model BillboardGalleryImage {
   @@index([billboardId])
   @@map("billboard_gallery_images")
 }
+
+model Product {
+  id              Int                   @id @default(autoincrement())
+  name            String                @db.VarChar(255)
+  slug            String                @unique @db.VarChar(255)
+  category        String                @db.VarChar(100)
+  description     String?
+  packagingType   String                @map("packaging_type") @db.VarChar(100)
+  packagingSize   String                @map("packaging_size") @db.VarChar(100)
+  moqValue        Decimal               @map("moq_value") @db.Decimal(10, 2)
+  moqUnit         String                @map("moq_unit") @db.VarChar(50)
+  stockQuantity   Decimal               @map("stock_quantity") @db.Decimal(10, 2)
+  stockUnit       String                @map("stock_unit") @db.VarChar(50)
+  stockStatus     String                @default("in_stock") @map("stock_status") @db.VarChar(50)
+  pricePerUnit    Decimal               @map("price_per_unit") @db.Decimal(10, 2)
+  priceUnitType   String                @map("price_unit_type") @db.VarChar(50)
+  isExportReady   Boolean               @default(true) @map("is_export_ready")
+  exportCountries String[]              @map("export_countries")
+  shippingMethods String[]              @map("shipping_methods")
+  isOrganic       Boolean               @default(false) @map("is_organic")
+  cashewGrade     String?               @map("cashew_grade") @db.VarChar(50)
+  moistureContent Decimal?              @map("moisture_content") @db.Decimal(5, 2)
+  kernelCount     Int?                  @map("kernel_count")
+  defectRate      Decimal?              @map("defect_rate") @db.Decimal(5, 2)
+  seasonality     String?               @map("seasonality") @db.VarChar(100)
+  sheaGrade       String?               @map("shea_grade") @db.VarChar(50)
+  sheaFatContent  Decimal?              @map("shea_fat_content") @db.Decimal(5, 2)
+  purityLevel     String?               @map("purity_level") @db.VarChar(100)
+  usageType       String[]              @map("usage_type")
+  certificates    String[]              @map("certificates")
+  featureImage    String?               @map("feature_image") @db.VarChar(500)
+  videoShowcase   String?               @map("video_showcase") @db.VarChar(500)
+  galleryImages   ProductGalleryImage[]
+  processingTime  String?               @map("processing_time") @db.VarChar(100)
+  warehouse       String?               @map("warehouse_location") @db.VarChar(255)
+  status          String                @default("published") @db.VarChar(50)
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+  exportOrders    ExportOrder[]
+  @@map("products")
+}
+
+model ProductGalleryImage {
+  id          Int     @id @default(autoincrement())
+  productId   Int     @map("product_id")
+  imagePath   String  @map("image_path") @db.VarChar(500)
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_gallery_images")
+}
+
+model ExportOrder {
+  id                  Int      @id @default(autoincrement())
+  referenceNumber     String   @unique @map("reference_number") @db.VarChar(50)
+  productId           Int      @map("product_id")
+  
+  // Step 2: Buyer Info
+  buyerType           String   @map("buyer_type") @db.VarChar(50)
+  companyName         String   @map("company_name") @db.VarChar(255)
+  destinationCountry  String   @map("destination_country") @db.VarChar(100)
+  city                String   @db.VarChar(100)
+  deliveryAddress     String   @map("delivery_address") @db.Text
+  stateRegion         String   @map("state_region") @db.VarChar(100)
+  postalCode          String   @map("postal_code") @db.VarChar(50)
+  email               String   @db.VarChar(255)
+  phone               String   @db.VarChar(100)
+  taxId               String?  @map("tax_id") @db.VarChar(100)
+  
+  // Step 3: Product Info (quantity)
+  quantityRequested   Decimal  @map("quantity_requested") @db.Decimal(10, 2)
+  
+  // Step 4: Shipping
+  shippingType        String   @map("shipping_type") @db.VarChar(100)
+  deliveryType        String   @map("delivery_type") @db.VarChar(100)
+  pickupOption        String   @map("pickup_option") @db.VarChar(50)
+  preferredDate       String?  @map("preferred_date") @db.VarChar(50)
+  deliveryPriority    String?  @map("delivery_priority") @db.VarChar(100)
+
+  // Step 5: Documents
+  requiresFda         Boolean  @default(true) @map("requires_fda")
+  requiresPhyto       Boolean  @default(true) @map("requires_phyto")
+  requiresOrganic     Boolean  @default(false) @map("requires_organic")
+  requiresOrigin      Boolean  @default(false) @map("requires_origin")
+  customsValue        Decimal? @map("customs_value") @db.Decimal(10, 2)
+  importRequirements  String?  @map("import_requirements") @db.Text
+
+  // Step 6: Payment
+  paymentMethod       String   @map("payment_method") @db.VarChar(50)
+  depositRequired     String   @map("deposit_required") @db.VarChar(100)
+  billingAddress      String?  @map("billing_address") @db.Text
+
+  // System Flags
+  status              String   @default("pending") @db.VarChar(50)
+
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  product             Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("export_orders")
+}
