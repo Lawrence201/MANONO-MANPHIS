@@ -83,7 +83,6 @@ export default function BillboardsListPage() {
     b.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalRevenue = billboards.reduce((acc, curr) => acc + (Number(curr.weeklyRate) * 4), 0);
 
   return (
     <AppLayout
@@ -100,8 +99,7 @@ export default function BillboardsListPage() {
       <TooltipProvider>
       <div style={{ fontFamily: "'Inter', sans-serif" }} className="animate-in fade-in duration-700 pb-20">
         
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
           <StatCard 
             label="Total Billboards" 
             value={billboards.length.toString()} 
@@ -117,11 +115,6 @@ export default function BillboardsListPage() {
             label="Cities" 
             value={Array.from(new Set(billboards.map(b => b.city))).length.toString()} 
             icon={<MapPin className="w-5 h-5 text-purple-500" />} 
-          />
-          <StatCard 
-            label="Monthly Rev." 
-            value={`GH₵${totalRevenue.toLocaleString()}`} 
-            icon={<Zap className="w-5 h-5 text-amber-500" />} 
           />
         </div>
 
@@ -312,9 +305,9 @@ function PremiumBillboardCard({ billboard, index, onDelete }: { billboard: any, 
 
             <div className="space-y-0.5">
               <h2 className="text-[18px] font-bold text-[#1a1a1a] dark:text-white leading-tight">
-                {billboard.maxSlots || "10"}
+                {billboard.availableSlots !== undefined ? billboard.availableSlots : (billboard.maxSlots || "10")}
               </h2>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Slots</p>
+              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Avail. Slots</p>
             </div>
 
             {/* Display & Duration */}

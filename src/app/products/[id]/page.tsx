@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { getBillboard, getBillboards } from "@/lib/actions/billboard-actions";
 import { getProduct, getHoneyProducts } from "@/lib/actions/product-actions";
 import { 
@@ -128,17 +128,20 @@ export default function ProductDetailsPage() {
   const [copied, setCopied] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [removedProductIds, setRemovedProductIds] = useState<number[]>([]);
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get('type');
 
   useEffect(() => {
-    async function fetchBillboard() {
+    async function loadData() {
       if (id) {
         setLoading(true);
 
-        // First try to fetch as a honey/product from the products table
-        const honeyRes = await getProduct(Number(id));
-        if (honeyRes.success && honeyRes.data) {
-          const h = honeyRes.data as any;
-          setProduct({
+        if (typeParam !== "billboard") {
+          // First try to fetch as a honey/product from the products table
+          const honeyRes = await getProduct(Number(id));
+          if (honeyRes.success && honeyRes.data) {
+            const h = honeyRes.data as any;
+            setProduct({
             id: h.id,
             name: h.name,
             price: `$${Number(h.pricePerUnit).toFixed(2)}`,
@@ -216,6 +219,7 @@ export default function ProductDetailsPage() {
           setLoading(false);
           return;
         }
+        } // End of if (typeParam !== "billboard")
 
         // Otherwise try as a billboard
         const [res, allRes] = await Promise.all([
@@ -255,7 +259,7 @@ export default function ProductDetailsPage() {
             isService: true,
             specs: [
               { label: "BILLBOARD CODE", value: b.assetCode },
-              { label: "Origin", value: b.city.charAt(0).toUpperCase() + b.city.slice(1) },
+              { label: "Location", value: b.city.charAt(0).toUpperCase() + b.city.slice(1) },
               { label: "Duration", value: formattedDuration },
               { label: "Display Type", value: b.screenType?.toLowerCase() === "led" ? "SMD LED Board" : b.screenType || "SMD LED Board" },
               { label: "Resolution", value: b.resolution?.toLowerCase() === "p6" ? "P6 (Standard)" : b.resolution || "P6 (Standard)" },
@@ -280,8 +284,8 @@ export default function ProductDetailsPage() {
       }
     }
 
-    fetchBillboard();
-  }, [id]);
+    loadData();
+  }, [id, typeParam]);
 
   const [activeImage, setActiveImage] = useState<string | null>(null);
 
@@ -625,7 +629,7 @@ export default function ProductDetailsPage() {
                     { id: "description", label: "Description" },
                     { id: "specs", label: "Additional information" },
                     { id: "reviews", label: `Reviews (${product.reviews})` },
-                    { id: "shipping", label: "Shipping Policy" }
+                    { id: "shipping", label: product?.isService ? "Map" : "Shipping Policy" }
                   ].map((tab) => (
                     <button
                       key={tab.id}

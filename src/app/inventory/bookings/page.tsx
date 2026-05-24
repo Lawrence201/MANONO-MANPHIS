@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/layout/app-layout";
 import {
   Search, Filter, Eye, CheckCircle2, XCircle, Clock, ChevronDown,
   DollarSign, Calendar, Users, BarChart3, Monitor, Download, RefreshCw,
-  Building2, Mail, Phone, MapPin, FileImage, CreditCard, Layers,
+  Building2, Mail, Phone, MapPin, FileImage, CreditCard, Layers, Pause
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,7 @@ type Booking = {
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   pending:   { label: "Pending",   color: "text-amber-500",  bg: "bg-amber-500/10",  icon: Clock },
+  paused:    { label: "Paused",    color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-500/10", icon: Pause },
   approved:  { label: "Approved",  color: "text-emerald-500", bg: "bg-emerald-500/10", icon: CheckCircle2 },
   rejected:  { label: "Rejected",  color: "text-red-500",    bg: "bg-red-500/10",    icon: XCircle },
   active:    { label: "Active",    color: "text-blue-500",   bg: "bg-blue-500/10",   icon: Monitor },
@@ -66,18 +67,45 @@ function formatCurrency(n: number) {
   return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function RowCountdown({ endDate, status }: { endDate: string; status: string }) {
+function getDurationString(start: string, end: string, duration: number | null) {
+  if (!duration) return "—";
+  const diffDays = Math.round((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (Math.abs(diffDays - duration) <= 1) return `${duration} day${duration > 1 ? 's' : ''}`;
+  if (Math.abs(diffDays - duration * 7) <= 2) return `${duration} week${duration > 1 ? 's' : ''}`;
+  
+  return `${duration} month${duration > 1 ? 's' : ''}`;
+}
+
+function RowCountdown({ startDate, endDate, status }: { startDate: string; endDate: string; status: string }) {
   const [, setTick] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setTick(n => n + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
+    if (status !== "pending" && status !== "paused") {
+      const t = setInterval(() => setTick(n => n + 1), 1000);
+      return () => clearInterval(t);
+    }
+  }, [status]);
 
   if (status === "completed" || status === "rejected") {
     return <span className="text-xs text-muted-foreground">—</span>;
   }
+  
+  if (status === "paused") {
+    return <span className="text-xs font-semibold text-blue-500 font-mono tracking-wider">⏸ PAUSED</span>;
+  }
 
-  const diff = new Date(endDate).getTime() - Date.now();
+  const now = Date.now();
+  const startT = new Date(startDate).getTime();
+  const endT = new Date(endDate).getTime();
+
+  if (now < startT) {
+    const daysUntilStart = Math.max(1, Math.ceil((startT - now) / (1000 * 60 * 60 * 24)));
+    return <span className="text-xs font-semibold text-emerald-500 font-mono tracking-wider">Starts in {daysUntilStart}d</span>;
+  }
+
+  const diff = status === "pending"
+    ? endT - startT
+    : endT - now;
   if (diff <= 0) {
     return <span className="text-xs font-semibold text-red-500 font-mono">Expired</span>;
   }
@@ -156,8 +184,8 @@ export default function AdBookingsPage() {
     const result = await updateBillboardBookingStatus(id, status);
     if (result.success) {
       toast.success(`Booking ${status} successfully`);
-      setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
-      if (selectedBooking?.id === id) setSelectedBooking(prev => prev ? { ...prev, status } : null);
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, status, ...((status === "approved" || status === "active") ? { paymentStatus: "paid" } : {}) } : b));
+      if (selectedBooking?.id === id) setSelectedBooking(prev => prev ? { ...prev, status, ...((status === "approved" || status === "active") ? { paymentStatus: "paid" } : {}) } : null);
     } else {
       toast.error("Failed to update booking status");
     }
@@ -305,8 +333,8 @@ export default function AdBookingsPage() {
                           <div className="text-foreground text-xs">{formatDate(booking.startDate)}</div>
                           <div className="text-muted-foreground text-xs">→ {formatDate(booking.endDate)}</div>
                         </td>
-                        <td className="px-4 py-0 overflow-hidden whitespace-nowrap">
-                          <RowCountdown endDate={booking.endDate} status={booking.status} />
+                        <td className="py-4 px-4 align-middle">
+                          <RowCountdown startDate={booking.startDate} endDate={booking.endDate} status={booking.status} />
                         </td>
                         <td className="px-4 py-0 overflow-hidden">
                           <span className="font-semibold text-foreground">{formatCurrency(booking.totalPrice)}</span>
@@ -359,7 +387,7 @@ export default function AdBookingsPage() {
                       size="sm"
                       className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
                       disabled={actionLoading === selectedBooking.id}
-                      onClick={() => handleStatusChange(selectedBooking.id, "approved")}
+                      onClick={() => handleStatusChange(selectedBooking.id, "active")}
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Approve
@@ -428,7 +456,7 @@ export default function AdBookingsPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Duration</span>
-                      <span className="text-foreground">{selectedBooking.campaignDuration ? `${selectedBooking.campaignDuration} days` : "—"}</span>
+                      <span className="text-foreground">{getDurationString(selectedBooking.startDate, selectedBooking.endDate, selectedBooking.campaignDuration)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Slots</span>

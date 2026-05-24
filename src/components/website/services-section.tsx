@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import React from "react";
+import { motion } from "framer-motion";
 
 const LoopyArrow = () => (
   <svg 
@@ -47,7 +50,7 @@ export function ServicesSection() {
 
   return (
     <section className="pt-24 pb-64 bg-white max-[1028px]:pt-12 max-[480px]:pb-32">
-      <div className="container mx-auto px-4 max-w-[1600px]">
+      <div className="container mx-auto pl-6 pr-4 md:pl-16 md:pr-4 lg:pl-28 lg:pr-4 max-w-[1600px]">
         {/* Header Section */}
         <div className="lg:sticky lg:top-28 z-40 mb-24 max-[480px]:mb-12">
           <p 
@@ -57,7 +60,7 @@ export function ServicesSection() {
             Our Services
           </p>
           <h2 
-            className="text-[52px] min-[480px]:text-[62px] md:text-[85px] font-bold text-[#1a1a1a] leading-[1.05] tracking-[-0.02em] uppercase max-w-4xl origin-left -ml-4"
+            className="text-[46px] min-[480px]:text-[56px] md:text-[76px] font-bold text-[#1a1a1a] leading-[1.05] tracking-[-0.02em] uppercase max-w-4xl origin-left"
             style={{ fontFamily: "var(--font-antonio)" }}
           >
             EXPORTING <br className="hidden md:block" />
@@ -67,7 +70,7 @@ export function ServicesSection() {
         </div>
 
         {/* Services List */}
-        <div className="space-y-48 max-[1028px]:space-y-32 max-[480px]:space-y-24 mt-[-80px] max-[480px]:mt-0 relative z-10">
+        <div className="space-y-48 max-[1028px]:space-y-32 max-[480px]:space-y-24 mt-[-80px] max-[480px]:mt-0 relative z-10 ml-4 md:ml-12 lg:ml-20">
           {services.map((item, index) => (
             <div key={index} className="relative flex flex-col md:flex-row items-start justify-center">
               
@@ -95,7 +98,13 @@ export function ServicesSection() {
               </div>
 
               {/* Content Card - Overlapping */}
-              <div className="relative mt-[-60px] md:mt-0 md:absolute md:left-[55%] md:top-[60%] w-[92%] mx-auto md:mx-0 md:w-[520px] bg-[#f5f5f5] p-8 md:p-16 z-10 shadow-xl md:shadow-none">
+              <motion.div 
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                className="relative mt-[-60px] md:mt-0 md:absolute md:left-[55%] md:top-[60%] w-[92%] mx-auto md:mx-0 md:w-[520px] bg-[#f5f5f5] p-8 md:p-16 z-10 shadow-xl md:shadow-none"
+              >
                 <div className="flex flex-col gap-6 md:gap-10">
                   <div className="relative inline-block">
                     <h3 
@@ -123,7 +132,7 @@ export function ServicesSection() {
                     {item.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             </div>
           ))}
         </div>

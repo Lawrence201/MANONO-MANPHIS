@@ -82,8 +82,10 @@ export async function getBillboards() {
 
     // Serialize for Client Component
     const serialized = billboards.map((b) => {
+      const now = new Date();
       const bookedSlots = b.bookings?.reduce((sum: number, bk: any) => {
-        if (bk.status === 'cancelled') return sum;
+        if (bk.status === 'completed' || bk.status === 'cancelled' || bk.status === 'rejected') return sum;
+        if (now < bk.startDate || now > bk.endDate) return sum;
         return sum + bk.slotsRequested;
       }, 0) || 0;
       const remainingSlots = Math.max(0, (b.maxSlots || 12) - bookedSlots);
@@ -128,8 +130,10 @@ export async function getBillboard(id: number) {
 
     if (!billboard) return { success: false, error: "Billboard not found" };
 
+    const now = new Date();
     const bookedSlots = billboard.bookings?.reduce((sum: number, bk: any) => {
-      if (bk.status === 'cancelled') return sum;
+      if (bk.status === 'cancelled' || bk.status === 'completed' || bk.status === 'rejected') return sum;
+      if (now < bk.startDate || now > bk.endDate) return sum;
       return sum + bk.slotsRequested;
     }, 0) || 0;
     const remainingSlots = Math.max(0, (billboard.maxSlots || 12) - bookedSlots);

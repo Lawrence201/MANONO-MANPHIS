@@ -54,7 +54,7 @@ export function WebsiteHeader() {
     { name: "TRACKING", href: "#", hasDropdown: true, active: pathname.includes("/tracking") },
     { name: "BLOG", href: "#", active: pathname === "/blog" },
     { name: "PAGES", href: "#", active: pathname === "/pages" },
-    { name: "CONTACT US", href: "#", active: pathname === "/contact" },
+    { name: "CONTACT US", href: "/contact", active: pathname === "/contact" },
   ];
 
   const serviceItems = [

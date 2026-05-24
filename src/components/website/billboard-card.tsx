@@ -144,7 +144,7 @@ export function BillboardCatalogCard({ item }: { item: ProductItem }) {
           {item.specs.slice(0, 4).map((spec, i) => (
             <div 
               key={i} 
-              className={`flex justify-between items-center px-4 py-1.5 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+              className={`flex justify-between items-center px-4 py-1.5 ${spec.label === "Duration" || spec.label === "Type" ? 'bg-[#f6f6f6]' : (i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50')}`}
             >
               <div className="flex items-center gap-2">
                 {spec.label === "Location" ? <MapPin className="w-3 h-3 text-[#eea000]" /> :
@@ -165,7 +165,7 @@ export function BillboardCatalogCard({ item }: { item: ProductItem }) {
               BOOK NOW <Calendar className="w-3 h-3" />
             </button>
           </Link>
-          <Link href={`/products/${item.id}`} className="block w-full">
+          <Link href={`/products/${item.id}?type=billboard`} className="block w-full">
             <button className="w-full bg-[#e2e2e2] text-[#1a1a1a] rounded-[6px] h-[42px] font-bold text-[11px] uppercase flex items-center justify-center gap-1.5 hover:bg-[#d4d4d4] transition-all">
               DETAILS <ChevronRight className="w-3 h-3" />
             </button>

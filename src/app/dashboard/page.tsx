@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { RevenueChart, ProductPerformanceChart, CountryDistributionChart, PipelineFunnelChart } from "@/components/dashboard/charts";
@@ -169,6 +169,14 @@ export default function DashboardPage() {
     totalClientsCount: number;
     totalBookingsCount: number;
     monthlyData?: { month: string; Billboards: number }[];
+    slotStats?: {
+      availableSlots: number;
+      reservedSlots: number;
+      activeSlots: number;
+      expiredSlots: number;
+      maintenanceSlots: number;
+    };
+    exportLocations?: string[];
   }>({
     totalRevenue: 0,
     activeBillboardsCount: 0,
@@ -176,10 +184,14 @@ export default function DashboardPage() {
     pendingApprovalsCount: 0,
     totalClientsCount: 0,
     totalBookingsCount: 0,
-    monthlyData: []
+    monthlyData: [],
+    slotStats: { availableSlots: 0, reservedSlots: 0, activeSlots: 0, expiredSlots: 0, maintenanceSlots: 0 },
+    exportLocations: []
   });
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [svgHtml, setSvgHtml] = useState<string>("");
+  const [mapMarkers, setMapMarkers] = useState<{ cx: number; cy: number; color: string; key: string }[]>([]);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchStats() {
@@ -192,9 +204,11 @@ export default function DashboardPage() {
             activeBillboardsCount: json.data.activeBillboardsCount || 0,
             totalBillboards: json.data.totalBillboards || 0,
             pendingApprovalsCount: json.data.pendingApprovalsCount !== undefined ? json.data.pendingApprovalsCount : 0,
-            totalClientsCount: 0, // Mock data
-            totalBookingsCount: 0, // Mock data
-            monthlyData: json.data.monthlyData
+            totalClientsCount: json.data.totalClientsCount || 0,
+            totalBookingsCount: json.data.totalBookingsCount || 0,
+            monthlyData: json.data.monthlyData,
+            slotStats: json.data.slotStats,
+            exportLocations: json.data.exportLocations || []
           });
           setRecentBookings(json.data.recentBookings || []);
         }
@@ -205,16 +219,333 @@ export default function DashboardPage() {
     fetchStats();
   }, []);
 
+  const mapCoordinates: Record<string, { cx: number, cy: number }> = {
+    // Americas
+    "United States": { cx: 130, cy: 155 },
+    "USA": { cx: 130, cy: 155 },
+    "US": { cx: 130, cy: 155 },
+    "Canada": { cx: 120, cy: 100 },
+    "Mexico": { cx: 115, cy: 185 },
+    "Brazil": { cx: 215, cy: 255 },
+    "Argentina": { cx: 200, cy: 300 },
+    "Colombia": { cx: 180, cy: 215 },
+    "Peru": { cx: 185, cy: 255 },
+    "Chile": { cx: 190, cy: 295 },
+    "Venezuela": { cx: 195, cy: 205 },
+    "Cuba": { cx: 155, cy: 185 },
+    "Jamaica": { cx: 160, cy: 195 },
+    // Europe
+    "United Kingdom": { cx: 305, cy: 118 },
+    "UK": { cx: 305, cy: 118 },
+    "Germany": { cx: 330, cy: 125 },
+    "France": { cx: 318, cy: 132 },
+    "Italy": { cx: 335, cy: 140 },
+    "Spain": { cx: 308, cy: 142 },
+    "Portugal": { cx: 300, cy: 142 },
+    "Netherlands": { cx: 325, cy: 120 },
+    "Belgium": { cx: 322, cy: 123 },
+    "Switzerland": { cx: 328, cy: 132 },
+    "Sweden": { cx: 340, cy: 105 },
+    "Norway": { cx: 330, cy: 100 },
+    "Denmark": { cx: 332, cy: 112 },
+    "Finland": { cx: 348, cy: 100 },
+    "Poland": { cx: 342, cy: 122 },
+    "Austria": { cx: 336, cy: 128 },
+    "Russia": { cx: 440, cy: 108 },
+    "Ukraine": { cx: 355, cy: 125 },
+    "Turkey": { cx: 370, cy: 142 },
+    "Greece": { cx: 348, cy: 148 },
+    // Middle East
+    "Saudi Arabia": { cx: 393, cy: 168 },
+    "UAE": { cx: 407, cy: 172 },
+    "United Arab Emirates": { cx: 407, cy: 172 },
+    "Qatar": { cx: 403, cy: 172 },
+    "Kuwait": { cx: 396, cy: 162 },
+    "Israel": { cx: 374, cy: 157 },
+    "Jordan": { cx: 376, cy: 160 },
+    "Iraq": { cx: 385, cy: 155 },
+    "Iran": { cx: 400, cy: 152 },
+    "Yemen": { cx: 394, cy: 182 },
+    "Oman": { cx: 408, cy: 178 },
+    // Africa
+    "Ghana": { cx: 305, cy: 200 },
+    "Nigeria": { cx: 318, cy: 198 },
+    "South Africa": { cx: 340, cy: 278 },
+    "Kenya": { cx: 368, cy: 215 },
+    "Ethiopia": { cx: 368, cy: 202 },
+    "Egypt": { cx: 355, cy: 165 },
+    "Morocco": { cx: 306, cy: 158 },
+    "Algeria": { cx: 315, cy: 163 },
+    "Tanzania": { cx: 365, cy: 228 },
+    "Senegal": { cx: 292, cy: 188 },
+    "Ivory Coast": { cx: 300, cy: 202 },
+    "Cameroon": { cx: 330, cy: 210 },
+    // Asia
+    "China": { cx: 508, cy: 152 },
+    "Japan": { cx: 556, cy: 148 },
+    "India": { cx: 447, cy: 172 },
+    "South Korea": { cx: 545, cy: 148 },
+    "Singapore": { cx: 508, cy: 215 },
+    "Malaysia": { cx: 505, cy: 210 },
+    "Indonesia": { cx: 525, cy: 222 },
+    "Thailand": { cx: 499, cy: 195 },
+    "Vietnam": { cx: 512, cy: 193 },
+    "Philippines": { cx: 533, cy: 195 },
+    "Pakistan": { cx: 432, cy: 162 },
+    "Bangladesh": { cx: 462, cy: 172 },
+    "Sri Lanka": { cx: 449, cy: 192 },
+    // Oceania
+    "Australia": { cx: 545, cy: 282 },
+    "New Zealand": { cx: 580, cy: 308 },
+  };
+
+  // Precomputed SVG-space centers (traced from actual path data in map.svg, 678x350 coordinate space)
+  // For countries with multiple subpaths (e.g. US includes Alaska), we use the mainland center only
+  const svgCountryCenters: Record<string, { x: number; y: number }> = {
+    "AE": { x: 556.24, y: 223 },
+    "AF": { x: 586.83, y: 196.46 },
+    "AL": { x: 471.45, y: 175.69 },
+    "AM": { x: 533.83, y: 179.09 },
+    "AO": { x: 465.66, y: 314.92 },
+    "AR": { x: 261.9, y: 384.91 },
+    "AT": { x: 454.08, y: 155.35 },
+    "AU": { x: 755.2, y: 349.9 },
+    "AZ": { x: 540.19, y: 178.83 },
+    "BA": { x: 465.22, y: 167.09 },
+    "BD": { x: 647.34, y: 223.93 },
+    "BE": { x: 431.84, y: 146.29 },
+    "BF": { x: 416.83, y: 253.73 },
+    "BG": { x: 484.62, y: 170.98 },
+    "BI": { x: 495.96, y: 293.35 },
+    "BJ": { x: 426.67, y: 261.76 },
+    "BN": { x: 708.52, y: 273.1 },
+    "BO": { x: 261.86, y: 326.28 },
+    "BR": { x: 284.87, y: 322.12 },
+    "BS": { x: 225.74, y: 222.37 },
+    "BT": { x: 647.47, y: 214.26 },
+    "BW": { x: 482.54, y: 341.65 },
+    "BY": { x: 490.91, y: 135.34 },
+    "BZ": { x: 198.96, y: 241.45 },
+    "CA": { x: 174.73, y: 118.34 },
+    "CD": { x: 475.17, y: 294.99 },
+    "CF": { x: 473.28, y: 267.78 },
+    "CG": { x: 458, y: 286.44 },
+    "CH": { x: 441.54, y: 158.34 },
+    "CI": { x: 407.02, y: 266.29 },
+    "CL": { x: 242.41, y: 382.19 },
+    "CM": { x: 451.57, y: 266.53 },
+    "CN": { x: 682.12, y: 184.98 },
+    "CO": { x: 238.11, y: 274.42 },
+    "CR": { x: 209.93, y: 260.42 },
+    "CU": { x: 221.93, y: 230.14 },
+    "CY": { x: 503.57, y: 193.88 },
+    "CZ": { x: 459.75, y: 148.57 },
+    "DE": { x: 447.2, y: 144 },
+    "DJ": { x: 527.34, y: 255.17 },
+    "DK": { x: 444.68, y: 126.8 },
+    "DO": { x: 245.35, y: 237.33 },
+    "DZ": { x: 425.06, y: 212.02 },
+    "EC": { x: 225.46, y: 289.34 },
+    "EE": { x: 485.36, y: 118.56 },
+    "EG": { x: 497.79, y: 216.01 },
+    "EH": { x: 387.55, y: 225.2 },
+    "ER": { x: 520.23, y: 246.52 },
+    "ES": { x: 413.08, y: 179.35 },
+    "ET": { x: 521.89, y: 261.82 },
+    "FI": { x: 486.36, y: 92.69 },
+    "FJ": { x: 866.66, y: 330.01 },
+    "FK": { x: 272.05, y: 427.32 },
+    "FR": { x: 425.23, y: 158.24 },
+    "GA": { x: 450.03, y: 286.94 },
+    "GB": { x: 415.36, y: 133.24 },
+    "GE": { x: 529.44, y: 172.2 },
+    "GH": { x: 418.13, y: 265.04 },
+    "GL": { x: 313.83, y: 56.57 },
+    "GM": { x: 381.59, y: 250.88 },
+    "GN": { x: 392.28, y: 259.88 },
+    "GQ": { x: 446.76, y: 280.71 },
+    "GR": { x: 479.48, y: 181.75 },
+    "GT": { x: 194.71, y: 245 },
+    "GW": { x: 382.96, y: 255.04 },
+    "GY": { x: 273.21, y: 272.82 },
+    "HN": { x: 204.84, y: 248.34 },
+    "HR": { x: 462.96, y: 164.85 },
+    "HT": { x: 239.46, y: 236.75 },
+    "HU": { x: 469.72, y: 157.09 },
+    "ID": { x: 761.13, y: 296.56 },
+    "IE": { x: 401.02, y: 136.8 },
+    "IL": { x: 508.2, y: 204.9 },
+    "IN": { x: 628.35, y: 228.54 },
+    "IQ": { x: 530.06, y: 198.32 },
+    "IR": { x: 555.45, y: 200.41 },
+    "IS": { x: 373.5, y: 93.57 },
+    "IT": { x: 452.54, y: 171.27 },
+    "JM": { x: 227.39, y: 239.04 },
+    "JO": { x: 513.73, y: 204 },
+    "JP": { x: 760.74, y: 189.78 },
+    "KE": { x: 515.61, y: 283.83 },
+    "KG": { x: 608.37, y: 175.24 },
+    "KH": { x: 683.83, y: 253.4 },
+    "KP": { x: 740.14, y: 178.08 },
+    "KR": { x: 741.01, y: 189.39 },
+    "KW": { x: 539.94, y: 209.43 },
+    "KZ": { x: 588.52, y: 153.5 },
+    "LA": { x: 681.06, y: 238.78 },
+    "LB": { x: 510.82, y: 196.75 },
+    "LK": { x: 623.14, y: 265.19 },
+    "LR": { x: 397.23, y: 268.77 },
+    "LS": { x: 491.48, y: 361.36 },
+    "LT": { x: 480.62, y: 130.72 },
+    "LU": { x: 435.88, y: 148.78 },
+    "LV": { x: 482.57, y: 124.86 },
+    "LY": { x: 464.15, y: 216.95 },
+    "MA": { x: 398.23, y: 210.91 },
+    "MD": { x: 491.9, y: 157.66 },
+    "ME": { x: 469.5, y: 170.75 },
+    "MG": { x: 538.3, y: 332.92 },
+    "MK": { x: 475.3, y: 174.35 },
+    "ML": { x: 411.08, y: 240.24 },
+    "MM": { x: 663.21, y: 235.46 },
+    "MN": { x: 680.83, y: 157.84 },
+    "MR": { x: 393.05, y: 231.41 },
+    "MW": { x: 506.69, y: 317.71 },
+    "MX": { x: 165.7, y: 223.9 },
+    "MY": { x: 707.52, y: 275.22 },
+    "MZ": { x: 509.78, y: 332.25 },
+    "NA": { x: 462.5, y: 343.71 },
+    "NC": { x: 835.54, y: 338.9 },
+    "NE": { x: 441.19, y: 240.09 },
+    "NG": { x: 442.55, y: 262.11 },
+    "NI": { x: 207.28, y: 252.45 },
+    "NL": { x: 434.31, y: 140.73 },
+    "NO": { x: 466.06, y: 93.61 },
+    "NP": { x: 631.58, y: 211.81 },
+    "NZ": { x: 860.67, y: 385.16 },
+    "OM": { x: 561.02, y: 231.98 },
+    "PA": { x: 220.39, y: 263.76 },
+    "PE": { x: 233.04, y: 308.2 },
+    "PG": { x: 786.22, y: 301.62 },
+    "PH": { x: 726.49, y: 245.55 },
+    "PK": { x: 594.87, y: 205.94 },
+    "PL": { x: 468.72, y: 141.31 },
+    "PR": { x: 254.6, y: 238.73 },
+    "PS": { x: 509.29, y: 201.97 },
+    "PT": { x: 400.97, y: 180.33 },
+    "PY": { x: 274.52, y: 344.77 },
+    "QA": { x: 549.11, y: 220.06 },
+    "RO": { x: 483.56, y: 160.9 },
+    "RS": { x: 473.31, y: 166.28 },
+    "RU": { x: 693.15, y: 105.22 },
+    "RW": { x: 495.9, y: 290 },
+    "SA": { x: 534.04, y: 222.46 },
+    "SB": { x: 819.86, y: 305.02 },
+    "SD": { x: 496.46, y: 246.08 },
+    "SE": { x: 464.61, y: 103.16 },
+    "SI": { x: 458.77, y: 160.38 },
+    "SK": { x: 470.23, y: 152.43 },
+    "SL": { x: 391.33, y: 263.74 },
+    "SN": { x: 384.65, y: 248.41 },
+    "SO": { x: 536.28, y: 271.75 },
+    "SR": { x: 280.66, y: 275.05 },
+    "SS": { x: 495.25, y: 265.08 },
+    "SV": { x: 198.33, y: 250.15 },
+    "SY": { x: 518.55, y: 194.16 },
+    "SZ": { x: 499.51, y: 352.8 },
+    "TD": { x: 467.84, y: 245.74 },
+    "TF": { x: 595.31, y: 419.23 },
+    "TG": { x: 423.18, y: 263.58 },
+    "TH": { x: 675.15, y: 244.16 },
+    "TJ": { x: 599.29, y: 182.44 },
+    "TL": { x: 736.7, y: 307.01 },
+    "TM": { x: 570.27, y: 181.83 },
+    "TN": { x: 444.77, y: 196.62 },
+    "TR": { x: 509.79, y: 181.99 },
+    "TT": { x: 267.34, y: 258.63 },
+    "TW": { x: 724, y: 224.44 },
+    "TZ": { x: 508.35, y: 300.89 },
+    "UA": { x: 498.82, y: 153.16 },
+    "UG": { x: 501.85, y: 281.44 },
+    "US": { x: 180.99, y: 185.42 },
+    "UY": { x: 281.12, y: 369.36 },
+    "UZ": { x: 582.25, y: 174.77 },
+    "VE": { x: 254.3, y: 268.79 },
+    "VN": { x: 685.84, y: 244.29 },
+    "VU": { x: 838.94, y: 323.25 },
+    "YE": { x: 540.85, y: 244.95 },
+    "ZA": { x: 482.47, y: 358.43 },
+    "ZM": { x: 490.27, y: 317.91 },
+    "ZW": { x: 493.84, y: 332.82 },
+  };
+
+  // After SVG is rendered in DOM, convert precomputed SVG coords to screen coords using getScreenCTM
+  const placeMarkersFromDom = useCallback(() => {
+    if (!mapContainerRef.current || mapTab !== "world") return;
+    const svgEl = mapContainerRef.current.querySelector("svg") as SVGSVGElement | null;
+    if (!svgEl) return;
+
+    const containerRect = mapContainerRef.current.getBoundingClientRect();
+    const ctm = svgEl.getScreenCTM();
+    if (!ctm) return;
+
+    const toScreen = (svgX: number, svgY: number) => {
+      const pt = svgEl.createSVGPoint();
+      pt.x = svgX;
+      pt.y = svgY;
+      const s = pt.matrixTransform(ctm);
+      return { cx: s.x - containerRect.left, cy: s.y - containerRect.top };
+    };
+
+    const markers: { cx: number; cy: number; color: string; key: string }[] = [];
+
+    // Ghana origin marker (gold)
+    const gh = svgCountryCenters["GH"];
+    const ghScreen = toScreen(gh.x, gh.y);
+    markers.push({ ...ghScreen, color: "#eea000", key: "GH-origin" });
+
+    // Destination markers (blue)
+    const nameToCode: Record<string, string> = {
+      "United States": "US", "USA": "US", "United Kingdom": "GB", "UK": "GB",
+      "Germany": "DE", "France": "FR", "Italy": "IT", "Spain": "ES", "Portugal": "PT",
+      "Netherlands": "NL", "Belgium": "BE", "Switzerland": "CH", "Sweden": "SE",
+      "Norway": "NO", "Denmark": "DK", "Finland": "FI", "Poland": "PL",
+      "Austria": "AT", "Russia": "RU", "Ukraine": "UA", "Turkey": "TR", "Greece": "GR",
+      "Saudi Arabia": "SA", "UAE": "AE", "United Arab Emirates": "AE", "Qatar": "QA",
+      "Kuwait": "KW", "Israel": "IL", "Jordan": "JO", "Iraq": "IQ", "Iran": "IR",
+      "Yemen": "YE", "Oman": "OM", "Nigeria": "NG", "South Africa": "ZA",
+      "Kenya": "KE", "Ethiopia": "ET", "Egypt": "EG", "Morocco": "MA",
+      "Algeria": "DZ", "Tanzania": "TZ", "Senegal": "SN", "Ivory Coast": "CI",
+      "Cameroon": "CM", "Ghana": "GH", "China": "CN", "Japan": "JP", "India": "IN",
+      "South Korea": "KR", "Singapore": "SG", "Malaysia": "MY", "Indonesia": "ID",
+      "Thailand": "TH", "Vietnam": "VN", "Philippines": "PH", "Pakistan": "PK",
+      "Bangladesh": "BD", "Sri Lanka": "LK", "Australia": "AU", "New Zealand": "NZ",
+      "Canada": "CA", "Mexico": "MX", "Brazil": "BR", "Argentina": "AR",
+      "Colombia": "CO", "Chile": "CL", "Peru": "PE",
+    };
+
+    (stats.exportLocations || []).forEach((country) => {
+      const code = nameToCode[country];
+      if (!code || !svgCountryCenters[code]) return;
+      const c = svgCountryCenters[code];
+      const screen = toScreen(c.x, c.y);
+      markers.push({ ...screen, color: "#0ea5e9", key: `dest-${code}` });
+    });
+
+    setMapMarkers(markers);
+  }, [mapTab, svgHtml, stats.exportLocations]);
+
+  useEffect(() => {
+    // Run after SVG HTML is painted
+    const timer = setTimeout(placeMarkersFromDom, 100);
+    return () => clearTimeout(timer);
+  }, [placeMarkersFromDom]);
+
   useEffect(() => {
     const filename = mapTab === "world" ? "map.svg" : "ghana_map.svg";
     fetch(`/${filename}?v=` + Date.now())
       .then((res) => res.text())
       .then((text) => {
-        let adjustedText = text;
-        if (mapTab === "world" && !text.includes("viewBox")) {
-          adjustedText = text.replace("<svg", '<svg viewBox="0 0 678 350"');
-        }
-        setSvgHtml(adjustedText);
+        setMapMarkers([]); // reset while loading
+        setSvgHtml(text);
       })
       .catch((err) => console.error("Error loading map SVG:", err));
   }, [mapTab]);
@@ -233,22 +564,13 @@ export default function DashboardPage() {
     <AppLayout
       title="Dashboard"
       subtitle="Welcome back, Sarah. Here's what's happening across your trade operations."
-      actions={
-        <>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Download className="w-4 h-4" /> Export
-          </Button>
-          <Button size="sm" className="gap-2 bg-[#6aabfc] hover:bg-[#6aabfc]/90 text-white border-0 font-semibold shadow-sm">
-            <Plus className="w-4 h-4" /> New Lead
-          </Button>
-        </>
-      }
     >
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         <KpiCard
           label="Total Revenue"
           value={formatRevenue(stats.totalRevenue)}
+          tooltip={stats.totalRevenue > 0 ? `GH₵${stats.totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : undefined}
           change={18.4}
           trend="up"
           icon={<DollarSign className="w-5 h-5" />}
@@ -308,7 +630,7 @@ export default function DashboardPage() {
           <RevenueChart data={stats.monthlyData} />
         </div>
         <div className="h-full">
-          <PipelineFunnelChart />
+          <PipelineFunnelChart slotStats={stats.slotStats} />
         </div>
       </div>
 
@@ -502,7 +824,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {[...recentBookings, ...orders].slice(0, 8).map((o) => (
+              {recentBookings.map((o) => (
                 <tr key={o.id} className="border-b border-black/10 dark:border-white/[0.06] last:border-0 hover:bg-secondary/30 transition-colors">
                   <td className="px-5 py-3.5 font-mono text-xs font-semibold">{o.id}</td>
                   <td className="px-5 py-3.5">
@@ -521,12 +843,16 @@ export default function DashboardPage() {
                     <StatusBadge status={o.status} />
                   </td>
                   <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-1.5 bg-secondary rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-accent" style={{ width: `${o.progress}%` }} />
+                    {o.type === "export" ? (
+                      <span className="text-xs font-semibold capitalize text-muted-foreground">{o.status}</span>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-1.5 bg-secondary rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-accent" style={{ width: `${o.progress}%` }} />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground tabular-nums w-8">{o.progress}%</span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground tabular-nums w-8">{o.progress}%</span>
-                    </div>
+                    )}
                   </td>
                 </tr>
               ))}

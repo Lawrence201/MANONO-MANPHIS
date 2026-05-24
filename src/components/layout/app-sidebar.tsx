@@ -21,15 +21,6 @@ const navGroups = [
     ],
   },
   {
-    label: "Sales & CRM",
-    items: [
-      { title: "Leads & CRM", url: "/leads", icon: Users, badge: "12" },
-      { title: "Quotations", url: "/quotations", icon: FileText },
-      { title: "Customers", url: "/customers", icon: Globe2 },
-      { title: "Communications", url: "/communications", icon: MessageSquare, badge: "2" },
-    ],
-  },
-  {
     label: "Advertising Services",
     items: [
       { title: "Billboard Manager", url: "/inventory/billboard-manager", icon: Monitor },
@@ -41,9 +32,18 @@ const navGroups = [
     label: "Trade Operations",
     items: [
       { title: "Orders", url: "/orders", icon: ShoppingCart, badge: "8" },
+      { title: "Customers", url: "/customers", icon: Globe2 },
       { title: "Inventory", url: "/inventory", icon: Layers },
       { title: "Logistics", url: "/logistics", icon: Truck },
       { title: "Production", url: "/production", icon: Factory },
+    ],
+  },
+  {
+    label: "Communication",
+    items: [
+      { title: "Quotations", url: "/quotations", icon: FileText },
+      { title: "Leads & CRM", url: "/leads", icon: Users, badge: "12" },
+      { title: "Communications", url: "/communications", icon: MessageSquare, badge: "2" },
     ],
   },
   {

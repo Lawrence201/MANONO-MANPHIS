@@ -21,12 +21,12 @@ export function TopBar() {
         </div>
         
         <div className="flex items-center gap-5 max-[1028px]:gap-3">
-          <Link href="/dashboard" className="flex items-center gap-2 hover:text-[#eea000] transition-colors">
+          <Link href="/login" className="flex items-center gap-2 hover:text-[#eea000] transition-colors">
             <LogIn className="w-3.5 h-3.5" />
             <span className="max-[1028px]:hidden">Login</span>
           </Link>
           <div className="w-px h-3 bg-white/20 max-[1028px]:hidden" />
-          <Link href="#" className="flex items-center gap-2 hover:text-[#eea000] transition-colors">
+          <Link href="/register" className="flex items-center gap-2 hover:text-[#eea000] transition-colors">
             <UserPlus className="w-3.5 h-3.5" />
             <span className="max-[1028px]:hidden">Registration</span>
           </Link>

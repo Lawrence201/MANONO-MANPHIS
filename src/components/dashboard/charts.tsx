@@ -353,7 +353,7 @@ export function CountryDistributionChart() {
   );
 }
 
-export function PipelineFunnelChart() {
+export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlots: number, reservedSlots: number, activeSlots: number, expiredSlots: number, maintenanceSlots: number } }) {
   const [mode, setMode] = useState<"trade" | "advertising">("trade");
 
   const tradePipeline = [
@@ -365,18 +365,20 @@ export function PipelineFunnelChart() {
   ];
 
   const adPipeline = [
-    { stage: "New Leads", value: 250 },
-    { stage: "Contacted", value: 180 },
-    { stage: "Qualified", value: 130 },
-    { stage: "Negotiating", value: 95 },
-    { stage: "Won", value: 60 }, // 24%
+    { stage: "Available Slots", value: slotStats?.availableSlots || 0 },
+    { stage: "Reserved Slots", value: slotStats?.reservedSlots || 0 },
+    { stage: "Active Slots", value: slotStats?.activeSlots || 0 },
+    { stage: "Expired Slots", value: slotStats?.expiredSlots || 0 },
+    { stage: "Maintenance", value: slotStats?.maintenanceSlots || 0 },
   ];
 
   const currentData = mode === "trade" ? tradePipeline : adPipeline;
-  const max = currentData[0].value;
+  
+  // Custom logic for the funnel chart math
+  const max = mode === "trade" ? currentData[0].value : Math.max(...currentData.map(d => d.value), 1);
   const totalWon = currentData[4].value;
   const totalLeads = currentData[0].value;
-  const conversionRate = ((totalWon / totalLeads) * 100).toFixed(1);
+  const conversionRate = mode === "trade" ? ((totalWon / totalLeads) * 100).toFixed(1) : ((slotStats?.activeSlots || 0) / Math.max((slotStats?.availableSlots || 0) + (slotStats?.activeSlots || 0), 1) * 100).toFixed(1);
 
   const tradeColors = [
     "linear-gradient(90deg, #f59e0b, #f59e0b 60%, transparent)",
@@ -401,8 +403,12 @@ export function PipelineFunnelChart() {
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="font-display font-semibold text-base">Sales Pipeline Funnel</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Lead conversion by stage</p>
+            <h3 className="font-display font-semibold text-base">
+              {mode === "trade" ? "Sales Pipeline Funnel" : "Billboard Activity Tracker"}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {mode === "trade" ? "Lead conversion by stage" : "Current slot utilization and status"}
+            </p>
           </div>
           <div className="flex bg-secondary p-1 rounded-lg border border-border shrink-0 select-none">
             <button
@@ -436,7 +442,7 @@ export function PipelineFunnelChart() {
                 <div className="flex items-center justify-between text-xs mb-1.5">
                   <span className="font-medium">{stage.stage}</span>
                   <div className="flex items-center gap-2 font-semibold">
-                    {conversion && <span className="text-muted-foreground font-medium">→ {conversion}%</span>}
+                    {mode === "trade" && conversion && <span className="text-muted-foreground font-medium">→ {conversion}%</span>}
                     <span className="tabular-nums">{stage.value}</span>
                   </div>
                 </div>
@@ -455,7 +461,7 @@ export function PipelineFunnelChart() {
         </div>
       </div>
       <div className="mt-5 pt-5 border-t border-border flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Overall Conversion</span>
+        <span className="text-xs text-muted-foreground">{mode === "trade" ? "Overall Conversion" : "Slot Utilization"}</span>
         <span className="text-lg font-bold font-display text-gradient-accent">
           {conversionRate}%
         </span>

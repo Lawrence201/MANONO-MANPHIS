@@ -3,18 +3,22 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
     try {
-        // 1. Fetch latest bookings from each model
-        const [billboardBookings, hallBookings, hostelBookings] = await Promise.all([
+        // 1. Fetch latest activities from each relevant model
+        const [billboardBookings, exportOrders, leads, quotations] = await Promise.all([
             prisma.billboardBooking.findMany({
-                take: 10,
-                orderBy: { createdAt: 'desc' },
-                include: { billboard: true }
-            }),
-            prisma.hallBooking.findMany({
                 take: 10,
                 orderBy: { createdAt: 'desc' }
             }),
-            prisma.hostelBooking.findMany({
+            prisma.exportOrder.findMany({
+                take: 10,
+                orderBy: { createdAt: 'desc' },
+                include: { product: true }
+            }),
+            prisma.lead.findMany({
+                take: 10,
+                orderBy: { createdAt: 'desc' }
+            }),
+            prisma.quotation.findMany({
                 take: 10,
                 orderBy: { createdAt: 'desc' }
             })
@@ -26,22 +30,29 @@ export async function GET() {
                 id: `bb-${b.id}`,
                 type: 'order',
                 icon: 'order',
-                text: `New Billboard booking "${b.campaignTitle}" confirmed for ${b.fullName} (${b.companyName || 'Individual'}) — GH₵${Number(b.totalPrice).toLocaleString()}`,
+                text: `New Billboard booking "${b.campaignTitle}" confirmed for ${b.fullName} — GH₵${Number(b.totalPrice).toLocaleString()}`,
                 createdAt: b.createdAt.toISOString()
             })),
-            ...hallBookings.map(h => ({
-                id: `hall-${h.id}`,
-                type: 'order',
-                icon: 'order',
-                text: `New Event Hall booking "${h.eventName || 'Hall Rental'}" by ${h.firstName} ${h.lastName} — GH₵${Number(h.totalAmount).toLocaleString()}`,
-                createdAt: h.createdAt.toISOString()
+            ...exportOrders.map(o => ({
+                id: `export-${o.id}`,
+                type: 'shipment',
+                icon: 'shipment',
+                text: `New Export Order for ${o.product?.name || 'Commodity'} placed by ${o.companyName || o.buyerType} to ${o.destinationCountry}`,
+                createdAt: o.createdAt.toISOString()
             })),
-            ...hostelBookings.map(hostel => ({
-                id: `hostel-${hostel.id}`,
-                type: 'order',
-                icon: 'order',
-                text: `New Hostel Accommodation booking by ${hostel.firstName} ${hostel.lastName} — GH₵${Number(hostel.totalAmount).toLocaleString()}`,
-                createdAt: hostel.createdAt.toISOString()
+            ...leads.map(lead => ({
+                id: `lead-${lead.id}`,
+                type: 'lead',
+                icon: 'lead',
+                text: `New Lead captured: ${lead.name} is interested in ${lead.serviceType}`,
+                createdAt: lead.createdAt.toISOString()
+            })),
+            ...quotations.map(q => ({
+                id: `quote-${q.id}`,
+                type: 'quote',
+                icon: 'quote',
+                text: `Quotation sent to ${q.customer} for ${q.qty} of ${q.product} — $${Number(q.amount).toLocaleString()}`,
+                createdAt: q.createdAt.toISOString()
             }))
         ];
 

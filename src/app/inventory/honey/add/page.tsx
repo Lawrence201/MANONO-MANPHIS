@@ -107,7 +107,6 @@ export default function AddHoneyPage() {
 
       if (result.success) {
         toast.success("Honey product registered successfully!");
-        router.push("/inventory");
       } else {
         toast.error(result.error || "Failed to publish product.");
       }

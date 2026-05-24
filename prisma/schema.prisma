@@ -647,3 +647,48 @@ model ExportOrder {
   @@index([productId])
   @@map("export_orders")
 }
+
+model Quotation {
+  id          Int      @id @default(autoincrement())
+  quoteNumber String   @unique @map("quote_number") @db.VarChar(50)
+  customer    String   @db.VarChar(255)
+  country     String   @db.VarChar(100)
+  product     String   @db.VarChar(255)
+  qty         String   @db.VarChar(100)
+  amount      Decimal  @db.Decimal(12, 2)
+  currency    String   @default("USD") @db.VarChar(10)
+  status      String   @default("draft") @db.VarChar(50) 
+  validUntil  DateTime @map("valid_until") @db.Timestamp(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  @@map("quotations")
+}
+
+model Lead {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  company   String?  @db.VarChar(255)
+  email     String   @db.VarChar(255)
+  phone     String?  @db.VarChar(100)
+  country   String?  @db.VarChar(100)
+  
+  // Inquiry Details
+  serviceType String @map("service_type") @db.VarChar(100) // e.g. "Advertising", "Export"
+  product     String? @db.VarChar(255) // e.g. "Honey", "Cashew", "LED Billboard"
+  quantity    String? @db.VarChar(100) // e.g. "3 Slots", "5000 kg"
+  subject     String? @db.VarChar(255)
+  message     String  @db.Text
+  
+  // CRM Tracking
+  stage       String   @default("new") @db.VarChar(50) // new, contacted, qualified, negotiating, won, lost
+  value       Decimal  @default(0) @db.Decimal(12, 2)
+  assignedTo  String?  @map("assigned_to") @db.VarChar(100)
+  tags        String[]
+  
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  @@map("leads")
+}
+

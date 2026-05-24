@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import {
   getBillboardBookings,
   updateBillboardBookingStatus,
-  extendBillboardBooking,
+  updateBillboardBookingDates,
   updateBillboardBookingMedia,
   deleteBillboardBooking,
 } from "@/lib/actions/booking-actions";
@@ -89,7 +89,7 @@ function daysLeft(endDate: string) {
 }
 
 // ── Live Countdown ─────────────────────────────────────────────────────────────
-function Countdown({ endDate, paused }: { endDate: string; paused?: boolean }) {
+function Countdown({ startDate, endDate, paused }: { startDate: string; endDate: string; paused?: boolean }) {
   const [, setTick] = useState(0);
   useEffect(() => {
     if (paused) return;
@@ -101,7 +101,15 @@ function Countdown({ endDate, paused }: { endDate: string; paused?: boolean }) {
     return <span className="font-mono text-xs font-bold text-blue-400 tracking-wider">⏸ PAUSED</span>;
   }
 
-  const diff = new Date(endDate).getTime() - Date.now();
+  const now = Date.now();
+  const startT = new Date(startDate).getTime();
+  
+  if (now < startT) {
+    const daysUntilStart = Math.max(1, Math.ceil((startT - now) / (1000 * 60 * 60 * 24)));
+    return <span className="font-mono text-xs font-bold text-emerald-500 tracking-wider">Starts in {daysUntilStart}d</span>;
+  }
+
+  const diff = new Date(endDate).getTime() - now;
   if (diff <= 0) {
     return <span className="font-mono text-xs font-bold text-red-500 tracking-wider">Expired</span>;
   }
@@ -130,10 +138,11 @@ function AdminModal({
   booking: Booking;
   onClose: () => void;
   onStatusChange: (id: number, status: string) => Promise<void>;
-  onExtend: (id: number, date: string) => Promise<void>;
+  onExtend: (id: number, startDate: string, endDate: string) => Promise<void>;
   onMediaUpdate: (id: number, url: string) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
 }) {
+  const [newStartDate, setNewStartDate] = useState(toInputDate(booking.startDate));
   const [newEndDate, setNewEndDate] = useState(toInputDate(booking.endDate));
   const [uploading, setUploading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -142,9 +151,9 @@ function AdminModal({
   const paused = booking.status === "paused";
 
   const handleExtend = async () => {
-    if (!newEndDate) return;
+    if (!newStartDate || !newEndDate) return;
     setSaving(true);
-    await onExtend(booking.id, newEndDate);
+    await onExtend(booking.id, newStartDate, newEndDate);
     setSaving(false);
   };
 
@@ -201,11 +210,23 @@ function AdminModal({
               {booking.companyName || booking.fullName} · {formatCurrency(booking.totalPrice)}
             </p>
             <div className="flex gap-3 mt-2 text-xs">
-              <span><span className="text-muted-foreground">Start:</span> {formatDate(booking.startDate)}</span>
-              <span><span className="text-muted-foreground">End:</span> {formatDate(booking.endDate)}</span>
+              <span>
+                <span className="text-muted-foreground">Start:</span>{" "}
+                <span className={newStartDate !== toInputDate(booking.startDate) ? "text-accent font-bold" : ""}>
+                  {formatDate(new Date(newStartDate).toISOString())}
+                </span>
+              </span>
+              <span>
+                <span className="text-muted-foreground">End:</span>{" "}
+                <span className={newEndDate !== toInputDate(booking.endDate) ? "text-accent font-bold" : ""}>
+                  {formatDate(new Date(newEndDate).toISOString())}
+                </span>
+              </span>
             </div>
             <div className="text-xs text-amber-500 font-semibold mt-1">
-              {daysLeft(booking.endDate)} days remaining
+              <span className={newEndDate !== toInputDate(booking.endDate) || newStartDate !== toInputDate(booking.startDate) ? "text-accent font-bold" : ""}>
+                {Math.max(0, Math.ceil((new Date(newEndDate).getTime() - new Date(newStartDate).getTime()) / (1000 * 60 * 60 * 24)))} days duration
+              </span>
             </div>
           </div>
 
@@ -216,24 +237,35 @@ function AdminModal({
             </p>
 
             <div className="space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">New End Date</label>
-                <input
-                  type="date"
-                  value={newEndDate}
-                  min={toInputDate(new Date().toISOString())}
-                  onChange={(e) => setNewEndDate(e.target.value)}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">New Start Date</label>
+                  <input
+                    type="date"
+                    value={newStartDate}
+                    onChange={(e) => setNewStartDate(e.target.value)}
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">New End Date</label>
+                  <input
+                    type="date"
+                    value={newEndDate}
+                    min={newStartDate}
+                    onChange={(e) => setNewEndDate(e.target.value)}
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+                  />
+                </div>
               </div>
               <Button
                 size="sm"
                 className="w-full gap-2"
                 onClick={handleExtend}
-                disabled={saving || newEndDate === toInputDate(booking.endDate)}
+                disabled={saving || (newEndDate === toInputDate(booking.endDate) && newStartDate === toInputDate(booking.startDate))}
               >
                 <Calendar className="w-4 h-4" />
-                {saving ? "Saving…" : "Update Campaign End Date"}
+                {saving ? "Saving…" : "Update Campaign Dates"}
               </Button>
             </div>
           </div>
@@ -382,9 +414,12 @@ function CampaignCard({ booking, onAdminClick }: {
   const paused = booking.status === "paused";
   const displayName = booking.companyName || booking.fullName;
 
-  const liveLabel = paused ? "PAUSED" : running && !expiring ? "LIVE" : expiring ? "EXPIRING" : "APPROVED";
+  const past = new Date(booking.endDate).getTime() < Date.now();
+  const liveLabel = paused ? "PAUSED" : past ? "COMPLETED" : running && !expiring ? "LIVE" : expiring ? "EXPIRING" : "APPROVED";
   const liveColor = paused
     ? "bg-blue-500/15 text-blue-400"
+    : past
+    ? "bg-zinc-500/15 text-zinc-500"
     : running && !expiring
     ? "bg-emerald-500/15 text-emerald-500"
     : expiring
@@ -479,7 +514,7 @@ function CampaignCard({ booking, onAdminClick }: {
       {/* ── Countdown ── */}
       <div className="px-4 py-3 flex items-center gap-2">
         <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-        <Countdown endDate={booking.endDate} paused={paused} />
+        <Countdown startDate={booking.startDate} endDate={booking.endDate} paused={paused} />
       </div>
 
       {/* Campaign name + Map */}
@@ -596,18 +631,18 @@ export default function BillboardManagerPage() {
     }
   };
 
-  const handleExtend = async (id: number, newEndDate: string) => {
-    const result = await extendBillboardBooking(id, newEndDate);
+  const handleExtend = async (id: number, newStartDate: string, newEndDate: string) => {
+    const result = await updateBillboardBookingDates(id, newStartDate, newEndDate);
     if (result.success) {
-      toast.success("Campaign end date updated");
+      toast.success("Campaign dates updated");
       setBookings((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, endDate: new Date(newEndDate).toISOString() } : b))
+        prev.map((b) => (b.id === id ? { ...b, startDate: new Date(newStartDate).toISOString(), endDate: new Date(newEndDate).toISOString() } : b))
       );
       setAdminTarget((prev) =>
-        prev?.id === id ? { ...prev, endDate: new Date(newEndDate).toISOString() } : prev
+        prev?.id === id ? { ...prev, startDate: new Date(newStartDate).toISOString(), endDate: new Date(newEndDate).toISOString() } : prev
       );
     } else {
-      toast.error("Failed to update date");
+      toast.error("Failed to update dates");
     }
   };
 

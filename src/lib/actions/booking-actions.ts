@@ -12,22 +12,32 @@ export async function getBillboardBookings() {
       orderBy: { createdAt: "desc" },
     });
 
-    const serialized = bookings.map((b) => ({
-      ...b,
-      totalPrice: Number(b.totalPrice),
-      taxRate: b.taxRate ? Number(b.taxRate) : null,
-      createdAt: b.createdAt.toISOString(),
-      updatedAt: b.updatedAt.toISOString(),
-      startDate: b.startDate.toISOString(),
-      endDate: b.endDate.toISOString(),
-      billboard: {
-        ...b.billboard,
-        weeklyRate: Number(b.billboard.weeklyRate),
-        taxRate: Number(b.billboard.taxRate),
-        createdAt: b.billboard.createdAt.toISOString(),
-        updatedAt: b.billboard.updatedAt.toISOString(),
-      },
-    }));
+    const now = new Date();
+    
+    const serialized = bookings.map((b) => {
+      let displayStatus = b.status;
+      if (now > b.endDate && b.status !== 'rejected' && b.status !== 'cancelled') {
+        displayStatus = 'completed';
+      }
+
+      return {
+        ...b,
+        status: displayStatus,
+        totalPrice: Number(b.totalPrice),
+        taxRate: b.taxRate ? Number(b.taxRate) : null,
+        createdAt: b.createdAt.toISOString(),
+        updatedAt: b.updatedAt.toISOString(),
+        startDate: b.startDate.toISOString(),
+        endDate: b.endDate.toISOString(),
+        billboard: {
+          ...b.billboard,
+          weeklyRate: Number(b.billboard.weeklyRate),
+          taxRate: Number(b.billboard.taxRate),
+          createdAt: b.billboard.createdAt.toISOString(),
+          updatedAt: b.billboard.updatedAt.toISOString(),
+        },
+      };
+    });
 
     return { success: true, data: serialized };
   } catch (error: any) {
@@ -38,9 +48,14 @@ export async function getBillboardBookings() {
 
 export async function updateBillboardBookingStatus(id: number, status: string) {
   try {
+    const dataToUpdate: any = { status };
+    if (status === "approved" || status === "active") {
+      dataToUpdate.paymentStatus = "paid";
+    }
+
     await prisma.billboardBooking.update({
       where: { id },
-      data: { status },
+      data: dataToUpdate,
     });
 
     revalidatePath("/inventory/bookings");
@@ -67,11 +82,11 @@ export async function updateBillboardBookingPaymentStatus(id: number, paymentSta
   }
 }
 
-export async function extendBillboardBooking(id: number, newEndDate: string) {
+export async function updateBillboardBookingDates(id: number, newStartDate: string, newEndDate: string) {
   try {
     await prisma.billboardBooking.update({
       where: { id },
-      data: { endDate: new Date(newEndDate) },
+      data: { startDate: new Date(newStartDate), endDate: new Date(newEndDate) },
     });
 
     revalidatePath("/inventory/bookings");
@@ -131,7 +146,73 @@ export async function createBillboardBooking(data: BookingInput) {
     // 1. Validate data
     const validatedData = BookingSchema.parse(data);
 
-    // 2. Create Booking in database
+    // 2. Check slot availability for the selected dates
+    const billboard = await prisma.billboard.findUnique({ where: { id: validatedData.billboardId } });
+    if (!billboard) return { success: false, error: "Billboard not found" };
+    const maxSlots = billboard.maxSlots || 12;
+
+    const reqStart = new Date(validatedData.startDate).getTime();
+    const reqEnd = new Date(validatedData.endDate).getTime();
+
+    const overlappingBookings = await prisma.billboardBooking.findMany({
+      where: {
+        billboardId: validatedData.billboardId,
+        status: { notIn: ['cancelled', 'rejected', 'completed'] },
+        startDate: { lte: new Date(validatedData.endDate) },
+        endDate: { gte: new Date(validatedData.startDate) }
+      }
+    });
+
+    let baseSlots = 0;
+    const events: { time: number, delta: number }[] = [];
+
+    overlappingBookings.forEach(b => {
+      const bStart = b.startDate.getTime();
+      const bEnd = b.endDate.getTime();
+      
+      // If it's already active at the exact start of the requested period
+      if (bStart <= reqStart && bEnd >= reqStart) {
+        baseSlots += b.slotsRequested;
+      }
+      
+      // If it starts during the requested period
+      if (bStart > reqStart && bStart <= reqEnd) {
+        events.push({ time: bStart, delta: b.slotsRequested });
+      }
+      
+      // If it ends during the requested period (frees up slots)
+      if (bEnd >= reqStart && bEnd < reqEnd) {
+        events.push({ time: bEnd, delta: -b.slotsRequested });
+      }
+    });
+
+    // Sort chronologically. If times match, process freeing slots (negative delta) first.
+    events.sort((a, b) => {
+      if (a.time !== b.time) return a.time - b.time;
+      return a.delta - b.delta;
+    });
+
+    let currentSlots = baseSlots;
+    let maxConsumed = baseSlots;
+
+    for (const e of events) {
+      currentSlots += e.delta;
+      if (currentSlots > maxConsumed) {
+        maxConsumed = currentSlots;
+      }
+    }
+
+    if (maxConsumed + validatedData.slotsRequested > maxSlots) {
+      const available = maxSlots - maxConsumed;
+      return { 
+        success: false, 
+        error: available <= 0 
+          ? "This billboard is fully booked during these dates."
+          : `Only ${available} slot(s) available during this period.` 
+      };
+    }
+
+    // 3. Create Booking in database
     const booking = await prisma.billboardBooking.create({
       data: {
         billboardId: validatedData.billboardId,

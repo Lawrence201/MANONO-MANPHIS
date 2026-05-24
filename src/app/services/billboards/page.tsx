@@ -11,8 +11,10 @@ export default async function BillboardRentalPage() {
     const city = b.city.charAt(0).toUpperCase() + b.city.slice(1).toLowerCase();
     const address = b.address.split(',')[0].charAt(0).toUpperCase() + b.address.split(',')[0].slice(1).toLowerCase();
 
+    const now = new Date();
     const bookedSlots = (b as any).bookings?.reduce((sum: number, bk: any) => {
-      if (bk.status === 'cancelled') return sum;
+      if (bk.status === 'cancelled' || bk.status === 'completed' || bk.status === 'rejected') return sum;
+      if (now < bk.startDate || now > bk.endDate) return sum;
       return sum + bk.slotsRequested;
     }, 0) || 0;
     const remainingSlots = Math.max(0, (b.maxSlots || 12) - bookedSlots);

@@ -2,16 +2,9 @@ import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, FileText, Send, Eye, Check, X, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const quotations = [
-  { id: "QT-1184", customer: "Bremen Trading GmbH", country: "Germany", product: "Premium Honey", qty: "5,000 kg", amount: 47500, currency: "USD", status: "viewed", date: "Dec 14, 2024", validUntil: "Jan 14, 2025" },
-  { id: "QT-1183", customer: "Osaka Imports Co.", country: "Japan", product: "W320 Cashew", qty: "20,000 kg", amount: 240000, currency: "USD", status: "negotiating", date: "Dec 12, 2024", validUntil: "Jan 12, 2025" },
-  { id: "QT-1182", customer: "Gulf Trade LLC", country: "UAE", product: "Premium Honey", qty: "8,000 kg", amount: 72000, currency: "USD", status: "accepted", date: "Dec 8, 2024", validUntil: "Jan 8, 2025" },
-  { id: "QT-1181", customer: "Atlantic Foods Inc.", country: "USA", product: "W240 Cashew", qty: "15,000 kg", amount: 210000, currency: "USD", status: "sent", date: "Dec 6, 2024", validUntil: "Jan 6, 2025" },
-  { id: "QT-1180", customer: "Provence Naturals", country: "France", product: "Refined Shea", qty: "2,500 kg", amount: 28000, currency: "EUR", status: "draft", date: "Dec 18, 2024", validUntil: "Jan 18, 2025" },
-  { id: "QT-1179", customer: "London Spice Co.", country: "UK", product: "Raw Honey", qty: "4,500 kg", amount: 32000, currency: "GBP", status: "rejected", date: "Dec 1, 2024", validUntil: "Jan 1, 2025" },
-  { id: "QT-1178", customer: "Madrid Organics", country: "Spain", product: "Premium Honey", qty: "6,000 kg", amount: 54000, currency: "EUR", status: "accepted", date: "Nov 18, 2024", validUntil: "Dec 18, 2024" },
-];
+import { getQuotations } from "@/lib/actions/quotation-actions";
+import { NewQuoteModal } from "@/components/dashboard/new-quote-modal";
+import Link from "next/link";
 
 const statusConfig: Record<string, { label: string; cls: string; icon: React.ElementType }> = {
   draft: { label: "Draft", cls: "bg-muted text-muted-foreground", icon: FileText },
@@ -24,7 +17,9 @@ const statusConfig: Record<string, { label: string; cls: string; icon: React.Ele
 
 const fmt = new Intl.NumberFormat("en-US");
 
-export default function QuotationsPage() {
+export default async function QuotationsPage() {
+  const res = await getQuotations();
+  const quotations = res.success ? (res.data as any[]) : [];
   const totalValue = quotations.reduce((s, q) => s + q.amount, 0);
   const accepted = quotations.filter(q => q.status === "accepted").length;
   const acceptedValue = quotations.filter(q => q.status === "accepted").reduce((s, q) => s + q.amount, 0);
@@ -36,7 +31,7 @@ export default function QuotationsPage() {
       actions={
         <>
           <Button variant="outline" size="sm" className="gap-2"><Download className="w-4 h-4" /> Export</Button>
-          <Button size="sm" className="gap-2 bg-gradient-accent border-0 shadow-glow"><Plus className="w-4 h-4" /> New Quote</Button>
+          <NewQuoteModal />
         </>
       }
     >
@@ -44,7 +39,7 @@ export default function QuotationsPage() {
         <Stat label="Total Quotes" value={quotations.length.toString()} hint="this period" />
         <Stat label="Total Value" value={`$${(totalValue / 1000).toFixed(0)}k`} hint="combined pipeline" accent />
         <Stat label="Accepted" value={accepted.toString()} hint={`$${(acceptedValue / 1000).toFixed(0)}k won`} success />
-        <Stat label="Win Rate" value={`${((accepted / quotations.length) * 100).toFixed(0)}%`} hint="from sent quotes" />
+        <Stat label="Win Rate" value={`${quotations.length > 0 ? ((accepted / quotations.length) * 100).toFixed(0) : 0}%`} hint="from sent quotes" />
       </div>
 
       <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
@@ -68,7 +63,7 @@ export default function QuotationsPage() {
                 const Icon = cfg.icon;
                 return (
                   <tr key={q.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
-                    <td className="px-5 py-3.5 font-mono text-xs font-semibold">{q.id}</td>
+                    <td className="px-5 py-3.5 font-mono text-xs font-semibold">{q.quoteNumber}</td>
                     <td className="px-5 py-3.5">
                       <div className="text-xs font-medium">{q.customer}</div>
                       <div className="text-[10px] text-muted-foreground">{q.country}</div>
@@ -83,10 +78,12 @@ export default function QuotationsPage() {
                         <Icon className="w-2.5 h-2.5" /> {cfg.label}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-xs text-muted-foreground">{q.date}</td>
-                    <td className="px-5 py-3.5 text-xs text-muted-foreground">{q.validUntil}</td>
+                    <td className="px-5 py-3.5 text-xs text-muted-foreground">{new Date(q.createdAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</td>
+                    <td className="px-5 py-3.5 text-xs text-muted-foreground">{new Date(q.validUntil).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</td>
                     <td className="px-5 py-3.5 text-right">
-                      <Button variant="ghost" size="sm" className="h-7 text-xs">View</Button>
+                      <Link href={`/quotations/${q.quoteNumber}`}>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs">View</Button>
+                      </Link>
                     </td>
                   </tr>
                 );

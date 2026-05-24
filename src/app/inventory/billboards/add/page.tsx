@@ -167,7 +167,6 @@ export default function AddBillboardPage() {
       });
       if (result.success) {
         toast.success("Billboard registered successfully!");
-        router.push("/inventory/billboards");
       } else {
         toast.error(result.error || "Failed to publish billboard.");
       }

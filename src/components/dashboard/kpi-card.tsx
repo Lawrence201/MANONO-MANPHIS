@@ -11,6 +11,7 @@ interface KpiCardProps {
   accent?: "primary" | "accent" | "warm" | "info";
   sparkline?: number[];
   description?: string;
+  tooltip?: string;
 }
 
 const accentClasses = {
@@ -20,7 +21,7 @@ const accentClasses = {
   info: "bg-info",
 };
 
-export function KpiCard({ label, value, change, trend, icon, accent = "primary", sparkline, description }: KpiCardProps) {
+export function KpiCard({ label, value, change, trend, icon, accent = "primary", sparkline, description, tooltip }: KpiCardProps) {
   const isUp = trend === "up";
   return (
     <div className="group relative bg-card rounded-xl border border-border p-5 transition-all duration-300 overflow-hidden flex flex-col justify-between">
@@ -28,7 +29,7 @@ export function KpiCard({ label, value, change, trend, icon, accent = "primary",
         <div className="flex items-start justify-between gap-3 relative">
           <div className="space-y-2 min-w-0">
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</div>
-            <div className="text-2xl font-bold font-display tracking-tight">{value}</div>
+            <div className="text-2xl font-bold font-display tracking-tight" title={tooltip}>{value}</div>
           </div>
           {icon && (
             <div className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground bg-secondary shrink-0 border border-border">

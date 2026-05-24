@@ -42,6 +42,7 @@ interface Hall {
     mainImagePath: string | null;
     addOns: HallAddOn[];
     maxSlots?: number;
+    bookings?: any[];
 }
 
 const HallBookingPageContent = () => {
@@ -171,7 +172,8 @@ const HallBookingPageContent = () => {
                         maxSlots: b.maxSlots || 12,
                         minDuration: b.minDuration || '1m',
                         city: b.city,
-                        address: b.address
+                        address: b.address,
+                        bookings: b.bookings || []
                     }));
                     setHalls(mappedHalls);
                 }
@@ -343,6 +345,45 @@ const HallBookingPageContent = () => {
         setSelectedDate(newDate);
     };
 
+    const isDateAvailable = (date: Date) => {
+        if (!selectedBillboard || !selectedBillboard.bookings) return true;
+        
+        const reqStart = date.getTime();
+        const end = new Date(date);
+        if (durationUnit === 'Weeks') end.setDate(end.getDate() + campaignDuration * 7);
+        else if (durationUnit === 'Days') end.setDate(end.getDate() + campaignDuration);
+        else end.setMonth(end.getMonth() + campaignDuration);
+        const reqEnd = end.getTime();
+
+        let baseSlots = 0;
+        const events: { time: number, delta: number }[] = [];
+
+        selectedBillboard.bookings.forEach((b: any) => {
+            if (b.status === 'completed' || b.status === 'cancelled' || b.status === 'rejected') return;
+            const bStart = new Date(b.startDate).getTime();
+            const bEnd = new Date(b.endDate).getTime();
+            
+            if (bStart <= reqStart && bEnd >= reqStart) baseSlots += b.slotsRequested;
+            if (bStart > reqStart && bStart <= reqEnd) events.push({ time: bStart, delta: b.slotsRequested });
+            if (bEnd >= reqStart && bEnd < reqEnd) events.push({ time: bEnd, delta: -b.slotsRequested });
+        });
+
+        events.sort((a, b) => {
+            if (a.time !== b.time) return a.time - b.time;
+            return a.delta - b.delta;
+        });
+
+        let currentSlots = baseSlots;
+        let maxConsumed = baseSlots;
+        for (const e of events) {
+            currentSlots += e.delta;
+            if (currentSlots > maxConsumed) maxConsumed = currentSlots;
+        }
+
+        const maxSlots = selectedBillboard.maxSlots || 12;
+        return maxConsumed + slotsRequested <= maxSlots;
+    };
+
     const renderCalendarDays = () => {
         const daysInMonth = getDaysInMonth(currentMonth);
         const firstDay = getFirstDayOfMonth(currentMonth);
@@ -361,17 +402,20 @@ const HallBookingPageContent = () => {
             const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
             date.setHours(0, 0, 0, 0);
             const isPast = date.getTime() < today.getTime();
+            const isAvailable = isDateAvailable(date);
+            const isDisabled = isPast || !isAvailable;
             const isSelected = selectedDate?.toDateString() === date.toDateString();
 
             days.push(
                 <div
                     key={day}
-                    className={`${styles.dateNum} ${isSelected ? styles.selected : ''} ${isPast ? styles.disabled : ''}`}
+                    className={`${styles.dateNum} ${isSelected ? styles.selected : ''} ${isDisabled ? styles.disabled : ''}`}
                     onClick={() => {
-                        if (!isPast) {
+                        if (!isDisabled) {
                             handleDateClick(day);
                         }
                     }}
+                    title={!isAvailable && !isPast ? "Not enough slots for this duration" : undefined}
                 >
                     {day}
                 </div>
@@ -1597,7 +1641,9 @@ const HallBookingPageContent = () => {
                             <FaCircleCheck className={styles.successIcon} />
                             <h2 className={styles.congratsTitle}>Booking Confirmed!</h2>
                             <p className={styles.congratsMessage}>
-                                Thank you! Your booking has been successfully confirmed. A receipt and confirmation details have been sent to your email address.
+                                Thank you for your booking. Your digital billboard slot has been successfully reserved.
+
+                                A confirmation receipt and booking details have been sent to your email address.
                             </p>
 
                             <div className={styles.refBox}>

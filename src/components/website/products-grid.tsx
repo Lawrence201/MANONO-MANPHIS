@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Phone, Clock, Star, ArrowRight, MapPin, Monitor, Calendar } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { BillboardCatalogCard } from "./billboard-card";
-
+import { ProductCard } from "./product-card";
+import { getHoneyProducts } from "@/lib/actions/product-actions";
 interface ProductSpec {
   label: string;
   value: string;
@@ -109,7 +110,7 @@ export function ProductsGrid({
             {type === "products" ? "Catalog" : "Billboard Catalog"}
           </p>
           <h2 
-            className="text-3xl md:text-[48px] font-bold text-[#1a1a1a] mb-6 md:mb-8 leading-[1.05] tracking-[-0.04em] uppercase transform origin-center max-[1028px]:text-[32px] max-[1028px]:px-4"
+            className="text-[36px] min-[480px]:text-[42px] md:text-[56px] font-bold text-[#1a1a1a] mb-6 md:mb-8 leading-[1.05] tracking-[-0.04em] uppercase transform origin-center max-[1028px]:text-[40px] max-[1028px]:px-4"
             style={{ fontFamily: "var(--font-antonio)" }}
           >
             {type === "products" ? "Available Product" : "Available Billboard Locations"}
@@ -123,62 +124,11 @@ export function ProductsGrid({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-          {items.map((item) => (
+          {items.slice(0, 3).map((item) => (
             type === "billboards" ? (
               <BillboardCatalogCard key={item.id} item={item} />
             ) : (
-              <div key={item.id} className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all overflow-hidden border border-gray-100 flex flex-col h-full">
-                <div className="relative h-56 min-[480px]:h-64 md:h-48 lg:h-52 overflow-hidden group">
-                  <Image 
-                    src={item.image} 
-                    alt={item.name} 
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                <div className="p-5 min-[480px]:p-6 md:p-6 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="max-w-[70%]">
-                      <h3 className="text-[19px] md:text-[20px] font-bold text-[#1a1a1a] leading-tight mb-1">{item.name}</h3>
-                      <p className="text-gray-400 font-medium text-[10px] md:text-[11px] uppercase tracking-wider">{item.subtitle}</p>
-                    </div>
-                    <span className="text-xl md:text-2xl font-black text-[#1a1a1a]">{item.price}</span>
-                  </div>
-
-                  <button className="w-full bg-[#eea000] text-white py-3.5 font-bold text-[11px] md:text-[12px] uppercase hover:bg-[#1a1a1a] transition-all rounded-md mb-5 shadow-sm flex items-center justify-center gap-2">
-                    Add to Cart
-                  </button>
-
-                  <div className="rounded-md overflow-hidden mb-6 border border-gray-100 text-[11px] md:text-[12px]">
-                    {item.specs.map((spec, i) => (
-                      <div key={i} className={`flex justify-between items-center px-4 py-2 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-400 font-medium">{spec.label}</span>
-                        </div>
-                        <span className="text-[#1a1a1a] font-bold text-right">{spec.value}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-4 pt-2 mt-auto border-t border-gray-50">
-                    <div className="flex items-center gap-2 pt-4">
-                      <MapPin className="w-3.5 h-3.5 text-[#eea000] shrink-0" />
-                      <span className="text-[#1a1a1a] font-bold text-[12px] md:text-[13px] truncate">{item.location}</span>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 ml-auto">
-                        <Star className="w-3.5 h-3.5 text-[#fbbf24] fill-[#fbbf24]" />
-                        <span className="text-[11px] font-black text-[#1a1a1a]">{item.rating}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{item.years}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ProductCard key={item.id} product={item} />
             )
           ))}
         </div>
@@ -210,8 +160,10 @@ export async function BillboardCatalog() {
     const city = b.city.charAt(0).toUpperCase() + b.city.slice(1).toLowerCase();
     const address = b.address.split(',')[0].charAt(0).toUpperCase() + b.address.split(',')[0].slice(1).toLowerCase();
 
+    const now = new Date();
     const bookedSlots = (b as any).bookings?.reduce((sum: number, bk: any) => {
-      if (bk.status === 'cancelled') return sum;
+      if (bk.status === 'cancelled' || bk.status === 'completed' || bk.status === 'rejected') return sum;
+      if (now < bk.startDate || now > bk.endDate) return sum;
       return sum + bk.slotsRequested;
     }, 0) || 0;
     const remainingSlots = Math.max(0, (b.maxSlots || 12) - bookedSlots);
@@ -243,6 +195,68 @@ export async function BillboardCatalog() {
     <ProductsGrid 
       type="billboards" 
       items={items} 
+    />
+  );
+}
+
+export async function HoneyCatalog() {
+  const CATEGORY_LABELS: Record<string, string> = {
+    raw: "Raw Honey",
+    processed: "Processed Honey",
+    organic: "Organic Certified",
+    wild: "Wild Honey",
+  };
+
+  const PACKAGING_LABELS: Record<string, string> = {
+    bottle: "Glass Bottles",
+    jerrycan: "Plastic Jerrycans",
+    bucket: "Food-grade Buckets",
+    drum: "Steel Drums",
+    container: "IBC Totes",
+  };
+
+  const WAREHOUSE_LABELS: Record<string, string> = {
+    accra_warehouse: "Accra",
+    kumasi_hub: "Kumasi",
+    tema_cold: "Tema",
+  };
+
+  const STOCK_LABELS: Record<string, string> = {
+    in_stock: "In Stock",
+    low_stock: "Low Stock",
+    out_of_stock: "Out of Stock",
+  };
+
+  const res = await getHoneyProducts();
+  let honeyProducts: any[] = [];
+  
+  if (res.success && res.data) {
+    honeyProducts = (res.data as any[]).map((db) => {
+      const galleryPaths: string[] = (db.galleryImages || []).map((g: any) => g.imagePath || g);
+      const allImages = [
+        ...(db.featureImage ? [db.featureImage] : []),
+        ...galleryPaths,
+      ].filter(Boolean);
+      return {
+        id: db.id,
+        image: db.featureImage || "/product_honey_card.png",
+        images: allImages.length > 0 ? allImages : [db.featureImage || "/product_honey_card.png"],
+        name: db.name,
+        category: CATEGORY_LABELS[db.category] || db.category,
+        description: db.description || "",
+        warehouse: WAREHOUSE_LABELS[db.warehouse] || db.warehouse || "—",
+        packagingType: PACKAGING_LABELS[db.packagingType] || db.packagingType || "—",
+        moq: `${db.moqValue} ${db.moqUnit}`,
+        stockStatus: STOCK_LABELS[db.stockStatus] || db.stockStatus || "—",
+        price: `$${Number(db.pricePerUnit).toFixed(2)}${db.priceUnitType === "per_liter" ? "/Liter" : db.priceUnitType === "per_kg" ? "/kg" : db.priceUnitType === "per_ton" ? "/ton" : db.priceUnitType === "per_unit" ? "/unit" : `/${db.priceUnitType}`}`,
+      };
+    });
+  }
+
+  return (
+    <ProductsGrid 
+      type="products" 
+      items={honeyProducts as any} 
     />
   );
 }
