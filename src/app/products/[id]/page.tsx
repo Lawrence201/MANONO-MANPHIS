@@ -6,6 +6,9 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { getBillboard, getBillboards } from "@/lib/actions/billboard-actions";
 import { getProduct, getHoneyProducts } from "@/lib/actions/product-actions";
+import { submitReview, getReviews } from "@/lib/actions/review-actions";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import { 
   Star,
   Heart,
@@ -131,6 +134,61 @@ export default function ProductDetailsPage() {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get('type');
 
+  // Review states
+  const { data: session } = useSession();
+  const [reviewsData, setReviewsData] = useState<any>({ reviews: [], totalReviews: 0, averageRating: 0, ratingCounts: {5:0, 4:0, 3:0, 2:0, 1:0} });
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', authorName: '', authorEmail: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  // Auto-populate when session loads
+  useEffect(() => {
+    if (session?.user) {
+      setReviewForm(prev => ({
+        ...prev,
+        authorName: session.user?.name || '',
+        authorEmail: session.user?.email || ''
+      }));
+    }
+  }, [session]);
+
+  const fetchReviewsData = async (type: string, refId: number) => {
+    const res = await getReviews(type, refId);
+    if (res.success && res.data) {
+      setReviewsData(res.data);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewForm.authorName || !reviewForm.authorEmail || !reviewForm.comment) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+    setIsSubmittingReview(true);
+    try {
+      const pType = typeParam === "billboard" ? "billboard" : "product";
+      const res = await submitReview({
+        itemType: pType,
+        referenceId: Number(id),
+        rating: reviewForm.rating,
+        comment: reviewForm.comment,
+        authorName: reviewForm.authorName,
+        authorEmail: reviewForm.authorEmail
+      });
+      if (res.success) {
+        toast.success(res.message);
+        setReviewForm(prev => ({ ...prev, comment: '', rating: 5 })); // reset form but keep name/email
+        fetchReviewsData(pType, Number(id)); // refresh list
+      } else {
+        toast.error(res.message);
+      }
+    } catch (err) {
+      toast.error("Failed to submit review.");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   useEffect(() => {
     async function loadData() {
       if (id) {
@@ -247,7 +305,7 @@ export default function ProductDetailsPage() {
             name: b.name,
             price: `GH₵${Number(b.weeklyRate).toLocaleString()}`,
             rating: 5,
-            reviews: 145,
+            reviews: 0, // will be updated dynamically
             sku: b.assetCode,
             image: b.featureImage || "/billboards/bill_boards 3.webp",
             gallery: gallery,
@@ -280,6 +338,10 @@ export default function ProductDetailsPage() {
             videoShowcase: b.videoShowcase
           });
         }
+        
+        // Fetch real reviews
+        await fetchReviewsData(typeParam === "billboard" ? "billboard" : "product", Number(id));
+
         setLoading(false);
       }
     }
@@ -444,10 +506,10 @@ export default function ProductDetailsPage() {
                   <div className="flex items-center gap-1 ml-4 border-l border-gray-200 pl-4">
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3.5 h-3.5 ${i < 5 ? "text-[#ffcc00] fill-[#ffcc00]" : "text-gray-200"}`} />
+                        <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(reviewsData.averageRating) ? "text-[#ffcc00] fill-[#ffcc00]" : "text-gray-200"}`} />
                       ))}
                     </div>
-                    <span className="text-[13px] text-gray-400 font-medium">({product.reviews} reviews)</span>
+                    <span className="text-[13px] text-gray-400 font-medium">({reviewsData.totalReviews} reviews)</span>
                   </div>
                 </div>
 
@@ -507,36 +569,6 @@ export default function ProductDetailsPage() {
                   </div>
                 ) : (
                   <div className="mb-8">
-                    {/* Stock badge */}
-                    {product.specs?.find((s: any) => s.label === "Stock") && (
-                      <div className="flex items-center gap-2 mb-5">
-                        <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-[12px] font-black px-3 py-1.5 rounded-full">
-                          <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                          {product.specs.find((s: any) => s.label === "Stock")?.value} in stock
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Quantity selector */}
-                    <div className="flex items-center gap-4 mb-6">
-                      <span className="text-[13px] font-black text-gray-500 uppercase tracking-wider">Qty</span>
-                      <div className="flex items-center border border-gray-200 rounded-full overflow-hidden">
-                        <button
-                          onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                          className="w-10 h-10 flex items-center justify-center text-[18px] font-bold text-gray-600 hover:bg-gray-100 transition-colors"
-                        >
-                          −
-                        </button>
-                        <span className="w-12 text-center text-[15px] font-black text-[#1a1a1a]">{quantity}</span>
-                        <button
-                          onClick={() => setQuantity(q => q + 1)}
-                          className="w-10 h-10 flex items-center justify-center text-[18px] font-bold text-gray-600 hover:bg-gray-100 transition-colors"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
                     {/* Action buttons */}
                     <div className="flex flex-col sm:flex-row gap-3">
                       <button className="flex-1 h-14 bg-[#ffcc00] hover:bg-[#f0be00] text-black font-black text-[13px] uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center gap-2">
@@ -628,7 +660,7 @@ export default function ProductDetailsPage() {
                   {[
                     { id: "description", label: "Description" },
                     { id: "specs", label: "Additional information" },
-                    { id: "reviews", label: `Reviews (${product.reviews})` },
+                    { id: "reviews", label: `Reviews (${reviewsData.totalReviews})` },
                     { id: "shipping", label: product?.isService ? "Map" : "Shipping Policy" }
                   ].map((tab) => (
                     <button
@@ -703,43 +735,121 @@ export default function ProductDetailsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
                     {/* Reviews Stats */}
                     <div className="p-8 rounded-sm border border-gray-200">
-                      <h2 className="text-[20px] font-bold mb-6">{product.reviews} reviews for <span>{product.name}</span></h2>
+                      <h2 className="text-[20px] font-bold mb-6">{reviewsData.totalReviews} reviews for <span>{product.name}</span></h2>
                       <div className="flex items-center gap-6 mb-8">
-                        <div className="text-[48px] font-black text-[#eea000]">5.00</div>
+                        <div className="text-[48px] font-black text-[#eea000]">
+                          {reviewsData.averageRating.toFixed(2)}
+                        </div>
                         <div>
                           <div className="flex gap-1 mb-1">
-                            {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-[#eea000] text-[#eea000]" />)}
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`w-4 h-4 ${i < Math.round(reviewsData.averageRating) ? "fill-[#eea000] text-[#eea000]" : "text-gray-200"}`} />
+                            ))}
                           </div>
                           <div className="text-sm text-gray-400 font-bold uppercase tracking-wider">out of 5 stars</div>
                         </div>
                       </div>
                       <div className="space-y-3">
-                        {[5, 4, 3, 2, 1].map((rating) => (
-                          <div key={rating} className="flex items-center gap-4 text-sm font-bold text-gray-900">
-                            <div className="w-4">{rating}</div>
-                            <Star className="w-3.5 h-3.5 fill-[#eea000] text-[#eea000]" />
-                            <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                              <div className="h-full bg-[#eea000]" style={{ width: rating === 5 ? '100%' : '0%' }} />
+                        {[5, 4, 3, 2, 1].map((rating) => {
+                          const count = reviewsData.ratingCounts[rating as keyof typeof reviewsData.ratingCounts] || 0;
+                          const percentage = reviewsData.totalReviews > 0 ? (count / reviewsData.totalReviews) * 100 : 0;
+                          return (
+                            <div key={rating} className="flex items-center gap-4 text-sm font-bold text-gray-900">
+                              <div className="w-4">{rating}</div>
+                              <Star className="w-3.5 h-3.5 fill-[#eea000] text-[#eea000]" />
+                              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-[#eea000] transition-all" style={{ width: `${percentage}%` }} />
+                              </div>
+                              <div className="w-4 text-gray-400">{count}</div>
                             </div>
-                            <div className="w-4 text-gray-400">{rating === 5 ? product.reviews : 0}</div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
 
                     {/* Review Form */}
                     <div className="border border-gray-200 p-8 rounded-sm">
                       <h3 className="text-xl font-bold mb-6">Add a review</h3>
-                      <form className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Name *" className="p-4 border border-gray-200 focus:border-black outline-none text-sm bg-white" />
-                          <input type="email" placeholder="Email *" className="p-4 border border-gray-200 focus:border-black outline-none text-sm bg-white" />
+                      
+                      {/* Interactive Star Selection */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-sm font-bold text-gray-700 mr-2">Your Rating:</span>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star} 
+                            onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
+                            className={`w-5 h-5 cursor-pointer transition-colors ${star <= reviewForm.rating ? "fill-[#eea000] text-[#eea000]" : "text-gray-300"}`} 
+                          />
+                        ))}
+                      </div>
+
+                      <form onSubmit={handleReviewSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <input 
+                            type="text" 
+                            placeholder="Name *" 
+                            value={reviewForm.authorName}
+                            onChange={(e) => setReviewForm(prev => ({ ...prev, authorName: e.target.value }))}
+                            required
+                            disabled={!!session?.user?.name}
+                            className="p-4 border border-gray-200 focus:border-black outline-none text-sm bg-white disabled:bg-gray-50 disabled:text-gray-500" 
+                          />
+                          <input 
+                            type="email" 
+                            placeholder="Email *" 
+                            value={reviewForm.authorEmail}
+                            onChange={(e) => setReviewForm(prev => ({ ...prev, authorEmail: e.target.value }))}
+                            required
+                            disabled={!!session?.user?.email}
+                            className="p-4 border border-gray-200 focus:border-black outline-none text-sm bg-white disabled:bg-gray-50 disabled:text-gray-500" 
+                          />
                         </div>
-                        <textarea placeholder="Your Review *" rows={6} className="w-full p-4 border border-gray-200 focus:border-black outline-none text-sm bg-white"></textarea>
-                        <button className="bg-black text-white px-10 py-4 rounded-full text-[12px] font-black uppercase tracking-widest hover:bg-[#ffcc00] hover:text-black transition-all">Submit Review</button>
+                        <textarea 
+                          placeholder="Your Review *" 
+                          rows={6} 
+                          value={reviewForm.comment}
+                          onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                          required
+                          className="w-full p-4 border border-gray-200 focus:border-black outline-none text-sm bg-white"
+                        ></textarea>
+                        <button 
+                          type="submit"
+                          disabled={isSubmittingReview}
+                          className="bg-black text-white px-10 py-4 rounded-full text-[12px] font-black uppercase tracking-widest hover:bg-[#ffcc00] hover:text-black transition-all disabled:opacity-50"
+                        >
+                          {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                        </button>
                       </form>
                     </div>
                   </div>
+
+                  {/* List of Reviews */}
+                  {reviewsData.reviews.length > 0 && (
+                    <div className="mt-12 space-y-6">
+                      <h3 className="text-lg font-bold text-[#1a1a1a] mb-6">Customer Feedback</h3>
+                      {reviewsData.reviews.map((review: any) => (
+                        <div key={review.id} className="p-6 border border-gray-100 rounded-sm bg-white shadow-sm flex flex-col sm:flex-row gap-4">
+                          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200">
+                            <span className="text-gray-500 font-bold uppercase">{review.authorName.charAt(0)}</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <h4 className="font-bold text-[#1a1a1a]">{review.authorName}</h4>
+                              <span className="text-xs text-gray-400 font-medium">
+                                {new Date(review.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                              </span>
+                            </div>
+                            <div className="flex gap-0.5 mb-3">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? "fill-[#eea000] text-[#eea000]" : "text-gray-200"}`} />
+                              ))}
+                            </div>
+                            <p className="text-[#666] text-sm leading-relaxed whitespace-pre-wrap">{review.comment}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -755,10 +865,21 @@ export default function ProductDetailsPage() {
                         frameBorder="0"
                         style={{ border: 0 }}
                         src={`https://maps.google.com/maps?ll=${product.latitude},${product.longitude}&z=${mapZoom}&t=m&hl=en&output=embed`}
-                        className="w-full h-full"
+                        className="w-full h-full pointer-events-none"
                         allowFullScreen
                       ></iframe>
-                      <div className="absolute top-3 right-3 flex flex-col gap-2 z-20">
+                      
+                      {/* Transparent overlay to capture clicks and prevent panning */}
+                      <div className="absolute inset-0 z-10"></div>
+                      
+                      {/* Bouncing Custom Marker */}
+                      <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none pb-8">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-xl animate-bounce">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#EA4335" />
+                        </svg>
+                      </div>
+
+                      <div className="absolute top-3 right-3 flex flex-col gap-2 z-30">
                         <button type="button" className="w-10 h-10 flex items-center justify-center rounded-lg bg-white shadow-md hover:bg-gray-50 border border-gray-200 transition-all text-black" onClick={(e) => { e.preventDefault(); setMapZoom(prev => Math.min(prev + 1, 21)); }}>
                           <Plus className="w-5 h-5" />
                         </button>

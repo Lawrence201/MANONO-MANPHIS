@@ -206,6 +206,12 @@ export async function GET() {
         });
         const exportLocations = activeExportDestinations.map(d => d.destinationCountry);
 
+        // 10. Fetch recent reviews
+        const recentReviews = await prisma.review.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 5
+        });
+
         return NextResponse.json({
             success: true,
             data: {
@@ -218,7 +224,8 @@ export async function GET() {
                 monthlyData,
                 recentBookings: allRecentActivity,
                 slotStats,
-                exportLocations
+                exportLocations,
+                recentReviews
             }
         });
     } catch (error: any) {

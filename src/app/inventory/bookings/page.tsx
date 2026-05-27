@@ -5,12 +5,12 @@ import { AppLayout } from "@/components/layout/app-layout";
 import {
   Search, Filter, Eye, CheckCircle2, XCircle, Clock, ChevronDown,
   DollarSign, Calendar, Users, BarChart3, Monitor, Download, RefreshCw,
-  Building2, Mail, Phone, MapPin, FileImage, CreditCard, Layers, Pause
+  Building2, Mail, Phone, MapPin, FileImage, CreditCard, Layers, Pause, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { getBillboardBookings, updateBillboardBookingStatus } from "@/lib/actions/booking-actions";
+import { getBillboardBookings, updateBillboardBookingStatus, deleteBillboardBooking } from "@/lib/actions/booking-actions";
 import { toast } from "sonner";
 
 type Booking = {
@@ -186,8 +186,26 @@ export default function AdBookingsPage() {
       toast.success(`Booking ${status} successfully`);
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status, ...((status === "approved" || status === "active") ? { paymentStatus: "paid" } : {}) } : b));
       if (selectedBooking?.id === id) setSelectedBooking(prev => prev ? { ...prev, status, ...((status === "approved" || status === "active") ? { paymentStatus: "paid" } : {}) } : null);
+      // Dispatch custom event to trigger real-time sidebar pending count updates
+      window.dispatchEvent(new Event("bookingsUpdated"));
     } else {
       toast.error("Failed to update booking status");
+    }
+    setActionLoading(null);
+  };
+
+  const handleDelete = async (id: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this booking?")) return;
+    setActionLoading(id);
+    const result = await deleteBillboardBooking(id);
+    if (result.success) {
+      toast.success("Booking deleted successfully");
+      setBookings(prev => prev.filter(b => b.id !== id));
+      if (selectedBooking?.id === id) setSelectedBooking(null);
+      window.dispatchEvent(new Event("bookingsUpdated"));
+    } else {
+      toast.error("Failed to delete booking");
     }
     setActionLoading(null);
   };
@@ -204,7 +222,7 @@ export default function AdBookingsPage() {
   });
 
   // Stats
-  const total = bookings.length;
+  const total = bookings.filter(b => b.status !== "rejected").length;
   const pending = bookings.filter(b => b.status === "pending").length;
   const approved = bookings.filter(b => b.status === "approved" || b.status === "active").length;
   const totalRevenue = bookings.filter(b => b.paymentStatus === "paid").reduce((s, b) => s + b.totalPrice, 0);
@@ -346,9 +364,19 @@ export default function AdBookingsPage() {
                           <PaymentBadge status={booking.paymentStatus} />
                         </td>
                         <td className="px-4 py-0">
-                          <button className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-                            <Eye className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center gap-1 justify-end">
+                            <button className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={(e) => handleDelete(booking.id, e)}
+                              className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                              disabled={actionLoading === booking.id}
+                              title="Delete Booking"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -366,12 +394,22 @@ export default function AdBookingsPage() {
                   <h3 className="font-display font-semibold text-foreground">Booking Detail</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">ID #{selectedBooking.id}</p>
                 </div>
-                <button
-                  onClick={() => setSelectedBooking(null)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <XCircle className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDelete(selectedBooking.id)}
+                    className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                    title="Delete Booking"
+                    disabled={actionLoading === selectedBooking.id}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setSelectedBooking(null)}
+                    className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                  >
+                    <XCircle className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               <div className="flex-1 overflow-y-auto scrollbar-very-thin p-4 space-y-5">

@@ -136,6 +136,11 @@ export default function DashboardPage() {
   } | null>(null);
 
   const [mapTab, setMapTab] = useState<"world" | "ghana">("world");
+  const [expandedReviews, setExpandedReviews] = useState<Record<number, boolean>>({});
+
+  const toggleReview = (id: number) => {
+    setExpandedReviews(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as SVGElement;
@@ -177,6 +182,7 @@ export default function DashboardPage() {
       maintenanceSlots: number;
     };
     exportLocations?: string[];
+    recentReviews?: any[];
   }>({
     totalRevenue: 0,
     activeBillboardsCount: 0,
@@ -186,7 +192,8 @@ export default function DashboardPage() {
     totalBookingsCount: 0,
     monthlyData: [],
     slotStats: { availableSlots: 0, reservedSlots: 0, activeSlots: 0, expiredSlots: 0, maintenanceSlots: 0 },
-    exportLocations: []
+    exportLocations: [],
+    recentReviews: []
   });
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [svgHtml, setSvgHtml] = useState<string>("");
@@ -208,7 +215,8 @@ export default function DashboardPage() {
             totalBookingsCount: json.data.totalBookingsCount || 0,
             monthlyData: json.data.monthlyData,
             slotStats: json.data.slotStats,
-            exportLocations: json.data.exportLocations || []
+            exportLocations: json.data.exportLocations || [],
+            recentReviews: json.data.recentReviews || []
           });
           setRecentBookings(json.data.recentBookings || []);
         }
@@ -551,7 +559,7 @@ export default function DashboardPage() {
   }, [mapTab]);
 
   const formatRevenue = (val: number) => {
-    if (val === 0) return "GH₵0"; 
+    if (val === 0) return "GH₵0";
     if (val >= 1000) {
       return `GH₵${(val / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })}k`;
     }
@@ -644,21 +652,19 @@ export default function DashboardPage() {
               <div className="flex bg-secondary p-1 rounded-lg border border-border shrink-0 select-none">
                 <button
                   onClick={() => setMapTab("world")}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
-                    mapTab === "world"
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${mapTab === "world"
                       ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   World Map
                 </button>
                 <button
                   onClick={() => setMapTab("ghana")}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
-                    mapTab === "ghana"
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${mapTab === "ghana"
                       ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   Ghana Map
                 </button>
@@ -671,7 +677,8 @@ export default function DashboardPage() {
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
               >
-                <style dangerouslySetInnerHTML={{ __html: `
+                <style dangerouslySetInnerHTML={{
+                  __html: `
                   path[data-code] {
                     fill: #e1e7e7 !important;
                     transition: fill 0.2s ease;
@@ -692,9 +699,8 @@ export default function DashboardPage() {
                 `}} />
                 {/* Dynamic inline map rendering */}
                 <div
-                   className={`w-full h-full [&>svg]:w-full [&>svg]:h-full ${
-                     mapTab === "world" ? "[&>svg]:scale-[1.15]" : "[&>svg]:scale-[1.05]"
-                   }`}
+                  className={`w-full h-full [&>svg]:w-full [&>svg]:h-full ${mapTab === "world" ? "[&>svg]:scale-[1.15]" : "[&>svg]:scale-[1.05]"
+                    }`}
                   dangerouslySetInnerHTML={{ __html: svgHtml }}
                 />
 
@@ -761,30 +767,46 @@ export default function DashboardPage() {
             </div>
             <div className="relative flex-1 min-h-0">
               <div className="p-5 pt-3 max-h-[325px] overflow-y-auto custom-scrollbar flex flex-col">
-                {reviews.map((review, idx) => (
-                  <div key={idx} className="flex items-center border-b border-border/50 pb-4 mb-4 last:border-b-0 last:pb-0 last:mb-0">
-                    <div className="mr-4 flex-shrink-0">
-                      <img
-                        src={review.avatar}
-                        alt={review.name}
-                        className="w-[100px] h-[100px] min-w-[100px] rounded-lg object-cover border border-border/50 shadow-sm"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h5 className="text-sm font-bold text-foreground mb-1 leading-none">{review.name}</h5>
-                      <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
-                        {review.comment}
-                      </p>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-muted-foreground">Rating: ({review.rating})</span>
-                          {renderStars(review.rating)}
+                {(stats.recentReviews || []).length > 0 ? (stats.recentReviews || []).map((review, idx) => {
+                  const isLong = review.comment.length > 100;
+                  const isExpanded = expandedReviews[review.id];
+                  return (
+                    <div key={review.id} className="flex items-center border-b border-border/50 pb-4 mb-4 last:border-b-0 last:pb-0 last:mb-0">
+                      <div className="mr-4 flex-shrink-0 self-start mt-1">
+                        <img
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(review.authorName)}&background=random`}
+                          alt={review.authorName}
+                          className="w-[50px] h-[50px] min-w-[50px] rounded-full object-cover border border-border/50 shadow-sm"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="text-sm font-bold text-foreground mb-1 leading-none">{review.authorName}</h5>
+                        <p className="text-xs text-muted-foreground mb-2 leading-relaxed whitespace-pre-wrap">
+                          {isExpanded || !isLong ? review.comment : `${review.comment.substring(0, 100)}... `}
+                          {isLong && (
+                            <button
+                              onClick={() => toggleReview(review.id)}
+                              className="text-[#0ea5e9] font-semibold hover:underline ml-1"
+                            >
+                              {isExpanded ? "Show less" : "Read more"}
+                            </button>
+                          )}
+                        </p>
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-muted-foreground">Rating: ({review.rating})</span>
+                            {renderStars(review.rating)}
+                          </div>
+                          <span className="text-[11px] text-muted-foreground">
+                            {new Date(review.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                          </span>
                         </div>
-                        <span className="text-[11px] text-muted-foreground">{review.time}</span>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                }) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground text-sm">No reviews yet</div>
+                )}
               </div>
               {/* Fade gradient overlay */}
               <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-card to-transparent pointer-events-none" />
@@ -843,7 +865,11 @@ export default function DashboardPage() {
                     <StatusBadge status={o.status} />
                   </td>
                   <td className="px-5 py-3.5">
-                    {o.type === "export" ? (
+                    {String(o.status).toLowerCase().includes("pending") ? (
+                      <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-full border border-amber-200/20">
+                        Pending Approval
+                      </span>
+                    ) : o.type === "export" ? (
                       <span className="text-xs font-semibold capitalize text-muted-foreground">{o.status}</span>
                     ) : (
                       <div className="flex items-center gap-2">

@@ -11,6 +11,8 @@ import styles from './BillboardBooking.module.css';
 import { generatePendingRequestPDF, formatReceiptDate } from '@/lib/receiptGenerator';
 import { getBillboards } from '@/lib/actions/billboard-actions';
 import { createBillboardBooking } from '@/lib/actions/booking-actions';
+import { addToCart } from '@/lib/actions/cart-actions';
+import { toast } from 'sonner';
 import { ProductsHero } from '@/components/website/products-hero';
 import { TopBar } from '@/components/website/top-bar';
 import { WebsiteHeader } from '@/components/website/header';
@@ -45,7 +47,13 @@ interface Hall {
     bookings?: any[];
 }
 
-const HallBookingPageContent = () => {
+interface UserProfile {
+    name?: string;
+    email?: string;
+    phoneNumber?: string;
+}
+
+const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) => {
     // Bypassed NextAuth session hook for runtime safety
     const session = null;
     const searchParams = useSearchParams();
@@ -56,9 +64,9 @@ const HallBookingPageContent = () => {
     const [selectedHallIds, setSelectedHallIds] = React.useState<string[]>(preSelectedHallId ? [preSelectedHallId] : []);
 
     // Billboard Specific Booking States
-    const [fullName, setFullName] = React.useState('');
-    const [email, setEmail] = React.useState('');
-    const [phone, setPhone] = React.useState('');
+    const [fullName, setFullName] = React.useState(userProfile?.name || '');
+    const [email, setEmail] = React.useState(userProfile?.email || '');
+    const [phone, setPhone] = React.useState(userProfile?.phoneNumber || '');
     const [companyName, setCompanyName] = React.useState('');
     const [website, setWebsite] = React.useState('');
     const [clientType, setClientType] = React.useState('individual');
@@ -347,7 +355,7 @@ const HallBookingPageContent = () => {
 
     const isDateAvailable = (date: Date) => {
         if (!selectedBillboard || !selectedBillboard.bookings) return true;
-        
+
         const reqStart = date.getTime();
         const end = new Date(date);
         if (durationUnit === 'Weeks') end.setDate(end.getDate() + campaignDuration * 7);
@@ -362,7 +370,7 @@ const HallBookingPageContent = () => {
             if (b.status === 'completed' || b.status === 'cancelled' || b.status === 'rejected') return;
             const bStart = new Date(b.startDate).getTime();
             const bEnd = new Date(b.endDate).getTime();
-            
+
             if (bStart <= reqStart && bEnd >= reqStart) baseSlots += b.slotsRequested;
             if (bStart > reqStart && bStart <= reqEnd) events.push({ time: bStart, delta: b.slotsRequested });
             if (bEnd >= reqStart && bEnd < reqEnd) events.push({ time: bEnd, delta: -b.slotsRequested });
@@ -633,8 +641,8 @@ const HallBookingPageContent = () => {
                                             placeholder="Available Slots"
                                             value={
                                                 selectedHallIds[0]
-                                                    ? `${(halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.availableSlots !== undefined 
-                                                        ? (halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.availableSlots 
+                                                    ? `${(halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.availableSlots !== undefined
+                                                        ? (halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.availableSlots
                                                         : ((halls.find(h => h.id.toString() === selectedHallIds[0]) as any)?.maxSlots || 12)} Slots`
                                                     : ''
                                             }
@@ -1195,7 +1203,7 @@ const HallBookingPageContent = () => {
                                     // Mocks/Fallback parameters for pixel-perfect matches when cart is empty
                                     const activeBillboard = selectedBillboard || {
                                         name: "Accra - Legon Campus (Screen inside Volta Hall)",
-                                        mainImagePath: "/uploads/billboards/update-1778767173327-87711508.jpg",
+                                        mainImagePath: "/uploads/billboards/update-1778918554789-612231548.jpg",
                                         address: "Legon Campus",
                                         city: "Accra",
                                         price: "763.63"
@@ -1257,6 +1265,17 @@ const HallBookingPageContent = () => {
                                                             src={activeBillboard.mainImagePath}
                                                             alt={activeBillboard.name}
                                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                                const parent = (e.target as HTMLImageElement).parentElement;
+                                                                if (parent && !parent.querySelector('.fallback-text')) {
+                                                                    const div = document.createElement('div');
+                                                                    div.className = 'fallback-text';
+                                                                    div.style.cssText = "width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px;";
+                                                                    div.innerText = "No Image";
+                                                                    parent.appendChild(div);
+                                                                }
+                                                            }}
                                                         />
                                                     ) : (
                                                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '12px' }}>
@@ -1535,39 +1554,115 @@ const HallBookingPageContent = () => {
                                                 </div>
                                             </div>
 
-                                            <button
-                                                onClick={handleConfirmBooking}
-                                                disabled={isSubmitting}
-                                                style={{
-                                                    width: '100%',
-                                                    padding: '16px',
-                                                    borderRadius: '8px',
-                                                    backgroundColor: '#3d3d3d',
-                                                    color: '#ffffff',
-                                                    fontWeight: '600',
-                                                    fontSize: '16px',
-                                                    border: 'none',
-                                                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                                                    transition: 'all 0.2s',
-                                                    marginTop: '8px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    gap: '8px'
-                                                }}
-                                                onMouseOver={(e) => {
-                                                    if (!isSubmitting) {
-                                                        e.currentTarget.style.backgroundColor = '#535353';
-                                                    }
-                                                }}
-                                                onMouseOut={(e) => {
-                                                    if (!isSubmitting) {
-                                                        e.currentTarget.style.backgroundColor = '#3d3d3d';
-                                                    }
-                                                }}
-                                            >
-                                                {isSubmitting ? 'Processing Payment...' : 'Pay now'}
-                                            </button>
+                                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!selectedHallsData.length) return;
+
+                                                        setIsSubmitting(true);
+                                                        try {
+                                                            const b = selectedHallsData[0];
+                                                            const res = await addToCart({
+                                                                itemType: 'billboard',
+                                                                referenceId: b.id,
+                                                                name: `${campaignTitle || 'Billboard Campaign'} - ${b.name}`,
+                                                                price: Number(totalPrice),
+                                                                quantity: 1, // Campaign represents 1 order item
+                                                                imagePath: advertFile || b.mainImagePath || '',
+                                                                details: {
+                                                                    slotsRequested,
+                                                                    campaignType,
+                                                                    campaignDuration,
+                                                                    durationUnit,
+                                                                    advertFile,
+                                                                    fullName,
+                                                                    email,
+                                                                    phone,
+                                                                    companyName,
+                                                                    clientType,
+                                                                    startDate: selectedDate ? selectedDate.toISOString() : null,
+                                                                    endDate: calculatedEndDate ? calculatedEndDate.toISOString() : null
+                                                                }
+                                                            });
+
+                                                            if (res.success) {
+                                                                toast.success("Billboard added to cart!", {
+                                                                    description: `${b.name} - $${Number(totalPrice).toFixed(2)}`
+                                                                });
+                                                                window.dispatchEvent(new Event("cartUpdated"));
+                                                                window.location.href = "/cart";
+                                                            } else {
+                                                                toast.error(res.message || "Failed to add to cart");
+                                                                if (res.message?.includes("log in")) {
+                                                                    window.location.href = "/login";
+                                                                }
+                                                            }
+                                                        } catch (err) {
+                                                            toast.error("Something went wrong");
+                                                        } finally {
+                                                            setIsSubmitting(false);
+                                                        }
+                                                    }}
+                                                    disabled={isSubmitting}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: '16px',
+                                                        borderRadius: '8px',
+                                                        backgroundColor: '#ffffff',
+                                                        color: '#3d3d3d',
+                                                        border: '2px solid #e2e8f0',
+                                                        fontWeight: '600',
+                                                        fontSize: '16px',
+                                                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                                                        transition: 'all 0.2s',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: '8px'
+                                                    }}
+                                                    onMouseOver={(e) => {
+                                                        if (!isSubmitting) e.currentTarget.style.backgroundColor = '#f8fafc';
+                                                    }}
+                                                    onMouseOut={(e) => {
+                                                        if (!isSubmitting) e.currentTarget.style.backgroundColor = '#ffffff';
+                                                    }}
+                                                >
+                                                    Add Cart
+                                                </button>
+
+                                                <button
+                                                    onClick={handleConfirmBooking}
+                                                    disabled={isSubmitting}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: '16px',
+                                                        borderRadius: '8px',
+                                                        backgroundColor: '#3d3d3d',
+                                                        color: '#ffffff',
+                                                        fontWeight: '600',
+                                                        fontSize: '16px',
+                                                        border: 'none',
+                                                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                                                        transition: 'all 0.2s',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: '8px'
+                                                    }}
+                                                    onMouseOver={(e) => {
+                                                        if (!isSubmitting) {
+                                                            e.currentTarget.style.backgroundColor = '#535353';
+                                                        }
+                                                    }}
+                                                    onMouseOut={(e) => {
+                                                        if (!isSubmitting) {
+                                                            e.currentTarget.style.backgroundColor = '#3d3d3d';
+                                                        }
+                                                    }}
+                                                >
+                                                    {isSubmitting ? 'Processing...' : 'Pay now'}
+                                                </button>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -1706,10 +1801,10 @@ const HallBookingPageContent = () => {
     );
 };
 
-const HallBookingPage = () => {
+const HallBookingPage = ({ userProfile }: { userProfile?: UserProfile }) => {
     return (
         <Suspense fallback={<div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading booking...</div>}>
-            <HallBookingPageContent />
+            <HallBookingPageContent userProfile={userProfile} />
         </Suspense>
     );
 };

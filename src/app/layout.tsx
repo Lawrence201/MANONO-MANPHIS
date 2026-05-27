@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Antonio, Anton, Bebas_Neue, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { NextAuthProvider } from "@/components/providers/session-provider";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 const antonio = Antonio({
   subsets: ["latin"],
@@ -39,19 +42,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
   return (
     <html lang="en" suppressHydrationWarning>
       <body 
         className={`${antonio.variable} ${anton.variable} ${bebasNeue.variable} ${jetbrainsMono.variable} ${plusJakarta.variable} antialiased`} 
         suppressHydrationWarning
       >
-        {children}
-        <Toaster />
+        <NextAuthProvider session={session}>
+          <div className="overflow-x-clip w-full relative min-h-screen">
+            {children}
+          </div>
+          <Toaster />
+        </NextAuthProvider>
       </body>
     </html>
   );

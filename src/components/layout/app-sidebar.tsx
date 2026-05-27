@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -84,6 +85,30 @@ const navGroups = [
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
+  const [pendingCount, setPendingCount] = useState<number>(5);
+
+  useEffect(() => {
+    async function fetchPendingCount() {
+      try {
+        const res = await fetch("/api/dashboard/stats");
+        const json = await res.json();
+        if (json.success && json.data) {
+          setPendingCount(json.data.pendingApprovalsCount);
+        }
+      } catch (err) {
+        console.error("Failed to fetch sidebar pending approvals count:", err);
+      }
+    }
+    fetchPendingCount();
+    
+    window.addEventListener("bookingsUpdated", fetchPendingCount);
+    window.addEventListener("cartUpdated", fetchPendingCount);
+
+    return () => {
+      window.removeEventListener("bookingsUpdated", fetchPendingCount);
+      window.removeEventListener("cartUpdated", fetchPendingCount);
+    };
+  }, []);
 
   return (
     <aside
@@ -155,7 +180,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                         <span className="truncate">{item.title}</span>
                         {"badge" in item && item.badge && (
                           <span className="text-[10px] font-semibold bg-accent/20 text-accent px-1.5 py-0.5 rounded-md ml-2">
-                            {item.badge}
+                            {item.title === "Ad Bookings" ? pendingCount : item.badge}
                           </span>
                         )}
                       </div>

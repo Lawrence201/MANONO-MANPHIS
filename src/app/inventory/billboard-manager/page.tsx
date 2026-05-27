@@ -626,6 +626,8 @@ export default function BillboardManagerPage() {
       toast.success(`Campaign ${status === "paused" ? "paused" : "resumed"}`);
       setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
       setAdminTarget((prev) => (prev?.id === id ? { ...prev, status } : prev));
+      // Dispatch custom event to trigger real-time sidebar pending count updates
+      window.dispatchEvent(new Event("bookingsUpdated"));
     } else {
       toast.error("Failed to update status");
     }
@@ -665,6 +667,8 @@ export default function BillboardManagerPage() {
       toast.success("Booking deleted");
       setBookings((prev) => prev.filter((b) => b.id !== id));
       setAdminTarget(null);
+      // Dispatch custom event to trigger real-time sidebar pending count updates
+      window.dispatchEvent(new Event("bookingsUpdated"));
     } else {
       toast.error("Failed to delete booking");
     }

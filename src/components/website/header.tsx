@@ -1,16 +1,18 @@
 "use client";
 
-import { Search, Ship, ChevronDown, Menu, X, LayoutGrid, Home, Settings, MapPin, FileText, Layers, PhoneCall, User } from "lucide-react";
+import { Search, Ship, ChevronDown, Menu, X, LayoutGrid, Home, Settings, MapPin, FileText, Layers, PhoneCall, User, ShoppingCart } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { getCart } from "@/lib/actions/cart-actions";
 
 export function WebsiteHeader() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
@@ -46,6 +48,28 @@ export function WebsiteHeader() {
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
+
+  const updateCartCount = async () => {
+    try {
+      const res = await getCart();
+      if (res.success && res.data?.items) {
+        const totalItems = res.data.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+        setCartCount(totalItems);
+      } else {
+        setCartCount(0);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    updateCartCount();
+    window.addEventListener("cartUpdated", updateCartCount);
+    return () => {
+      window.removeEventListener("cartUpdated", updateCartCount);
+    };
+  }, []);
 
   const navLinks = [
     { name: "HOME", href: "/", active: pathname === "/" },
@@ -123,13 +147,16 @@ export function WebsiteHeader() {
             ))}
           </ul>
           
-          <button className="ml-4 bg-[#eea000] p-3 text-white hover:bg-[#eea000]/90 transition-colors rounded-sm shadow-md">
-            <Search className="w-5 h-5" />
-          </button>
+          <Link href="/cart" className="ml-4 bg-[#eea000] p-3 text-white hover:bg-[#eea000]/90 transition-colors rounded-sm shadow-md flex items-center justify-center relative">
+            <ShoppingCart className="w-5 h-5" />
+            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+              {cartCount}
+            </span>
+          </Link>
         </nav>
 
         {/* Mobile Middle Search Bar */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] max-[768px]:w-[40%] max-[480px]:w-[48%] max-[1028px]:flex hidden items-center z-40 ml-22 max-[768px]:ml-8 max-[480px]:ml-2">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] max-[768px]:w-[40%] max-[480px]:w-[48%] max-[1028px]:flex hidden items-center z-40">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
           <input 
             type="text" 
@@ -140,11 +167,17 @@ export function WebsiteHeader() {
           />
         </div>
 
-        {/* Mobile Toggle & Search Icon */}
-        <div className="flex items-center gap-2 max-[1028px]:flex hidden z-[100] -mr-2">
+        {/* Mobile Toggle & Cart Icon */}
+        <div className="flex items-center gap-2 max-[1028px]:flex hidden">
+          <Link href="/cart" className="p-2 flex items-center justify-center bg-transparent z-[80] relative">
+            <ShoppingCart className="w-6 h-6 max-[380px]:w-5 max-[380px]:h-5 text-[#eea000]" />
+            <span className="absolute top-0 right-0 bg-red-600 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+              {cartCount}
+            </span>
+          </Link>
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="bg-white border border-gray-200 text-[#1a1a1a] p-2 rounded-xl hover:border-[#eea000] transition-all shadow-sm flex items-center justify-center"
+            className="bg-white border border-gray-200 text-[#1a1a1a] p-2 rounded-xl hover:border-[#eea000] transition-all shadow-sm flex items-center justify-center z-[100] relative"
           >
             <div className={`relative w-6 h-6 max-[380px]:w-5 max-[380px]:h-5 transition-all duration-500 ${isMenuOpen ? "rotate-180" : "rotate-0"}`}>
               {/* X Icon (appears with delay as menu slides in) */}

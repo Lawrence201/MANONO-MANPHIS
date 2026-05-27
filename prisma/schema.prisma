@@ -438,13 +438,16 @@ model ClientTeam {
 
 model Client {
   id             Int      @id @default(autoincrement())
-  googleId       String   @unique @map("google_id") @db.VarChar(255)
+  googleId       String?  @unique @map("google_id") @db.VarChar(255)
   email          String   @unique @db.VarChar(255)
+  password       String?  @db.VarChar(255)
   name           String?  @db.VarChar(255)
   phoneNumber    String?  @map("phone_number") @db.VarChar(50)
   profilePicture String?  @map("profile_picture") @db.VarChar(255)
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
+  carts          Cart[]
+  reviews        Review[]
 
   @@map("clients")
 }
@@ -690,5 +693,54 @@ model Lead {
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
 
   @@map("leads")
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  clientId  Int?       @map("client_id")
+  sessionId String?    @map("session_id") @db.VarChar(255)
+  status    String     @default("active") @db.VarChar(50) // active, checked_out, abandoned
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  items     CartItem[]
+  client    Client?    @relation(fields: [clientId], references: [id])
+
+  @@map("carts")
+}
+
+model CartItem {
+  id          Int      @id @default(autoincrement())
+  cartId      Int      @map("cart_id")
+  itemType    String   @map("item_type") @db.VarChar(50) // 'billboard', 'product'
+  referenceId Int      @map("reference_id")
+  name        String   @db.VarChar(255)
+  price       Decimal  @db.Decimal(10, 2)
+  quantity    Int      @default(1)
+  imagePath   String?  @map("image_path") @db.VarChar(500)
+  details     Json?    
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  cart        Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  itemType    String   @map("item_type") @db.VarChar(50) // 'billboard', 'product'
+  referenceId Int      @map("reference_id")
+  rating      Int      @default(5)
+  comment     String   @db.Text
+  authorName  String   @map("author_name") @db.VarChar(255)
+  authorEmail String   @map("author_email") @db.VarChar(255)
+  clientId    Int?     @map("client_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([itemType, referenceId])
+  @@map("reviews")
 }
 

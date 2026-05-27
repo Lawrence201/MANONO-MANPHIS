@@ -42,37 +42,50 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 // Check Admin Table with sanitized email
-                const user = await prisma.admin.findUnique({
+                const admin = await prisma.admin.findUnique({
                     where: { email: credentials.email.toLowerCase().trim() }
                 });
 
-                // Use constant-time comparison to prevent timing attacks
-                // Even if user doesn't exist, still do a bcrypt compare
-                const dummyHash = "$2a$10$dummyHashForTimingAttackPreventionXX";
-                const passwordToCompare = user?.password || dummyHash;
+                if (admin) {
+                    const isCorrectPassword = await bcrypt.compare(credentials.password, admin.password);
+                    if (!isCorrectPassword) return null;
 
-                const isCorrectPassword = await bcrypt.compare(
-                    credentials.password,
-                    passwordToCompare
-                );
+                    // Update lastLoginAt timestamp
+                    await prisma.admin.update({
+                        where: { id: admin.id },
+                        data: { lastLoginAt: new Date() }
+                    });
 
-                if (!user || !isCorrectPassword) {
-                    // Generic error message to prevent user enumeration
-                    return null;
+                    return {
+                        id: admin.id.toString(),
+                        email: admin.email,
+                        name: admin.name,
+                        role: "admin",
+                    };
                 }
 
-                // Update lastLoginAt timestamp
-                await prisma.admin.update({
-                    where: { id: user.id },
-                    data: { lastLoginAt: new Date() }
+                // Check Client Table if not an admin
+                const client = await prisma.client.findUnique({
+                    where: { email: credentials.email.toLowerCase().trim() }
                 });
 
-                return {
-                    id: user.id.toString(),
-                    email: user.email,
-                    name: user.name, // Return actual admin name from database
-                    role: "admin",
-                };
+                if (client && client.password) {
+                    const isCorrectPassword = await bcrypt.compare(credentials.password, client.password);
+                    if (!isCorrectPassword) return null;
+
+                    return {
+                        id: client.id.toString(),
+                        email: client.email,
+                        name: client.name,
+                        role: "user",
+                    };
+                }
+
+                // If neither, do a dummy comparison to prevent timing attacks
+                const dummyHash = "$2a$10$dummyHashForTimingAttackPreventionXX";
+                await bcrypt.compare(credentials.password, dummyHash);
+
+                return null;
             }
         })
     ],

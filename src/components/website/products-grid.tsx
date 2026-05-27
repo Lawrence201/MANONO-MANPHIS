@@ -104,7 +104,7 @@ export function ProductsGrid({
 
   return (
     <section className={`py-12 md:py-24 ${type === "products" ? "bg-[#f7f3f0]" : "bg-white"}`}>
-      <div className="container mx-auto max-[450px]:px-0 min-[451px]:px-4 max-w-7xl">
+      <div className="container mx-auto px-4 max-w-7xl">
         <div className="text-center mb-12 md:mb-20 max-w-3xl mx-auto">
           <p className="text-[#eea000] font-bold tracking-[0.3em] text-[11px] md:text-[12px] uppercase mb-4 md:mb-6">
             {type === "products" ? "Catalog" : "Billboard Catalog"}

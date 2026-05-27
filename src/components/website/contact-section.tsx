@@ -94,11 +94,12 @@ export function ContactSection() {
               </div>
             ) : null}
 
-            <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6" suppressHydrationWarning>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
                 <div className="space-y-2">
                   <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#1a1a1a]">Full Name</label>
                   <input 
+                    suppressHydrationWarning
                     required
                     type="text" 
                     placeholder="John Doe"
@@ -110,6 +111,7 @@ export function ContactSection() {
                 <div className="space-y-2">
                   <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#1a1a1a]">Email Address</label>
                   <input 
+                    suppressHydrationWarning
                     required
                     type="email" 
                     placeholder="john@example.com"
@@ -123,6 +125,7 @@ export function ContactSection() {
               <div className="space-y-2">
                 <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#1a1a1a]">Subject</label>
                 <input 
+                  suppressHydrationWarning
                   type="text" 
                   placeholder="Bulk Honey Export Inquiry"
                   value={form.subject}
@@ -134,6 +137,7 @@ export function ContactSection() {
               <div className="space-y-2">
                 <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#1a1a1a]">Your Message</label>
                 <textarea 
+                  suppressHydrationWarning
                   required
                   rows={5}
                   placeholder="How can we help you?"

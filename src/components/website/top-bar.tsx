@@ -1,7 +1,13 @@
-import { Mail, Phone, Clock, LogIn, UserPlus, Globe } from "lucide-react";
+"use client";
+
+import { Mail, Phone, Clock, LogIn, UserPlus, Globe, User, LogOut } from "lucide-react";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 
 export function TopBar() {
+  const { data: session } = useSession();
+  
+  const firstName = session?.user?.name ? session.user.name.split(" ")[0] : "";
   return (
     <div className="bg-[#1a1a1a] text-white py-2 px-4 hidden md:block border-b border-white/5">
       <div className="container mx-auto flex justify-between items-center text-[11px] font-medium tracking-wide">
@@ -21,15 +27,31 @@ export function TopBar() {
         </div>
         
         <div className="flex items-center gap-5 max-[1028px]:gap-3">
-          <Link href="/login" className="flex items-center gap-2 hover:text-[#eea000] transition-colors">
-            <LogIn className="w-3.5 h-3.5" />
-            <span className="max-[1028px]:hidden">Login</span>
-          </Link>
-          <div className="w-px h-3 bg-white/20 max-[1028px]:hidden" />
-          <Link href="/register" className="flex items-center gap-2 hover:text-[#eea000] transition-colors">
-            <UserPlus className="w-3.5 h-3.5" />
-            <span className="max-[1028px]:hidden">Registration</span>
-          </Link>
+          {session ? (
+            <>
+              <div className="flex items-center gap-2 cursor-default">
+                <User className="w-3.5 h-3.5 text-[#eea000]" />
+                <span className="max-[1028px]:hidden font-semibold text-white">Welcome, {firstName}</span>
+              </div>
+              <div className="w-px h-3 bg-white/20 max-[1028px]:hidden" />
+              <button onClick={() => signOut()} className="flex items-center gap-2 hover:text-[#ff8080] transition-colors">
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="max-[1028px]:hidden">Logout</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="flex items-center gap-2 hover:text-[#eea000] transition-colors">
+                <LogIn className="w-3.5 h-3.5" />
+                <span className="max-[1028px]:hidden">Login</span>
+              </Link>
+              <div className="w-px h-3 bg-white/20 max-[1028px]:hidden" />
+              <Link href="/register" className="flex items-center gap-2 hover:text-[#eea000] transition-colors">
+                <UserPlus className="w-3.5 h-3.5" />
+                <span className="max-[1028px]:hidden">Registration</span>
+              </Link>
+            </>
+          )}
           <div className="w-px h-3 bg-white/20 max-[1028px]:hidden" />
           <div className="flex items-center gap-2 cursor-pointer hover:text-[#eea000] transition-colors group">
             <Globe className="w-3.5 h-3.5" />

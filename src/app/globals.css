@@ -454,3 +454,10 @@
 .comparison-weight-value a:hover {
   color: #eea000;
 }
+
+@media (max-width: 1024px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+}

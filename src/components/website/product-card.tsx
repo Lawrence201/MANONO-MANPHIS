@@ -32,7 +32,7 @@ export function ProductCard({ product }: { product: any }) {
 
         {/* Polygon divider at the bottom of the image */}
         <div
-          className="absolute bottom-0 left-0 right-0 z-10 h-10 bg-white"
+          className="absolute -bottom-px left-0 right-0 z-10 h-[41px] bg-white"
           style={{ clipPath: "polygon(0px 100%, 0px 45%, 15% 45%, 20% 0px, 80% 0px, 85% 45%, 100% 45%, 100% 100%)" }}
         />
 
@@ -101,9 +101,11 @@ export function ProductCard({ product }: { product: any }) {
               ))}
             </div>
 
-            <button className="w-full bg-[#ffcc00] hover:bg-black hover:text-white text-black py-3.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2">
-              <Eye className="w-3.5 h-3.5" /> View Details
-            </button>
+            <Link href={`/products/${product.id}`} className="block w-full">
+              <button className="w-full bg-[#ffcc00] hover:bg-black hover:text-white text-black py-3.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center">
+                View Details
+              </button>
+            </Link>
           </div>
         )}
       </div>
