@@ -25,7 +25,7 @@ export default async function BillboardRentalPage() {
       subtitle: b.assetCode,
       image: b.featureImage || "/billboards/bill_boards1.webp",
       images: [b.featureImage, ...(b.galleryImages?.map((g: any) => g.imagePath) || [])].filter(Boolean),
-      price: `GH₵${Number(b.weeklyRate).toLocaleString()}`,
+      price: `GH₵ ${Number(b.weeklyRate).toLocaleString()}`,
       specs: [
         { label: "Location", value: city },
         { label: "Duration", value: b.minDuration?.replace(/m$/, " Month").replace(/w$/, " Week") || "1 Week" },

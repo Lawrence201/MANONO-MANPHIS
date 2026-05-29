@@ -5,7 +5,7 @@ const products = [
   {
     id: 1,
     name: "HEATHER HONEY",
-    price: "$10.00",
+    price: "GH₵ 10.00",
     description: "Premium natural honeycomb harvested from the finest fields, rich in flavor and nutrients.",
     image: "/honey_comb_transparent.png",
     isNew: false
@@ -13,7 +13,7 @@ const products = [
   {
     id: 2,
     name: "JARRAH HONEY",
-    price: "$15.00",
+    price: "GH₵ 15.00",
     description: "Rare and potent honey with a unique dark amber color and high medicinal properties.",
     image: "/honey_jar_dark_transparent.png",
     isNew: true
@@ -21,7 +21,7 @@ const products = [
   {
     id: 3,
     name: "LINDEN HONEY",
-    price: "$20.00",
+    price: "GH₵ 20.00",
     description: "Delicate and aromatic light honey with a subtle floral taste and creamy texture.",
     image: "/honey_jar_light_transparent.png",
     isNew: false

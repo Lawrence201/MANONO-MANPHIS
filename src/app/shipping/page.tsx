@@ -7,6 +7,7 @@ import { TopBar } from "@/components/website/top-bar";
 import { ProductsHero } from "@/components/website/products-hero";
 import { getProduct } from "@/lib/actions/product-actions";
 import { submitExportOrder } from "@/lib/actions/export-actions";
+import { mapCountries } from "@/lib/countries";
 import { ChevronRight, ChevronLeft, MapPin, Package, Truck, CreditCard, CheckCircle2, Search, FileText } from "lucide-react";
 import Image from "next/image";
 
@@ -31,7 +32,7 @@ export default function CreateShippingPage() {
   const [formData, setFormData] = useState({
     buyerType: "Individual Buyer",
     companyName: "",
-    destinationCountry: "USA",
+    destinationCountry: "US",
     city: "",
     deliveryAddress: "",
     stateRegion: "",
@@ -296,18 +297,12 @@ export default function CreateShippingPage() {
                         onChange={(e) => setFormData({...formData, destinationCountry: e.target.value})}
                         className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none bg-[#f9f9f9]"
                       >
-                        <option value="USA">United States (USA)</option>
-                        <option value="UK">United Kingdom (UK)</option>
-                        <option value="UAE">United Arab Emirates (UAE)</option>
-                        <option value="Germany">Germany</option>
-                        <option value="China">China</option>
-                        <option value="Canada">Canada</option>
-                        <option value="France">France</option>
-                        <option value="Ghana">Ghana</option>
-                        <option value="Nigeria">Nigeria</option>
-                        <option value="South Africa">South Africa</option>
-                        <option value="Kenya">Kenya</option>
-                        <option value="Egypt">Egypt</option>
+                        <option value="" disabled>Select a destination country...</option>
+                        {mapCountries.map(country => (
+                          <option key={country.code} value={country.code}>
+                            {country.name} ({country.code})
+                          </option>
+                        ))}
                         <option value="Others">Others (Please Specify)</option>
                       </select>
                     </div>
@@ -464,7 +459,7 @@ export default function CreateShippingPage() {
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">Unit Price</label>
                       <div className="relative">
-                        <input type="text" value={productDetails ? `$${Number(productDetails.pricePerUnit).toFixed(2)}` : ""} readOnly className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-700 font-bold outline-none cursor-not-allowed" />
+                        <input type="text" value={productDetails ? `GH₵ ${Number(productDetails.pricePerUnit).toFixed(2)}` : ""} readOnly className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-700 font-bold outline-none cursor-not-allowed" />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">
                           {productDetails ? (productDetails.priceUnitType === "per_liter" ? "/ liter" : productDetails.priceUnitType === "per_kg" ? "/ kg" : "") : ""}
                         </span>
@@ -584,7 +579,7 @@ export default function CreateShippingPage() {
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">Customs Declaration Value<span className="text-red-500">*</span></label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">GH₵</span>
                         <input 
                           type="number" 
                           placeholder="Auto or Manual" 

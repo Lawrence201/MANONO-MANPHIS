@@ -16,27 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
-  Monitor, 
-  MapPin, 
-  Zap, 
-  DollarSign, 
-  Activity, 
-  ImagePlus, 
-  Info, 
-  Save, 
-  Eye, 
-  Maximize2,
-  Settings2,
-  ShieldCheck,
-  TrendingUp,
-  Clock,
-  Layout,
-  Plus,
-  X,
-  Search,
-  CheckCircle2
-} from "lucide-react";
+import { Monitor, MapPin, Zap, Activity, ImagePlus, Info, Save, Eye, Maximize2, Settings2, ShieldCheck, TrendingUp, Clock, Layout, Plus, X, Search, CheckCircle2 } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";

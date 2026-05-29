@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Building2, DollarSign, Receipt, CreditCard, Truck, Globe, Save, Bell as BellIcon } from "lucide-react";
+import { Building2, Receipt, CreditCard, Truck, Globe, Save, Bell as BellIcon } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 
 const sections = [
   { id: "company", label: "Company Profile", icon: Building2, active: true },
@@ -65,7 +66,7 @@ export default function SettingsPage() {
           <Panel title="Currency Settings" subtitle="Base currency, accepted currencies and FX behavior">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Field label="Base Currency"><Input defaultValue="USD" /></Field>
-              <Field label="Display Format"><Input defaultValue="$1,234.56" /></Field>
+              <Field label="Display Format"><Input defaultValue="GH₵ 1,234.56" /></Field>
               <Field label="FX Rate Source"><Input defaultValue="ECB Daily" /></Field>
             </div>
             <div className="mt-4">

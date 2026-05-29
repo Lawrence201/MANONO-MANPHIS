@@ -13,27 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
-  Monitor, 
-  MapPin, 
-  Zap, 
-  DollarSign, 
-  Activity, 
-  ImagePlus, 
-  Info, 
-  Save, 
-  Eye, 
-  Maximize2,
-  Settings2,
-  ShieldCheck,
-  TrendingUp,
-  Clock,
-  Layout,
-  Plus,
-  Minus,
-  X,
-  Search
-} from "lucide-react";
+import { Monitor, MapPin, Zap, Activity, ImagePlus, Info, Save, Eye, Maximize2, Settings2, ShieldCheck, TrendingUp, Clock, Layout, Plus, Minus, X, Search } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -741,7 +722,7 @@ export default function AddBillboardPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Est. Monthly Revenue:</span>
-                    <span className="font-bold text-foreground">$0.00</span>
+                    <span className="font-bold text-foreground">GH₵ 0.00</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Max Utilization:</span>

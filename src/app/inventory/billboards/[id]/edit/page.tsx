@@ -13,28 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
-  Monitor, 
-  MapPin, 
-  Zap, 
-  DollarSign, 
-  Activity, 
-  ImagePlus, 
-  Info, 
-  Save, 
-  Eye, 
-  Maximize2,
-  Settings2,
-  ShieldCheck,
-  TrendingUp,
-  Clock,
-  Layout,
-  Plus, 
-  Minus,
-  X,
-  Search,
-  ArrowLeft
-} from "lucide-react";
+import { Monitor, MapPin, Zap, Activity, ImagePlus, Info, Save, Eye, Maximize2, Settings2, ShieldCheck, TrendingUp, Clock, Layout, Plus, Minus, X, Search, ArrowLeft } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import { resolveGoogleMapsLink } from "@/lib/actions/location-actions";
 import { uploadBillboardMedia } from "@/lib/actions/upload-actions";
 import { Separator } from "@/components/ui/separator";

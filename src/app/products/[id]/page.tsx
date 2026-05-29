@@ -56,7 +56,7 @@ const products = [
   {
     id: 1,
     name: "24 Mantra Organic 100% Pure & RAW Honey | Zero Added Sugar",
-    price: "$18.00 - $20.00",
+    price: "GH₵ 18.00 - GH₵ 20.00",
     rating: 5,
     reviews: 12,
     sku: "AMD-PSJ-958",
@@ -75,7 +75,7 @@ const products = [
   {
     id: 2,
     name: "A Glass Jar Of Honey With Dipper Resting On Top Surrounded",
-    price: "$29.00",
+    price: "GH₵ 29.00",
     rating: 4,
     reviews: 8,
     sku: "HDF-GHD-546",
@@ -94,7 +94,7 @@ const products = [
   {
     id: 13,
     name: "Hot Sale Low Carbon Footprint LED Digital Advertising Billboard",
-    price: "US$200.00 - 10,000.00",
+    price: "GH₵ 200.00 - 10,000.00",
     rating: 5,
     reviews: 145,
     sku: "Billboard-LED-X1",
@@ -202,7 +202,7 @@ export default function ProductDetailsPage() {
             setProduct({
             id: h.id,
             name: h.name,
-            price: `$${Number(h.pricePerUnit).toFixed(2)}`,
+            price: `GH₵ ${Number(h.pricePerUnit).toFixed(2)}`,
             rating: 5,
             reviews: 0,
             sku: h.slug,
@@ -234,7 +234,6 @@ export default function ProductDetailsPage() {
               },
               { label: "Size",          value: h.packagingSize },
               { label: "MOQ",           value: `${h.moqValue} ${h.moqUnit}` },
-              { label: "Stock",         value: `${h.stockQuantity} ${h.stockUnit}` },
               {
                 label: "Stock Status",
                 value:
@@ -245,7 +244,7 @@ export default function ProductDetailsPage() {
               },
               {
                 label: "Price",
-                value: `$${Number(h.pricePerUnit).toFixed(2)} ${
+                value: `GH₵ ${Number(h.pricePerUnit).toFixed(2)} ${
                   h.priceUnitType === "per_liter" ? "per liter" :
                   h.priceUnitType === "per_kg" ? "per kg" :
                   h.priceUnitType === "per_ton" ? "per ton" :
@@ -303,7 +302,7 @@ export default function ProductDetailsPage() {
           setProduct({
             id: b.id,
             name: b.name,
-            price: `GH₵${Number(b.weeklyRate).toLocaleString()}`,
+            price: `GH₵ ${Number(b.weeklyRate).toLocaleString()}`,
             rating: 5,
             reviews: 0, // will be updated dynamically
             sku: b.assetCode,
@@ -962,19 +961,19 @@ export default function ProductDetailsPage() {
                 let currentOrigPrice = "";
                 let currentPrice = product.price;
                 if (product.name.includes("Zandu")) {
-                  currentOrigPrice = "$25.00";
-                  currentPrice = "$22.00";
+                  currentOrigPrice = "GH₵ 25.00";
+                  currentPrice = "GH₵ 22.00";
                 } else if (product.name.includes("Lion Kashmir")) {
-                  currentOrigPrice = "$30.00";
-                  currentPrice = "$28.00";
+                  currentOrigPrice = "GH₵ 30.00";
+                  currentPrice = "GH₵ 28.00";
                 } else if (product.name.includes("24 Mantra")) {
-                  currentPrice = "$18.00 - $20.00";
+                  currentPrice = "GH₵ 18.00 - GH₵ 20.00";
                 } else if (product.name.includes("World'S No.1")) {
-                  currentPrice = "$17.00 - $24.00";
+                  currentPrice = "GH₵ 17.00 - GH₵ 24.00";
                 } else if (product.name.includes("Glass Jar")) {
-                  currentPrice = "$29.00";
+                  currentPrice = "GH₵ 29.00";
                 } else if (product.name.includes("Coorg Essence")) {
-                  currentPrice = "$35.00";
+                  currentPrice = "GH₵ 35.00";
                 }
 
                 // Unified list of products for comparison (current product first)
@@ -992,26 +991,26 @@ export default function ProductDetailsPage() {
                     isCurrent: true,
                   },
                   ...relatedHoneyProducts.map((p) => {
-                    let priceVal = `$${Number(p.pricePerUnit).toFixed(2)}`;
+                    let priceVal = `GH₵ ${Number(p.pricePerUnit).toFixed(2)}`;
                     let origPrice = "";
                     let customRating = 5;
                     
                     if (p.name.includes("24 Mantra")) {
-                      priceVal = "$18.00 - $20.00";
+                      priceVal = "GH₵ 18.00 - GH₵ 20.00";
                     } else if (p.name.includes("Zandu")) {
-                      origPrice = "$25.00";
-                      priceVal = "$22.00";
+                      origPrice = "GH₵ 25.00";
+                      priceVal = "GH₵ 22.00";
                     } else if (p.name.includes("World'S No.1")) {
-                      priceVal = "$17.00 - $24.00";
+                      priceVal = "GH₵ 17.00 - GH₵ 24.00";
                     } else if (p.name.includes("Glass Jar")) {
-                      priceVal = "$29.00";
+                      priceVal = "GH₵ 29.00";
                       customRating = 4;
                     } else if (p.name.includes("Coorg Essence")) {
-                      priceVal = "$35.00";
+                      priceVal = "GH₵ 35.00";
                       customRating = 4;
                     } else if (p.name.includes("Lion Kashmir")) {
-                      origPrice = "$30.00";
-                      priceVal = "$28.00";
+                      origPrice = "GH₵ 30.00";
+                      priceVal = "GH₵ 28.00";
                     }
                     
                     return {
@@ -1053,7 +1052,7 @@ export default function ProductDetailsPage() {
                         <tr className="row-even row-names">
                           <td className="cell-label" />
                           {compareList.map((p) => (
-                            <td key={p.id} className="cell-value">
+                            <td key={p.id} className="cell-value text-center">
                               <div className="relative group/name">
                                 <Link href={`/products/${p.id}`} draggable="false" className="block pr-4">
                                   {p.name}
@@ -1078,7 +1077,7 @@ export default function ProductDetailsPage() {
                         <tr className="row-even row-images">
                           <td className="cell-label">Image</td>
                           {compareList.map((p) => (
-                            <td key={p.id} className="cell-value">
+                            <td key={p.id} className="cell-value text-center">
                               <Link href={`/products/${p.id}`} draggable="false">
                                 <img 
                                   width="300" 
@@ -1097,7 +1096,7 @@ export default function ProductDetailsPage() {
                         <tr className="row-odd row-ratings">
                           <td className="cell-label">Rating</td>
                           {compareList.map((p) => (
-                            <td key={p.id} className="cell-value">
+                            <td key={p.id} className="cell-value text-center">
                               <div className="comparison-stars">
                                 {[...Array(5)].map((_, i) => (
                                   <Star 
@@ -1114,7 +1113,7 @@ export default function ProductDetailsPage() {
                         <tr className="row-even row-prices">
                           <td className="cell-label">Price</td>
                           {compareList.map((p) => (
-                            <td key={p.id} className="cell-value">
+                            <td key={p.id} className="cell-value text-center">
                               {formatPriceClean(p.price)}
                             </td>
                           ))}
@@ -1158,7 +1157,7 @@ export default function ProductDetailsPage() {
                             }
 
                             return (
-                              <td key={p.id} className="cell-value">
+                              <td key={p.id} className="cell-value text-center">
                                 <Link href={`/products/${p.id}`} className="comparison-btn">
                                   {iconSvg}
                                   {btnText}
@@ -1182,7 +1181,7 @@ export default function ProductDetailsPage() {
                               }
                             }
                             return (
-                              <td key={p.id} className="cell-value">
+                              <td key={p.id} className="cell-value text-center">
                                 {stockText || ""}
                               </td>
                             );
@@ -1203,7 +1202,7 @@ export default function ProductDetailsPage() {
                               }
                             }
                             return (
-                              <td key={p.id} className="cell-value">
+                              <td key={p.id} className="cell-value text-center">
                                 {sizesToUse.length > 0 ? (
                                   <div>
                                     <span className="comparison-weight-label">Weight</span>

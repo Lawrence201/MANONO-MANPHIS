@@ -1,7 +1,8 @@
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { notifications } from "@/lib/mock-data";
-import { Bell, CheckCheck, DollarSign, Truck, Users, ShieldAlert, Package, Settings, Check } from "lucide-react";
+import { Bell, CheckCheck, Truck, Users, ShieldAlert, Package, Settings, Check } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 
 const catIcon: Record<string, { i: React.ElementType; color: string; bg: string }> = {
   payment: { i: DollarSign, color: "text-success", bg: "bg-success/10" },

@@ -2,24 +2,8 @@
 import { useState, useEffect, use } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
-import { 
-  MapPin, 
-  Monitor, 
-  Activity, 
-  DollarSign, 
-  Clock, 
-  Maximize, 
-  Zap, 
-  ChevronLeft,
-  Pencil,
-  Eye,
-  Navigation2,
-  Calendar,
-  ShieldCheck,
-  Layout,
-  Star,
-  Info
-} from "lucide-react";
+import { MapPin, Monitor, Activity, Clock, Maximize, Zap, ChevronLeft, Pencil, Eye, Navigation2, Calendar, ShieldCheck, Layout, Star, Info } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getBillboard } from "@/lib/actions/billboard-actions";

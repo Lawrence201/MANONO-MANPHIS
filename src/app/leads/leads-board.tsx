@@ -47,7 +47,7 @@ export default function LeadsBoard({ initialLeads }: { initialLeads: any[] }) {
   return (
     <AppLayout
       title="Leads & Pipeline"
-      subtitle={`${items.length} active leads · $${(totalValue / 1000).toFixed(0)}k total pipeline value`}
+      subtitle={`${items.length} active leads · GH₵ ${(totalValue / 1000).toFixed(0)}k total pipeline value`}
       actions={
         <>
           <Button variant="outline" size="sm" className="gap-2"><Filter className="w-4 h-4" /> Filter</Button>

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// Always fetch fresh data — never serve a cached response
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         // 1. Calculate Total Revenue from Billboards
@@ -33,6 +36,13 @@ export async function GET() {
             }
         });
 
+        // Count Pending Export Orders
+        const pendingOrdersCount = await prisma.exportOrder.count({
+            where: {
+                status: 'pending'
+            }
+        });
+
         // 4. Count Total Clients (unique emails from bookings)
         const uniqueClients = await prisma.billboardBooking.groupBy({
             by: ['email']
@@ -42,26 +52,39 @@ export async function GET() {
         // 5. Total bookings count (Export Orders)
         const totalBookingsCount = await prisma.exportOrder.count();
 
-        // 6. Calculate monthly billboard revenue trends
+        // 6. Monthly revenue — Billboards (GH₵) + Export streams (GH₵)
         const allBookings = await prisma.billboardBooking.findMany({
-            where: {
-                status: { in: ['approved', 'active'] }
-            },
+            where: { status: { in: ['approved', 'active'] } },
+            select: { totalPrice: true, createdAt: true }
+        });
+
+        const allExportForChart = await prisma.exportOrder.findMany({
+            where: { status: { in: ['approved', 'processing', 'in_transit', 'shipped', 'delivered', 'paid'] } },
             select: {
-                totalPrice: true,
-                createdAt: true
+                createdAt: true,
+                quantityRequested: true,
+                customsValue: true,
+                product: { select: { name: true, pricePerUnit: true } }
             }
         });
 
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const monthlyData = monthNames.map(month => ({ month, Billboards: 0 }));
+        const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const monthlyData = monthNames.map(month => ({
+            month, Billboards: 0, Honey: 0, Shea: 0, Cashew: 0
+        }));
 
-        allBookings.forEach(booking => {
-            const date = new Date(booking.createdAt);
-            const monthIndex = date.getMonth();
-            if (monthIndex >= 0 && monthIndex < 12) {
-                monthlyData[monthIndex].Billboards += Number(booking.totalPrice || 0);
-            }
+        allBookings.forEach(b => {
+            const idx = new Date(b.createdAt).getMonth();
+            monthlyData[idx].Billboards += Number(b.totalPrice || 0);
+        });
+
+        allExportForChart.forEach(o => {
+            const idx = new Date(o.createdAt).getMonth();
+            const rev = Number(o.customsValue) || (Number(o.quantityRequested) * Number(o.product.pricePerUnit || 0));
+            const name = o.product.name.toLowerCase();
+            if (name.includes('honey'))  monthlyData[idx].Honey  += rev;
+            else if (name.includes('shea'))   monthlyData[idx].Shea   += rev;
+            else if (name.includes('cashew')) monthlyData[idx].Cashew += rev;
         });
 
         // 7. Fetch recent bookings and format them for the dashboard table
@@ -128,21 +151,25 @@ export async function GET() {
             include: { product: true }
         });
 
-        const formattedExportOrders = recentExportOrders.map(o => ({
-            id: o.referenceNumber,
-            customer: o.companyName || o.buyerType,
-            company: o.companyName,
-            country: o.destinationCountry,
-            product: o.product.name,
-            quantity: `${Number(o.quantityRequested)} ${o.product.moqUnit}`,
-            amount: Number(o.customsValue) || 0,
-            currency: "USD",
-            payment: "pending",
-            status: o.status,
-            progress: o.status === 'pending' ? 10 : o.status === 'approved' ? 50 : o.status === 'shipped' ? 80 : 100,
-            date: new Date(o.createdAt),
-            type: "export"
-        }));
+        const formattedExportOrders = recentExportOrders.map(o => {
+            const calculatedAmount = Number(o.customsValue) || (Number(o.quantityRequested) * Number(o.product.pricePerUnit || 0));
+            
+            return {
+                id: o.referenceNumber,
+                customer: o.companyName || o.buyerType,
+                company: o.companyName,
+                country: o.destinationCountry,
+                product: o.product.name,
+                quantity: `${Number(o.quantityRequested)} ${o.product.moqUnit}`,
+                amount: calculatedAmount,
+                currency: "USD",
+                payment: o.status === 'paid' || o.status === 'approved' ? 'paid' : 'pending',
+                status: o.status,
+                progress: o.status === 'pending' ? 10 : (o.status === 'approved' || o.status === 'paid') ? 50 : o.status === 'shipped' ? 80 : 100,
+                date: new Date(o.createdAt),
+                type: "export"
+            };
+        });
 
         // Combine and sort by date
         const allRecentActivity = [...formattedBookings, ...formattedExportOrders]
@@ -194,17 +221,49 @@ export async function GET() {
             maintenanceSlots: 0 // Mocked for now since Billboards don't have a status field yet
         };
 
-        // 9. Fetch active export order destinations
-        const activeExportDestinations = await prisma.exportOrder.findMany({
+        // 9. Fetch active export order destinations + per-country totals
+        const activeExportOrders = await prisma.exportOrder.findMany({
             where: {
-                status: { in: ['approved', 'processing', 'in_transit'] }
+                status: { in: ['approved', 'processing', 'in_transit', 'shipped', 'delivered', 'paid'] }
             },
             select: {
-                destinationCountry: true
-            },
-            distinct: ['destinationCountry']
+                destinationCountry: true,
+                quantityRequested: true,
+                customsValue: true,
+                product: { select: { pricePerUnit: true, moqUnit: true } }
+            }
         });
-        const exportLocations = activeExportDestinations.map(d => d.destinationCountry);
+
+        // Unique destination ISO codes (for map markers)
+        const exportLocations = [...new Set(activeExportOrders.map(d => d.destinationCountry))];
+
+        // Per-country summary: total units, revenue, and unit label
+        const countryMap: Record<string, { units: number; revenue: number; unit: string }> = {};
+        activeExportOrders.forEach(o => {
+            const qty   = Number(o.quantityRequested) || 0;
+            const rev   = Number(o.customsValue) || (qty * Number(o.product.pricePerUnit || 0));
+            const unit  = o.product.moqUnit || 'units';
+            if (!countryMap[o.destinationCountry]) {
+                countryMap[o.destinationCountry] = { units: 0, revenue: 0, unit };
+            }
+            countryMap[o.destinationCountry].units   += qty;
+            countryMap[o.destinationCountry].revenue += rev;
+        });
+
+        const maxUnits       = Math.max(...Object.values(countryMap).map(v => v.units), 1);
+        const totalRevenue   = Object.values(countryMap).reduce((s, v) => s + v.revenue, 0) || 1;
+
+        const exportCountrySummary = Object.entries(countryMap)
+            .sort((a, b) => b[1].revenue - a[1].revenue)
+            .slice(0, 6)
+            .map(([code, v]) => ({
+                code,
+                units:      Math.round(v.units),
+                unit:       v.unit,
+                revenue:    Math.round(v.revenue),
+                percentage: Math.round((v.units / maxUnits) * 100),
+                share:      Math.round((v.revenue / totalRevenue) * 100),
+            }));
 
         // 10. Fetch recent reviews
         const recentReviews = await prisma.review.findMany({
@@ -219,12 +278,14 @@ export async function GET() {
                 activeBillboardsCount,
                 totalBillboards,
                 pendingApprovalsCount,
+                pendingOrdersCount,
                 totalClientsCount,
                 totalBookingsCount,
                 monthlyData,
                 recentBookings: allRecentActivity,
                 slotStats,
                 exportLocations,
+                exportCountrySummary,
                 recentReviews
             }
         });

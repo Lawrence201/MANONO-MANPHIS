@@ -82,10 +82,10 @@ export interface Lead {
 }
 
 export const leads: Lead[] = [
-  { id: "L-2841", name: "Hans Mueller", company: "Bremen Trading GmbH", country: "Germany", email: "h.mueller@bremen-trading.de", phone: "+49 421 555-0123", product: "Premium Honey", quantity: "5,000 kg", budget: "$45-50k", stage: "negotiating", assignedTo: "Sarah Chen", initials: "HM", date: "2 days ago", tags: ["Hot", "VIP"], value: 47500 },
-  { id: "L-2840", name: "Yuki Tanaka", company: "Osaka Imports Co.", country: "Japan", email: "tanaka@osaka-imports.jp", phone: "+81 6 6555 0188", product: "W320 Cashew", quantity: "20,000 kg", budget: "$240k", stage: "qualified", assignedTo: "James Okoro", initials: "YT", date: "3 days ago", tags: ["Bulk"], value: 240000 },
-  { id: "L-2839", name: "Marie Dubois", company: "Provence Naturals", country: "France", email: "marie@provence-naturals.fr", phone: "+33 4 91 555 042", product: "Refined Shea", quantity: "2,500 kg", budget: "$28k", stage: "new", assignedTo: "Sarah Chen", initials: "MD", date: "5 hours ago", tags: ["New"], value: 28000 },
-  { id: "L-2838", name: "John Whitman", company: "Atlantic Foods Inc.", country: "USA", email: "j.whitman@atlanticfoods.com", phone: "+1 212 555-0167", product: "W240 Cashew", quantity: "15,000 kg", budget: "$210k", stage: "contacted", assignedTo: "James Okoro", initials: "JW", date: "1 day ago", tags: ["Repeat"], value: 210000 },
+  { id: "L-2841", name: "Hans Mueller", company: "Bremen Trading GmbH", country: "Germany", email: "h.mueller@bremen-trading.de", phone: "+49 421 555-0123", product: "Premium Honey", quantity: "5,000 kg", budget: "GH₵ 45-50k", stage: "negotiating", assignedTo: "Sarah Chen", initials: "HM", date: "2 days ago", tags: ["Hot", "VIP"], value: 47500 },
+  { id: "L-2840", name: "Yuki Tanaka", company: "Osaka Imports Co.", country: "Japan", email: "tanaka@osaka-imports.jp", phone: "+81 6 6555 0188", product: "W320 Cashew", quantity: "20,000 kg", budget: "GH₵ 240k", stage: "qualified", assignedTo: "James Okoro", initials: "YT", date: "3 days ago", tags: ["Bulk"], value: 240000 },
+  { id: "L-2839", name: "Marie Dubois", company: "Provence Naturals", country: "France", email: "marie@provence-naturals.fr", phone: "+33 4 91 555 042", product: "Refined Shea", quantity: "2,500 kg", budget: "GH₵ 28k", stage: "new", assignedTo: "Sarah Chen", initials: "MD", date: "5 hours ago", tags: ["New"], value: 28000 },
+  { id: "L-2838", name: "John Whitman", company: "Atlantic Foods Inc.", country: "USA", email: "j.whitman@atlanticfoods.com", phone: "+1 212 555-0167", product: "W240 Cashew", quantity: "15,000 kg", budget: "GH₵ 210k", stage: "contacted", assignedTo: "James Okoro", initials: "JW", date: "1 day ago", tags: ["Repeat"], value: 210000 },
 ];
 
 export type OrderStatus = "processing" | "ready" | "in_transit" | "delivered" | "pending";
@@ -114,7 +114,7 @@ export const orders: Order[] = [
 ];
 
 export const recentActivities = [
-  { id: 1, type: "payment", text: "Payment of $72,000 received from Gulf Trade LLC", time: "12 minutes ago", icon: "payment" },
+  { id: 1, type: "payment", text: "Payment of GH₵ 72,000 received from Gulf Trade LLC", time: "12 minutes ago", icon: "payment" },
   { id: 2, type: "lead", text: "New lead from Provence Naturals (France) — Refined Shea", time: "5 hours ago", icon: "lead" },
 ];
 
@@ -145,7 +145,7 @@ export const shippingRules = [
 ];
 
 export const notifications = [
-  { id: "N-1", category: "payment", title: "Payment received", message: "$72,000 from Gulf Trade LLC for ORD-9846", time: "12 min ago", read: false, priority: "high" },
+  { id: "N-1", category: "payment", title: "Payment received", message: "GH₵ 72,000 from Gulf Trade LLC for ORD-9846", time: "12 min ago", read: false, priority: "high" },
 ];
 
 export const workflows = [

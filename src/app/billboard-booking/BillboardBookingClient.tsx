@@ -1587,7 +1587,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
 
                                                             if (res.success) {
                                                                 toast.success("Billboard added to cart!", {
-                                                                    description: `${b.name} - $${Number(totalPrice).toFixed(2)}`
+                                                                    description: `${b.name} - GH₵ ${Number(totalPrice).toFixed(2)}`
                                                                 });
                                                                 window.dispatchEvent(new Event("cartUpdated"));
                                                                 window.location.href = "/cart";

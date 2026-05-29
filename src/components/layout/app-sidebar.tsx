@@ -85,7 +85,8 @@ const navGroups = [
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
-  const [pendingCount, setPendingCount] = useState<number>(5);
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
 
   useEffect(() => {
     async function fetchPendingCount() {
@@ -93,7 +94,8 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
         const res = await fetch("/api/dashboard/stats");
         const json = await res.json();
         if (json.success && json.data) {
-          setPendingCount(json.data.pendingApprovalsCount);
+          setPendingCount(json.data.pendingApprovalsCount || 0);
+          setPendingOrdersCount(json.data.pendingOrdersCount || 0);
         }
       } catch (err) {
         console.error("Failed to fetch sidebar pending approvals count:", err);
@@ -179,8 +181,15 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                       )}>
                         <span className="truncate">{item.title}</span>
                         {"badge" in item && item.badge && (
-                          <span className="text-[10px] font-semibold bg-accent/20 text-accent px-1.5 py-0.5 rounded-md ml-2">
-                            {item.title === "Ad Bookings" ? pendingCount : item.badge}
+                          <span className={cn(
+                            "text-[10px] font-semibold bg-accent/20 text-accent px-1.5 py-0.5 rounded-md ml-2",
+                            (item.title === "Ad Bookings" && pendingCount === 0) || (item.title === "Orders" && pendingOrdersCount === 0) ? "hidden" : ""
+                          )}>
+                            {item.title === "Ad Bookings" 
+                              ? pendingCount 
+                              : item.title === "Orders" 
+                                ? pendingOrdersCount 
+                                : item.badge}
                           </span>
                         )}
                       </div>

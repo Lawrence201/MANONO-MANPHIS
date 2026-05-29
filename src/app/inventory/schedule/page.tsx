@@ -50,7 +50,7 @@ function getFirstDayOfMonth(year: number, month: number) {
 }
 
 function formatCurrency(n: number) {
-  return `$${n.toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
+  return `GH₵ ${n.toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
 }
 
 function isoToDate(iso: string) {

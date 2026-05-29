@@ -3,7 +3,8 @@
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { aiInsights } from "@/lib/mock-data";
-import { Activity, AlertTriangle, TrendingUp, DollarSign, BrainCircuit, Sparkles, Zap, Eye } from "lucide-react";
+import { Activity, AlertTriangle, TrendingUp, BrainCircuit, Sparkles, Zap, Eye } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

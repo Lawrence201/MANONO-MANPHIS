@@ -3,25 +3,8 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, 
-  Search, 
-  Droplets,
-  Scale, 
-  DollarSign,
-  Activity,
-  Filter,
-  Trash2,
-  ChevronRight,
-  Sparkles,
-  MoreVertical,
-  Eye,
-  Pencil,
-  FileText,
-  MapPin,
-  Truck,
-  ShieldCheck
-} from "lucide-react";
+import { Plus, Search, Droplets, Scale, Activity, Filter, Trash2, ChevronRight, Sparkles, MoreVertical, Eye, Pencil, FileText, MapPin, Truck, ShieldCheck } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -127,7 +110,7 @@ export default function HoneyListPage() {
           />
           <StatCard 
             label="Wholesale Valuation" 
-            value={`$${totalValuation.toLocaleString()}`} 
+            value={`GH₵ ${totalValuation.toLocaleString()}`} 
             icon={<DollarSign className="w-5 h-5 text-blue-500" />} 
           />
         </div>

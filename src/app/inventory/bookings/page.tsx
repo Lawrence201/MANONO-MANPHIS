@@ -2,11 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
-import {
-  Search, Filter, Eye, CheckCircle2, XCircle, Clock, ChevronDown,
-  DollarSign, Calendar, Users, BarChart3, Monitor, Download, RefreshCw,
-  Building2, Mail, Phone, MapPin, FileImage, CreditCard, Layers, Pause, Trash2
-} from "lucide-react";
+import { Search, Filter, Eye, CheckCircle2, XCircle, Clock, ChevronDown, Calendar, Users, BarChart3, Monitor, Download, RefreshCw, Building2, Mail, Phone, MapPin, FileImage, CreditCard, Layers, Pause, Trash2 } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -64,7 +61,7 @@ function formatDate(iso: string) {
 }
 
 function formatCurrency(n: number) {
-  return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `GH₵ ${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function getDurationString(start: string, end: string, duration: number | null) {

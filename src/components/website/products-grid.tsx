@@ -41,7 +41,7 @@ const agriculturalProducts = [
     name: "HEATHER HONEY",
     subtitle: "HEATHER HONEY",
     image: "/product_honey_card.png",
-    price: "$10.00",
+    price: "GH₵ 10.00",
     specs: [
       { label: "Type", value: "Premium Raw" },
       { label: "Origin", value: "Ghana" },
@@ -59,7 +59,7 @@ const agriculturalProducts = [
     name: "JARRAH HONEY",
     subtitle: "JARRAH HONEY",
     image: "/product_honey_card.png",
-    price: "$15.00",
+    price: "GH₵ 15.00",
     specs: [
       { label: "Type", value: "Rare Medicinal" },
       { label: "Origin", value: "Ghana" },
@@ -77,7 +77,7 @@ const agriculturalProducts = [
     name: "LINDEN HONEY",
     subtitle: "LINDEN HONEY",
     image: "/product_honey_card.png",
-    price: "$20.00",
+    price: "GH₵ 20.00",
     specs: [
       { label: "Type", value: "Aromatic Light" },
       { label: "Origin", value: "Ghana" },
@@ -174,7 +174,7 @@ export async function BillboardCatalog() {
       subtitle: b.assetCode,
       image: b.featureImage || "/billboards/bill_boards1.webp",
       images: [b.featureImage, ...(b.galleryImages?.map((g: any) => g.imagePath) || [])].filter(Boolean),
-      price: `GH₵${Number(b.weeklyRate).toLocaleString()}`,
+      price: `GH₵ ${Number(b.weeklyRate).toLocaleString()}`,
       specs: [
         { label: "Location", value: city },
         { label: "Duration", value: b.minDuration?.replace(/m$/, " Month").replace(/w$/, " Week") || "1 Week" },
@@ -248,7 +248,7 @@ export async function HoneyCatalog() {
         packagingType: PACKAGING_LABELS[db.packagingType] || db.packagingType || "—",
         moq: `${db.moqValue} ${db.moqUnit}`,
         stockStatus: STOCK_LABELS[db.stockStatus] || db.stockStatus || "—",
-        price: `$${Number(db.pricePerUnit).toFixed(2)}${db.priceUnitType === "per_liter" ? "/Liter" : db.priceUnitType === "per_kg" ? "/kg" : db.priceUnitType === "per_ton" ? "/ton" : db.priceUnitType === "per_unit" ? "/unit" : `/${db.priceUnitType}`}`,
+        price: `GH₵ ${Number(db.pricePerUnit).toFixed(2)}${db.priceUnitType === "per_liter" ? "/Liter" : db.priceUnitType === "per_kg" ? "/kg" : db.priceUnitType === "per_ton" ? "/ton" : db.priceUnitType === "per_unit" ? "/unit" : `/${db.priceUnitType}`}`,
       };
     });
   }

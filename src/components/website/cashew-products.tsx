@@ -5,8 +5,8 @@ const products = [
   {
     id: 1,
     name: "Premium Raw Cashew Nuts | Grade W320 Export Quality",
-    price: "$20",
-    oldPrice: "$24",
+    price: "GH₵ 20",
+    oldPrice: "GH₵ 24",
     discount: "-16%",
     timer: "299d : 13h : 55m : 52s",
     image: "/product_cashew_card.png",
@@ -16,8 +16,8 @@ const products = [
   {
     id: 2,
     name: "Roasted Jumbo Cashews | Sea Salted & Crunchy",
-    price: "$25",
-    oldPrice: "$30",
+    price: "GH₵ 25",
+    oldPrice: "GH₵ 30",
     discount: "-15%",
     timer: "238d : 13h : 55m : 52s",
     image: "/product_cashew_card.png",
@@ -27,8 +27,8 @@ const products = [
   {
     id: 3,
     name: "Organic Cashew Butter | 100% Pure & Unprocessed",
-    price: "$32",
-    oldPrice: "$34",
+    price: "GH₵ 32",
+    oldPrice: "GH₵ 34",
     discount: "-6%",
     timer: "225d : 13h : 55m : 52s",
     image: "/product_cashew_card.png",

@@ -68,7 +68,7 @@ export default function AnalyticsPage() {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-chart-grid)" vertical={false} />
             <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis yAxisId="left" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+            <YAxis yAxisId="left" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `GH₵ ${(v / 1000).toFixed(0)}k`} />
             <YAxis yAxisId="right" orientation="right" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
             <Tooltip contentStyle={tooltipStyle} />
             <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="var(--color-chart-1)" strokeWidth={2.5} fill="url(#forecast)" name="Revenue" />
@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
               <XAxis dataKey="x" name="Orders" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} label={{ value: "Orders", position: "bottom", offset: -5, fontSize: 10, fill: "var(--color-muted-foreground)" }} />
               <YAxis dataKey="y" name="Revenue ($k)" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} label={{ value: "Revenue ($k)", angle: -90, position: "insideLeft", fontSize: 10, fill: "var(--color-muted-foreground)" }} />
               <ZAxis dataKey="z" range={[80, 600]} />
-              <Tooltip contentStyle={tooltipStyle} cursor={{ strokeDasharray: "3 3" }} formatter={(v: any, n: any) => n === "Revenue ($k)" ? `$${v}k` : v} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ strokeDasharray: "3 3" }} formatter={(v: any, n: any) => n === "Revenue ($k)" ? `GH₵ ${v}k` : v} />
               <Scatter data={scatterData} fill="var(--color-chart-2)" fillOpacity={0.7} stroke="var(--color-chart-2)" />
             </ScatterChart>
           </ResponsiveContainer>

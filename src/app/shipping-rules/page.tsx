@@ -32,8 +32,8 @@ export default function ShippingRulesPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <StatCard label="Active Rules" value={shippingRules.filter(r => r.active).length.toString()} hint="currently applied" />
         <StatCard label="Shipping Zones" value="4" hint="A · B · C · D" accent />
-        <StatCard label="Avg Sea Rate" value="$0.62/kg" hint="per kilogram" />
-        <StatCard label="Avg Air Rate" value="$3.38/kg" hint="per kilogram" />
+        <StatCard label="Avg Sea Rate" value="GH₵ 0.62/kg" hint="per kilogram" />
+        <StatCard label="Avg Air Rate" value="GH₵ 3.38/kg" hint="per kilogram" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

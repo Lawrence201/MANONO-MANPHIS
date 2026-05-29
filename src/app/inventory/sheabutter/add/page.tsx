@@ -13,26 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
-  Droplets,
-  Package,
-  DollarSign,
-  Activity,
-  ImagePlus,
-  Save,
-  Eye,
-  Settings2,
-  ShieldCheck,
-  Layout,
-  Plus,
-  X,
-  FileText,
-  Truck,
-  Percent,
-  Layers,
-  FlaskConical,
-  Sparkles
-} from "lucide-react";
+import { Droplets, Package, Activity, ImagePlus, Save, Eye, Settings2, ShieldCheck, Layout, Plus, X, FileText, Truck, Percent, Layers, FlaskConical, Sparkles } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -525,15 +507,15 @@ export default function AddSheaButterPage() {
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Unit Export Price (USD)</Label>
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Unit Export Price (GH₵)</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">GH₵</span>
                     <Input 
                       type="number"
                       value={formData.pricePerUnit}
                       onChange={(e) => setFormData({...formData, pricePerUnit: e.target.value})}
                       placeholder="0.00" 
-                      className="pl-8 h-10 border-border dark:border-white/10 dark:bg-transparent font-mono shadow-none" 
+                      className="pl-12 h-10 border-border dark:border-white/10 dark:bg-transparent font-mono shadow-none" 
                     />
                   </div>
                 </div>

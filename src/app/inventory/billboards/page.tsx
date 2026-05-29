@@ -3,27 +3,8 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, 
-  Search, 
-  MapPin, 
-  Monitor, 
-  Activity, 
-  DollarSign,
-  Filter,
-  Trash2,
-  ChevronRight,
-  Star,
-  MoreVertical,
-  Eye,
-  Pencil,
-  Navigation2,
-  ChevronLeft,
-  Zap,
-  Calendar,
-  Clock,
-  Phone
-} from "lucide-react";
+import { Plus, Search, MapPin, Monitor, Activity, Filter, Trash2, ChevronRight, Star, MoreVertical, Eye, Pencil, Navigation2, ChevronLeft, Zap, Calendar, Clock, Phone } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,

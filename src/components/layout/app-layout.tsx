@@ -60,17 +60,17 @@ export function AppLayout({ children, title, subtitle, actions }: {
   };
 
   return (
-    <div className={cn("h-screen w-full flex bg-background text-foreground overflow-hidden", dark && "dark")}>
+    <div className={cn("h-screen w-full flex bg-background text-foreground overflow-hidden print:h-auto print:overflow-visible", dark && "dark")}>
       <div 
         onMouseEnter={() => setCollapsed(false)}
         onMouseLeave={() => setCollapsed(true)}
-        className="h-full flex shrink-0 transition-all duration-300 ease-in-out"
+        className="h-full flex shrink-0 transition-all duration-300 ease-in-out print:hidden"
       >
         <AppSidebar collapsed={collapsed} />
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <header className="h-16 border-b border-border bg-white dark:bg-[#181818] flex items-center px-4 gap-4 sticky top-0 z-30 shadow-sm transition-colors shrink-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden print:h-auto print:overflow-visible">
+        <header className="h-16 border-b border-border bg-white dark:bg-[#181818] flex items-center px-4 gap-4 sticky top-0 z-30 shadow-sm transition-colors shrink-0 print:hidden">
           <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)} className="lg:hidden text-foreground">
             <Menu className="w-5 h-5" />
           </Button>
@@ -132,10 +132,10 @@ export function AppLayout({ children, title, subtitle, actions }: {
         </header>
 
         {/* Scrollable Area */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="flex-1 overflow-y-auto scrollbar-thin print:overflow-visible">
           {/* Page header */}
           {(title || actions) && (
-            <div className="px-8 pt-8 pb-2 flex items-start justify-between gap-4 flex-wrap">
+            <div className="px-8 pt-8 pb-2 flex items-start justify-between gap-4 flex-wrap print:hidden">
               <div>
                 {title && <h1 className="text-2xl font-bold tracking-tight font-display">{title}</h1>}
                 {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}

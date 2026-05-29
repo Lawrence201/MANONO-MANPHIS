@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { PaymentBadge, StatusBadge } from "@/components/dashboard/badges";
-import { Plane, Ship, Package as PackageIcon, CheckCircle2, XCircle, Edit3 } from "lucide-react";
+import { Plane, Ship, Package as PackageIcon, CheckCircle2, XCircle, Edit3, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { updateExportOrderStatus } from "@/lib/actions/export-order-actions";
 import { EditOrderModal } from "@/components/dashboard/edit-order-modal";
+import { ViewOrderModal } from "@/components/dashboard/view-order-modal";
 
 const fmt = new Intl.NumberFormat("en-US");
 
@@ -14,6 +15,7 @@ const shipIcon = (s: string) => s.toLowerCase().includes("air") ? Plane : s.toLo
 export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
   const [orders, setOrders] = useState(initialOrders);
   const [editingOrder, setEditingOrder] = useState<any | null>(null);
+  const [viewingOrder, setViewingOrder] = useState<any | null>(null);
 
   const handleApprove = async (id: number) => {
     setOrders(orders.map(o => o.id === id ? { ...o, status: "approved" } : o));
@@ -71,7 +73,7 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
                         <div className="text-[10px] text-muted-foreground">{o.quantityRequested} {o.product.moqUnit}</div>
                       </td>
                       <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">USD {fmt.format(amount)}</td>
-                      <td className="px-5 py-3.5"><PaymentBadge status={"pending"} /></td>
+                      <td className="px-5 py-3.5"><PaymentBadge status={o.status === "paid" || o.status === "approved" ? "paid" : "pending"} /></td>
                       <td className="px-5 py-3.5"><StatusBadge status={o.status} /></td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-1.5 text-xs">
@@ -82,9 +84,12 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
                       <td className="px-5 py-3.5 text-xs text-muted-foreground tabular-nums">{o.preferredDate || "N/A"}</td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2">
+                          <button onClick={() => setViewingOrder(o)} className="p-1.5 text-muted-foreground hover:text-info hover:bg-info/10 rounded-md transition-colors" title="View Details">
+                            <Eye className="w-4 h-4" />
+                          </button>
                           {o.status === "pending" && (
                             <>
-                              <button onClick={() => handleApprove(o.id)} className="p-1.5 text-success hover:bg-success/10 rounded-md transition-colors" title="Approve">
+                              <button onClick={() => handleApprove(o.id)} className="p-1.5 text-success hover:bg-success/10 rounded-md transition-colors" title="Confirm Payment">
                                 <CheckCircle2 className="w-4 h-4" />
                               </button>
                               <button onClick={() => handleReject(o.id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md transition-colors" title="Reject">
@@ -106,12 +111,19 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
         </div>
       </div>
       
+      {viewingOrder && (
+        <ViewOrderModal 
+          order={viewingOrder} 
+          onClose={() => setViewingOrder(null)} 
+          onApprove={handleApprove}
+        />
+      )}
+
       {editingOrder && (
         <EditOrderModal 
           order={editingOrder} 
           onClose={() => setEditingOrder(null)} 
           onSaved={() => {
-            // Hard reload for now to reflect new data from server
             window.location.reload();
           }} 
         />

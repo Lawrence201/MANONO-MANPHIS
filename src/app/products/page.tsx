@@ -43,8 +43,8 @@ const cashewProducts = [
   {
     id: 7,
     name: "Premium Raw Cashew Nuts | Grade W320 Export Quality",
-    price: "$20",
-    oldPrice: "$24",
+    price: "GH₵ 20",
+    oldPrice: "GH₵ 24",
     discount: "-16%",
     rating: 5,
     image: "/product_cashew_card.png",
@@ -55,8 +55,8 @@ const cashewProducts = [
   {
     id: 8,
     name: "Roasted Jumbo Cashews | Sea Salted & Crunchy",
-    price: "$25",
-    oldPrice: "$30",
+    price: "GH₵ 25",
+    oldPrice: "GH₵ 30",
     discount: "-15%",
     rating: 4,
     image: "/product_cashew_card.png",
@@ -67,8 +67,8 @@ const cashewProducts = [
   {
     id: 9,
     name: "Organic Cashew Butter | 100% Pure & Unprocessed",
-    price: "$32",
-    oldPrice: "$34",
+    price: "GH₵ 32",
+    oldPrice: "GH₵ 34",
     discount: "-6%",
     rating: 5,
     image: "/product_cashew_card.png",
@@ -79,8 +79,8 @@ const cashewProducts = [
   {
     id: 10,
     name: "Salted Caramel Cashews | Sweet & Salty Premium Snack",
-    price: "$22",
-    oldPrice: "$26",
+    price: "GH₵ 22",
+    oldPrice: "GH₵ 26",
     discount: "-15%",
     rating: 5,
     image: "/product_cashew_card.png",
@@ -91,8 +91,8 @@ const cashewProducts = [
   {
     id: 11,
     name: "Broken Cashew Kernels | Perfect for Baking & Cooking",
-    price: "$15",
-    oldPrice: "$18",
+    price: "GH₵ 15",
+    oldPrice: "GH₵ 18",
     discount: "-16%",
     rating: 4,
     image: "/product_cashew_card.png",
@@ -103,8 +103,8 @@ const cashewProducts = [
   {
     id: 12,
     name: "Honey Glazed Cashews | Premium Crunchy & Sweet Treat",
-    price: "$24",
-    oldPrice: "$28",
+    price: "GH₵ 24",
+    oldPrice: "GH₵ 28",
     discount: "-14%",
     rating: 5,
     image: "/product_cashew_card.png",
@@ -142,7 +142,7 @@ export default function ShopPage() {
               packagingType: PACKAGING_LABELS[db.packagingType] || db.packagingType || "—",
               moq: `${db.moqValue} ${db.moqUnit}`,
               stockStatus: STOCK_LABELS[db.stockStatus] || db.stockStatus || "—",
-              price: `$${Number(db.pricePerUnit).toFixed(2)}${db.priceUnitType === "per_liter" ? "/Liter" : db.priceUnitType === "per_kg" ? "/kg" : db.priceUnitType === "per_ton" ? "/ton" : db.priceUnitType === "per_unit" ? "/unit" : `/${db.priceUnitType}`}`,
+              price: `GH₵ ${Number(db.pricePerUnit).toFixed(2)}${db.priceUnitType === "per_liter" ? "/Liter" : db.priceUnitType === "per_kg" ? "/kg" : db.priceUnitType === "per_ton" ? "/ton" : db.priceUnitType === "per_unit" ? "/unit" : `/${db.priceUnitType}`}`,
             };
           })
         );

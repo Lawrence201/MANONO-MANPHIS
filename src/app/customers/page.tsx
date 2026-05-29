@@ -29,7 +29,7 @@ export default function CustomersPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Stat label="Total Customers" value={customers.length.toString()} hint="active accounts" />
         <Stat label="VIP Clients" value={customers.filter(c => c.type === "VIP").length.toString()} hint="high-value buyers" accent />
-        <Stat label="Lifetime Revenue" value={`$${(customers.reduce((s, c) => s + c.revenue, 0) / 1_000_000).toFixed(2)}M`} hint="across all clients" />
+        <Stat label="Lifetime Revenue" value={`GH₵ ${(customers.reduce((s, c) => s + c.revenue, 0) / 1_000_000).toFixed(2)}M`} hint="across all clients" />
         <Stat label="Countries" value={new Set(customers.map(c => c.country)).size.toString()} hint="export markets" />
       </div>
 

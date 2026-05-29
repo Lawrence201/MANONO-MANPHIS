@@ -62,7 +62,7 @@ function getInitials(name: string) {
 }
 function getAvatarColor(id: number) { return AVATAR_COLORS[id % AVATAR_COLORS.length]; }
 function formatCurrency(n: number) {
-  return `$${n.toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
+  return `GH₵ ${n.toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
 }
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });

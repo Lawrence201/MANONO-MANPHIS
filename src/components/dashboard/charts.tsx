@@ -6,7 +6,7 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, RadialBarChart, RadialBar, Legend,
   FunnelChart, Funnel, LabelList,
 } from "recharts";
-import { revenueData, productPerformance, countryData, pipelineFunnel } from "@/lib/mock-data";
+import { countryData } from "@/lib/mock-data";
 
 const tooltipStyle = {
   backgroundColor: "var(--color-card)",
@@ -17,22 +17,12 @@ const tooltipStyle = {
   padding: "8px 12px",
 };
 
-const formatCurrency = (n: number) => `$${(n / 1000).toFixed(0)}k`;
+const formatCurrency = (n: number) => `GH₵ ${(n / 1000).toFixed(0)}k`;
 
-const dualEngineRevenueData = [
-  { month: "Jan", Billboards: 45000, Honey: 35000, Shea: 25000, Cashew: 80000 },
-  { month: "Feb", Billboards: 50000, Honey: 40000, Shea: 30000, Cashew: 95000 },
-  { month: "Mar", Billboards: 48000, Honey: 38000, Shea: 28000, Cashew: 85000 },
-  { month: "Apr", Billboards: 62000, Honey: 50000, Shea: 48000, Cashew: 125000 },
-  { month: "May", Billboards: 70000, Honey: 55000, Shea: 42000, Cashew: 145000 },
-  { month: "Jun", Billboards: 65000, Honey: 45000, Shea: 35000, Cashew: 150000 },
-  { month: "Jul", Billboards: 80000, Honey: 60000, Shea: 48000, Cashew: 180000 },
-  { month: "Aug", Billboards: 92000, Honey: 52000, Shea: 55000, Cashew: 211000 },
-  { month: "Sep", Billboards: 88000, Honey: 50000, Shea: 52000, Cashew: 195000 },
-  { month: "Oct", Billboards: 110000, Honey: 72000, Shea: 65000, Cashew: 210000 },
-  { month: "Nov", Billboards: 135000, Honey: 85000, Shea: 80000, Cashew: 220000 },
-  { month: "Dec", Billboards: 155000, Honey: 92000, Shea: 90000, Cashew: 230000 },
-];
+// Empty baseline — chart renders from real DB data only, no dummy values
+const emptyMonthlyData = [
+  "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
+].map(month => ({ month, Billboards: 0, Honey: 0, Shea: 0, Cashew: 0 }));
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -51,15 +41,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           </div>
           <div className="flex justify-between gap-6">
             <span className="text-[#10b981]">Cashew :</span>
-            <span className="text-[#10b981] tabular-nums">GH₵{cashewVal.toLocaleString()}</span>
+            <span className="text-[#10b981] tabular-nums">$ {cashewVal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between gap-6">
             <span className="text-[#f59e0b]">Honey :</span>
-            <span className="text-[#f59e0b] tabular-nums">GH₵{honeyVal.toLocaleString()}</span>
+            <span className="text-[#f59e0b] tabular-nums">$ {honeyVal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between gap-6">
             <span className="text-[#ea580c]">Shea :</span>
-            <span className="text-[#ea580c] tabular-nums">GH₵{sheaVal.toLocaleString()}</span>
+            <span className="text-[#ea580c] tabular-nums">$ {sheaVal.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -68,32 +58,18 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const fallbackData = [
-  { month: "Jan", Billboards: 45000, Honey: 35000, Shea: 25000, Cashew: 80000 },
-  { month: "Feb", Billboards: 50000, Honey: 40000, Shea: 30000, Cashew: 95000 },
-  { month: "Mar", Billboards: 48000, Honey: 38000, Shea: 28000, Cashew: 85000 },
-  { month: "Apr", Billboards: 62000, Honey: 50000, Shea: 48000, Cashew: 125000 },
-  { month: "May", Billboards: 70000, Honey: 55000, Shea: 42000, Cashew: 145000 },
-  { month: "Jun", Billboards: 65000, Honey: 45000, Shea: 35000, Cashew: 150000 },
-  { month: "Jul", Billboards: 80000, Honey: 60000, Shea: 48000, Cashew: 180000 },
-  { month: "Aug", Billboards: 92000, Honey: 52000, Shea: 55000, Cashew: 211000 },
-  { month: "Sep", Billboards: 88000, Honey: 50000, Shea: 52000, Cashew: 195000 },
-  { month: "Oct", Billboards: 110000, Honey: 72000, Shea: 65000, Cashew: 210000 },
-  { month: "Nov", Billboards: 135000, Honey: 85000, Shea: 80000, Cashew: 220000 },
-  { month: "Dec", Billboards: 155000, Honey: 92000, Shea: 90000, Cashew: 230000 },
-];
-
-export function RevenueChart({ data }: { data?: { month: string; Billboards: number }[] }) {
-  const hasRealData = data && data.some(d => d.Billboards > 0);
-  
-  const chartData = fallbackData.map((fallback, index) => {
-    const dbVal = data?.[index]?.Billboards || 0;
+export function RevenueChart({ data }: {
+  data?: { month: string; Billboards: number; Honey?: number; Shea?: number; Cashew?: number }[]
+}) {
+  // Merge incoming DB data into the 12-month skeleton — real zeros for empty months
+  const chartData = emptyMonthlyData.map((skeleton, i) => {
+    const row = data?.[i];
     return {
-      month: fallback.month,
-      Billboards: hasRealData ? dbVal : fallback.Billboards,
-      Honey: fallback.Honey,
-      Shea: fallback.Shea,
-      Cashew: fallback.Cashew
+      month:      skeleton.month,
+      Billboards: row?.Billboards ?? 0,
+      Honey:      row?.Honey      ?? 0,
+      Shea:       row?.Shea       ?? 0,
+      Cashew:     row?.Cashew     ?? 0,
     };
   });
 
@@ -101,11 +77,11 @@ export function RevenueChart({ data }: { data?: { month: string; Billboards: num
   const useKFormat = maxValue >= 1000;
   
   const tickFormatter = (v: number) => {
-    if (v === 0) return "GH₵0";
+    if (v === 0) return "GH₵ 0";
     if (useKFormat) {
-      return `GH₵${(v / 1000).toFixed(0)}k`;
+      return `GH₵ ${(v / 1000).toFixed(0)}k`;
     }
-    return `GH₵${v.toLocaleString()}`;
+    return `GH₵ ${v.toLocaleString()}`;
   };
 
   return (
@@ -113,7 +89,7 @@ export function RevenueChart({ data }: { data?: { month: string; Billboards: num
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h3 className="font-display font-semibold text-base">Revenue Performance</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Monthly revenue trends across all streams (GH₵)</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Monthly revenue trends — Billboards (GH₵) · Exports (GH₵)</p>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-xs font-semibold select-none">
           <span className="flex items-center gap-1.5">
@@ -237,7 +213,7 @@ export function ProductPerformanceChart() {
               fontSize={11} 
               tickLine={false} 
               axisLine={false} 
-              tickFormatter={(v) => `GH₵${(v / 1000).toFixed(0)}k`} 
+              tickFormatter={(v) => `GH₵ ${(v / 1000).toFixed(0)}k`} 
             />
             <YAxis 
               dataKey="product" 
@@ -250,7 +226,7 @@ export function ProductPerformanceChart() {
             />
             <Tooltip 
               contentStyle={tooltipStyle} 
-              formatter={(v: any) => [`GH₵${v.toLocaleString()}`, "Revenue"]} 
+              formatter={(v: any) => [`GH₵ ${v.toLocaleString()}`, "Revenue"]} 
               cursor={{ fill: "var(--color-secondary)" }} 
             />
             <Bar dataKey="revenue" fill={barColor} radius={[0, 6, 6, 0]} barSize={22} />
@@ -261,7 +237,11 @@ export function ProductPerformanceChart() {
   );
 }
 
-export function CountryDistributionChart() {
+export function CountryDistributionChart({
+  exportData,
+}: {
+  exportData?: { name: string; revenue: number; share: number }[];
+}) {
   const [mode, setMode] = useState<"exports" | "ads">("exports");
 
   const adLocationData = [
@@ -272,8 +252,10 @@ export function CountryDistributionChart() {
     { name: "Others", revenue: 156000, share: 13 },
   ];
 
+  const fallbackExportData = countryData.map((c) => ({ name: c.country, revenue: c.revenue, share: c.share }));
+
   const currentData = mode === "exports"
-    ? countryData.map((c) => ({ name: c.country, revenue: c.revenue, share: c.share }))
+    ? (exportData && exportData.length > 0 ? exportData : fallbackExportData)
     : adLocationData;
 
   const palette = ["var(--color-chart-1)", "var(--color-chart-2)", "var(--color-chart-3)", "var(--color-chart-4)", "var(--color-chart-5)", "#8b5cf6", "#ec4899", "#94a3b8"];
@@ -332,7 +314,7 @@ export function CountryDistributionChart() {
               </Pie>
               <Tooltip 
                 contentStyle={tooltipStyle} 
-                formatter={(v: any) => mode === "exports" ? `$${v.toLocaleString()}` : `GH₵${v.toLocaleString()}`} 
+                formatter={(v: any) => mode === "exports" ? `GH₵ ${v.toLocaleString()}` : `GH₵ ${v.toLocaleString()}`} 
               />
             </PieChart>
           </ResponsiveContainer>
@@ -470,6 +452,21 @@ export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlot
   );
 }
 
+const leadVolumeData = [
+  { month: "Jan", leads: 0, orders: 0 },
+  { month: "Feb", leads: 0, orders: 0 },
+  { month: "Mar", leads: 0, orders: 0 },
+  { month: "Apr", leads: 0, orders: 0 },
+  { month: "May", leads: 2, orders: 2 },
+  { month: "Jun", leads: 0, orders: 0 },
+  { month: "Jul", leads: 0, orders: 0 },
+  { month: "Aug", leads: 0, orders: 0 },
+  { month: "Sep", leads: 0, orders: 0 },
+  { month: "Oct", leads: 0, orders: 0 },
+  { month: "Nov", leads: 0, orders: 0 },
+  { month: "Dec", leads: 0, orders: 0 },
+];
+
 export function ConversionTrendChart() {
   return (
     <div className="bg-card rounded-xl border border-border p-6 shadow-card">
@@ -480,7 +477,7 @@ export function ConversionTrendChart() {
         </div>
       </div>
       <ResponsiveContainer width="100%" height={260}>
-        <LineChart data={revenueData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+        <LineChart data={leadVolumeData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
           <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
           <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />

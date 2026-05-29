@@ -7,20 +7,16 @@ import { RevenueChart, ProductPerformanceChart, CountryDistributionChart, Pipeli
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { Button } from "@/components/ui/button";
 import { kpis, orders } from "@/lib/mock-data";
-import { DollarSign, ShoppingCart, Users, TrendingUp, Truck, Target, Download, Plus, ArrowRight, Monitor, MessageSquare, ClipboardCheck, Globe, Star, MoreHorizontal } from "lucide-react";
+import { ShoppingCart, Users, TrendingUp, Truck, Target, Download, Plus, ArrowRight, Monitor, MessageSquare, ClipboardCheck, Globe, Star, MoreHorizontal } from "lucide-react";
+import { CediSign as DollarSign } from "@/components/CediSign";;
 import Link from "next/link";
 import { PaymentBadge, StatusBadge } from "@/components/dashboard/badges";
 import "./dashboard.css";
 
 const fmt = new Intl.NumberFormat("en-US");
 
-const countriesData = [
-  { name: "Canada", percentage: 75, units: 500, x: 194.978, y: 85.27, color: "#0ea5e9" },
-  { name: "Brazil", percentage: 90, units: 600, x: 278.001, y: 310.02, color: "#f97316" }, // Origin
-  { name: "China", percentage: 85, units: 700, x: 687.42, y: 188.10, color: "#eab308" },
-  { name: "Japan", percentage: 95, units: 450, x: 763.70, y: 187.57, color: "#ef4444" },
-  { name: "Germany", percentage: 70, units: 350, x: 447.17, y: 144.54, color: "#8b5cf6" },
-];
+// Colour palette cycled per country slot
+const COUNTRY_COLORS = ["#0ea5e9", "#f97316", "#eab308", "#ef4444", "#8b5cf6", "#10b981"];
 
 const ghanaData = [
   { name: "Greater Accra", percentage: 95, units: 1200, color: "#0ea5e9" },
@@ -171,9 +167,10 @@ export default function DashboardPage() {
     activeBillboardsCount: number;
     totalBillboards: number;
     pendingApprovalsCount: number;
+    pendingOrdersCount: number;
     totalClientsCount: number;
     totalBookingsCount: number;
-    monthlyData?: { month: string; Billboards: number }[];
+    monthlyData?: { month: string; Billboards: number; Honey: number; Shea: number; Cashew: number }[];
     slotStats?: {
       availableSlots: number;
       reservedSlots: number;
@@ -182,17 +179,20 @@ export default function DashboardPage() {
       maintenanceSlots: number;
     };
     exportLocations?: string[];
+    exportCountrySummary?: { code: string; units: number; unit: string; revenue: number; percentage: number; share: number }[];
     recentReviews?: any[];
   }>({
     totalRevenue: 0,
     activeBillboardsCount: 0,
     totalBillboards: 0,
     pendingApprovalsCount: 0,
+    pendingOrdersCount: 0,
     totalClientsCount: 0,
     totalBookingsCount: 0,
     monthlyData: [],
     slotStats: { availableSlots: 0, reservedSlots: 0, activeSlots: 0, expiredSlots: 0, maintenanceSlots: 0 },
     exportLocations: [],
+    exportCountrySummary: [],
     recentReviews: []
   });
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
@@ -211,11 +211,13 @@ export default function DashboardPage() {
             activeBillboardsCount: json.data.activeBillboardsCount || 0,
             totalBillboards: json.data.totalBillboards || 0,
             pendingApprovalsCount: json.data.pendingApprovalsCount !== undefined ? json.data.pendingApprovalsCount : 0,
+            pendingOrdersCount: json.data.pendingOrdersCount !== undefined ? json.data.pendingOrdersCount : 0,
             totalClientsCount: json.data.totalClientsCount || 0,
             totalBookingsCount: json.data.totalBookingsCount || 0,
             monthlyData: json.data.monthlyData,
             slotStats: json.data.slotStats,
             exportLocations: json.data.exportLocations || [],
+            exportCountrySummary: json.data.exportCountrySummary || [],
             recentReviews: json.data.recentReviews || []
           });
           setRecentBookings(json.data.recentBookings || []);
@@ -485,67 +487,89 @@ export default function DashboardPage() {
     "ZW": { x: 493.84, y: 332.82 },
   };
 
-  // After SVG is rendered in DOM, convert precomputed SVG coords to screen coords using getScreenCTM
-  const placeMarkersFromDom = useCallback(() => {
-    if (!mapContainerRef.current || mapTab !== "world") return;
-    const svgEl = mapContainerRef.current.querySelector("svg") as SVGSVGElement | null;
-    if (!svgEl) return;
+  // We will inject markers + trade route lines natively into the SVG string before rendering
+  const getSvgWithMarkers = () => {
+    if (!svgHtml) return { __html: "" };
+    let modifiedSvg = svgHtml;
 
-    const containerRect = mapContainerRef.current.getBoundingClientRect();
-    const ctm = svgEl.getScreenCTM();
-    if (!ctm) return;
+    if (mapTab === "world") {
+      let linesHtml = "";
+      let markersHtml = "";
 
-    const toScreen = (svgX: number, svgY: number) => {
-      const pt = svgEl.createSVGPoint();
-      pt.x = svgX;
-      pt.y = svgY;
-      const s = pt.matrixTransform(ctm);
-      return { cx: s.x - containerRect.left, cy: s.y - containerRect.top };
-    };
+      // Ghana origin marker (gold) — always the single source
+      const gh = svgCountryCenters["GH"];
+      if (gh) {
+        markersHtml += `<circle cx="${gh.x}" cy="${gh.y}" r="4" fill="#eea000" fill-opacity="1" stroke="#eea000" stroke-width="8" stroke-opacity="0.22" cursor="pointer" class="animate-pulse"></circle>`;
+      }
 
-    const markers: { cx: number; cy: number; color: string; key: string }[] = [];
+      // Name → ISO code lookup
+      const nameToCode: Record<string, string> = {
+        "United States": "US", "USA": "US", "United Kingdom": "GB", "UK": "GB",
+        "Germany": "DE", "France": "FR", "Italy": "IT", "Spain": "ES", "Portugal": "PT",
+        "Netherlands": "NL", "Belgium": "BE", "Switzerland": "CH", "Sweden": "SE",
+        "Norway": "NO", "Denmark": "DK", "Finland": "FI", "Poland": "PL",
+        "Austria": "AT", "Russia": "RU", "Ukraine": "UA", "Turkey": "TR", "Greece": "GR",
+        "Saudi Arabia": "SA", "UAE": "AE", "United Arab Emirates": "AE", "Qatar": "QA",
+        "Kuwait": "KW", "Israel": "IL", "Jordan": "JO", "Iraq": "IQ", "Iran": "IR",
+        "Yemen": "YE", "Oman": "OM", "Nigeria": "NG", "South Africa": "ZA",
+        "Kenya": "KE", "Ethiopia": "ET", "Egypt": "EG", "Morocco": "MA",
+        "Algeria": "DZ", "Tanzania": "TZ", "Senegal": "SN", "Ivory Coast": "CI",
+        "Cameroon": "CM", "Ghana": "GH", "China": "CN", "Japan": "JP", "India": "IN",
+        "South Korea": "KR", "Singapore": "SG", "Malaysia": "MY", "Indonesia": "ID",
+        "Thailand": "TH", "Vietnam": "VN", "Philippines": "PH", "Pakistan": "PK",
+        "Bangladesh": "BD", "Sri Lanka": "LK", "Australia": "AU", "New Zealand": "NZ",
+        "Canada": "CA", "Mexico": "MX", "Brazil": "BR", "Argentina": "AR",
+        "Colombia": "CO", "Chile": "CL", "Peru": "PE",
+      };
 
-    // Ghana origin marker (gold)
-    const gh = svgCountryCenters["GH"];
-    const ghScreen = toScreen(gh.x, gh.y);
-    markers.push({ ...ghScreen, color: "#eea000", key: "GH-origin" });
+      (stats.exportLocations || []).forEach((country) => {
+        const code = nameToCode[country] || country;
+        if (!code || !svgCountryCenters[code]) return;
+        const dest = svgCountryCenters[code];
 
-    // Destination markers (blue)
-    const nameToCode: Record<string, string> = {
-      "United States": "US", "USA": "US", "United Kingdom": "GB", "UK": "GB",
-      "Germany": "DE", "France": "FR", "Italy": "IT", "Spain": "ES", "Portugal": "PT",
-      "Netherlands": "NL", "Belgium": "BE", "Switzerland": "CH", "Sweden": "SE",
-      "Norway": "NO", "Denmark": "DK", "Finland": "FI", "Poland": "PL",
-      "Austria": "AT", "Russia": "RU", "Ukraine": "UA", "Turkey": "TR", "Greece": "GR",
-      "Saudi Arabia": "SA", "UAE": "AE", "United Arab Emirates": "AE", "Qatar": "QA",
-      "Kuwait": "KW", "Israel": "IL", "Jordan": "JO", "Iraq": "IQ", "Iran": "IR",
-      "Yemen": "YE", "Oman": "OM", "Nigeria": "NG", "South Africa": "ZA",
-      "Kenya": "KE", "Ethiopia": "ET", "Egypt": "EG", "Morocco": "MA",
-      "Algeria": "DZ", "Tanzania": "TZ", "Senegal": "SN", "Ivory Coast": "CI",
-      "Cameroon": "CM", "Ghana": "GH", "China": "CN", "Japan": "JP", "India": "IN",
-      "South Korea": "KR", "Singapore": "SG", "Malaysia": "MY", "Indonesia": "ID",
-      "Thailand": "TH", "Vietnam": "VN", "Philippines": "PH", "Pakistan": "PK",
-      "Bangladesh": "BD", "Sri Lanka": "LK", "Australia": "AU", "New Zealand": "NZ",
-      "Canada": "CA", "Mexico": "MX", "Brazil": "BR", "Argentina": "AR",
-      "Colombia": "CO", "Chile": "CL", "Peru": "PE",
-    };
+        // ── Curved dashed trade-route arc from Ghana → destination ──
+        if (gh) {
+          const dx = dest.x - gh.x;
+          const dy = dest.y - gh.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const midX = (gh.x + dest.x) / 2;
+          const midY = (gh.y + dest.y) / 2;
 
-    (stats.exportLocations || []).forEach((country) => {
-      const code = nameToCode[country];
-      if (!code || !svgCountryCenters[code]) return;
-      const c = svgCountryCenters[code];
-      const screen = toScreen(c.x, c.y);
-      markers.push({ ...screen, color: "#0ea5e9", key: `dest-${code}` });
-    });
+          // Perpendicular unit vector — pick the direction that arcs northward (lower Y)
+          const perpX1 = -dy / dist;
+          const perpY1 =  dx / dist;
+          const curveAmount = dist * 0.30; // 30% of chord = gentle arc
 
-    setMapMarkers(markers);
-  }, [mapTab, svgHtml, stats.exportLocations]);
+          let cpX = midX + perpX1 * curveAmount;
+          let cpY = midY + perpY1 * curveAmount;
+          // If control point is south of midpoint, flip to guarantee northward arc
+          if (cpY > midY) {
+            cpX = midX - perpX1 * curveAmount;
+            cpY = midY - perpY1 * curveAmount;
+          }
 
-  useEffect(() => {
-    // Run after SVG HTML is painted
-    const timer = setTimeout(placeMarkersFromDom, 100);
-    return () => clearTimeout(timer);
-  }, [placeMarkersFromDom]);
+          const pathD = `M ${gh.x},${gh.y} Q ${cpX.toFixed(1)},${cpY.toFixed(1)} ${dest.x},${dest.y}`;
+
+          // Layer 1 — static faint trail so the full arc is always visible
+          linesHtml += `<path d="${pathD}" fill="none" stroke="#969ba4" stroke-width="1.2" stroke-dasharray="5,5" stroke-opacity="0.25" stroke-linecap="round"/>`;
+
+          // Layer 2 — animated flowing dashes
+          linesHtml += `<path d="${pathD}" fill="none" stroke="#969ba4" stroke-width="1.8" stroke-dasharray="8,6" stroke-opacity="0.85" stroke-linecap="round"><animate attributeName="stroke-dashoffset" from="14" to="0" dur="0.5s" repeatCount="indefinite"/></path>`;
+        }
+
+        // Blue destination marker (on top of line)
+        markersHtml += `<circle cx="${dest.x}" cy="${dest.y}" r="4" fill="#0ea5e9" fill-opacity="1" stroke="#0ea5e9" stroke-width="8" stroke-opacity="0.22" cursor="pointer" class="animate-pulse"></circle>`;
+      });
+
+      // Inject: lines first (behind), then markers (on top) — both INSIDE transform group
+      modifiedSvg = modifiedSvg.replace(
+        "</g></svg>",
+        `<g class="map-trade-lines">${linesHtml}</g><g class="map-markers">${markersHtml}</g></g></svg>`
+      );
+    }
+
+    return { __html: modifiedSvg };
+  };
 
   useEffect(() => {
     const filename = mapTab === "world" ? "map.svg" : "ghana_map.svg";
@@ -559,14 +583,30 @@ export default function DashboardPage() {
   }, [mapTab]);
 
   const formatRevenue = (val: number) => {
-    if (val === 0) return "GH₵0";
+    if (val === 0) return "GH₵ 0";
     if (val >= 1000) {
-      return `GH₵${(val / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })}k`;
+      return `GH₵ ${(val / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })}k`;
     }
-    return `GH₵${val.toLocaleString()}`;
+    return `GH₵ ${val.toLocaleString()}`;
   };
 
-  const activeSidebarData = mapTab === "world" ? countriesData : ghanaData;
+  // Build dynamic world sidebar from live export order data
+  const worldSidebarData = (stats.exportCountrySummary || []).map((item, idx) => ({
+    name: countryNames[item.code] || item.code,
+    units: item.units,
+    unit: item.unit || 'units',
+    percentage: item.percentage,
+    color: COUNTRY_COLORS[idx % COUNTRY_COLORS.length],
+  }));
+
+  const activeSidebarData = mapTab === "world" ? worldSidebarData : ghanaData;
+
+  // Build data for the Top Export Markets pie chart
+  const exportPieData = (stats.exportCountrySummary || []).map((item) => ({
+    name: countryNames[item.code] || item.code,
+    revenue: item.revenue ?? 0,
+    share: item.share ?? 0,
+  }));
 
   return (
     <AppLayout
@@ -578,7 +618,7 @@ export default function DashboardPage() {
         <KpiCard
           label="Total Revenue"
           value={formatRevenue(stats.totalRevenue)}
-          tooltip={stats.totalRevenue > 0 ? `GH₵${stats.totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : undefined}
+          tooltip={stats.totalRevenue > 0 ? `GH₵ ${stats.totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : undefined}
           change={18.4}
           trend="up"
           icon={<DollarSign className="w-5 h-5" />}
@@ -604,8 +644,8 @@ export default function DashboardPage() {
           sparkline={[25, 32, 38, 42, 50, 58, 70, 82]}
         />
         <KpiCard
-          label="New Enquiries"
-          value="0"
+          label="Pending Orders"
+          value={String(stats.pendingOrdersCount || 0)}
           change={15.3}
           trend="up"
           icon={<MessageSquare className="w-5 h-5" />}
@@ -701,7 +741,7 @@ export default function DashboardPage() {
                 <div
                   className={`w-full h-full [&>svg]:w-full [&>svg]:h-full ${mapTab === "world" ? "[&>svg]:scale-[1.15]" : "[&>svg]:scale-[1.05]"
                     }`}
-                  dangerouslySetInnerHTML={{ __html: svgHtml }}
+                  dangerouslySetInnerHTML={getSvgWithMarkers()}
                 />
 
                 {/* Custom Tooltip */}
@@ -720,11 +760,16 @@ export default function DashboardPage() {
 
               {/* Country List Sidebar */}
               <div className="w-full lg:w-[30%] flex flex-col">
+                {activeSidebarData.length === 0 && mapTab === "world" && (
+                  <div className="flex flex-col items-center justify-center h-full py-8 text-center">
+                    <span className="text-muted-foreground text-xs">No approved export orders yet</span>
+                  </div>
+                )}
                 {activeSidebarData.map((country, idx) => (
                   <div key={idx} className="flex items-center justify-between p-[10px] mb-[10px] last:mb-0 bg-card border border-border/80 dark:border-[#3a3a3a] rounded-lg transition-all duration-300 hover:bg-primary/5 hover:border-primary/5">
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold text-foreground">{country.name}</span>
-                      <span className="text-[11px] text-muted-foreground">{country.units} Unit</span>
+                      <span className="text-[11px] text-muted-foreground">{country.units} {(country as any).unit ?? 'Units'}</span>
                     </div>
                     <div className="relative flex items-center justify-center w-11 h-11">
                       <svg className="w-full h-full transform -rotate-90">
@@ -817,7 +862,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <ProductPerformanceChart />
-        <CountryDistributionChart />
+        <CountryDistributionChart exportData={exportPieData} />
         <ActivityFeed />
       </div>
 

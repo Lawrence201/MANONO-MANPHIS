@@ -29,10 +29,10 @@ export default function PaymentsPage() {
       actions={<Button size="sm" className="gap-2 bg-gradient-accent border-0 shadow-glow"><Plus className="w-4 h-4" /> Record Payment</Button>}
     >
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Stat label="Total Invoiced" value={`$${(total / 1000).toFixed(0)}k`} hint="across all orders" />
-        <Stat label="Collected" value={`$${(paid / 1000).toFixed(0)}k`} hint={`${((paid / total) * 100).toFixed(0)}% of total`} success />
-        <Stat label="Outstanding" value={`$${(pending / 1000).toFixed(0)}k`} hint="awaiting collection" warning />
-        <Stat label="Overdue" value={`$${(overdue / 1000).toFixed(0)}k`} hint="needs attention" danger />
+        <Stat label="Total Invoiced" value={`GH₵ ${(total / 1000).toFixed(0)}k`} hint="across all orders" />
+        <Stat label="Collected" value={`GH₵ ${(paid / 1000).toFixed(0)}k`} hint={`${((paid / total) * 100).toFixed(0)}% of total`} success />
+        <Stat label="Outstanding" value={`GH₵ ${(pending / 1000).toFixed(0)}k`} hint="awaiting collection" warning />
+        <Stat label="Overdue" value={`GH₵ ${(overdue / 1000).toFixed(0)}k`} hint="needs attention" danger />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
@@ -45,7 +45,7 @@ export default function PaymentsPage() {
               <Pie data={methods} dataKey="value" innerRadius={45} outerRadius={75} paddingAngle={3} stroke="var(--color-card)" strokeWidth={2}>
                 {methods.map((m, i) => <Cell key={i} fill={m.fill} />)}
               </Pie>
-              <Tooltip contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px", fontSize: "12px" }} formatter={(v: any) => `$${fmt.format(v)}`} />
+              <Tooltip contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px", fontSize: "12px" }} formatter={(v: any) => `GH₵ ${fmt.format(v)}`} />
             </PieChart>
           </ResponsiveContainer>
           <div className="space-y-2 mt-4">

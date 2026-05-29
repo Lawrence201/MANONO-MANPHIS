@@ -56,7 +56,7 @@ export function EditOrderModal({ order, onClose, onSaved }: { order: any; onClos
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Customs Value (USD)</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Customs Value (GH₵)</label>
             <Input 
               type="number" 
               value={customsValue} 

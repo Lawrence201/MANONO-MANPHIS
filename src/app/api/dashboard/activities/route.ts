@@ -30,7 +30,7 @@ export async function GET() {
                 id: `bb-${b.id}`,
                 type: 'order',
                 icon: 'order',
-                text: `New Billboard booking "${b.campaignTitle}" confirmed for ${b.fullName} — GH₵${Number(b.totalPrice).toLocaleString()}`,
+                text: `New Billboard booking "${b.campaignTitle}" confirmed for ${b.fullName} — GH₵ ${Number(b.totalPrice).toLocaleString()}`,
                 createdAt: b.createdAt.toISOString()
             })),
             ...exportOrders.map(o => ({
@@ -51,7 +51,7 @@ export async function GET() {
                 id: `quote-${q.id}`,
                 type: 'quote',
                 icon: 'quote',
-                text: `Quotation sent to ${q.customer} for ${q.qty} of ${q.product} — $${Number(q.amount).toLocaleString()}`,
+                text: `Quotation sent to ${q.customer} for ${q.qty} of ${q.product} — GH₵ ${Number(q.amount).toLocaleString()}`,
                 createdAt: q.createdAt.toISOString()
             }))
         ];

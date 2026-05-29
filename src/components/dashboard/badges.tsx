@@ -23,6 +23,7 @@ export function StatusBadge({ status }: { status: string }) {
     delivered: { label: "Delivered", cls: "bg-success/10 text-success" },
     active: { label: "Active", cls: "bg-success/10 text-success" },
     approved: { label: "Approved", cls: "bg-info/10 text-info" },
+    paid: { label: "Paid", cls: "bg-success/10 text-success" },
     paused: { label: "Paused", cls: "bg-warning/10 text-warning" },
   };
   

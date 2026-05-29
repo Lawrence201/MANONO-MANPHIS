@@ -56,3 +56,17 @@ export async function submitExportOrder(data: any) {
     return { success: false, message: "Failed to submit export order. Please try again." };
   }
 }
+
+export async function getPendingOrdersCount() {
+  try {
+    const count = await prisma.exportOrder.count({
+      where: {
+        status: "pending"
+      }
+    });
+    return count;
+  } catch (error) {
+    console.error("Failed to fetch pending orders count:", error);
+    return 0;
+  }
+}
