@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 const fmt = new Intl.NumberFormat("en-US");
 const shipIcon = (s: string) => s?.toLowerCase().includes("air") ? Plane : s?.toLowerCase().includes("sea") ? Ship : PackageIcon;
 
-export function ViewOrderModal({ order, onClose, onApprove }: { order: any; onClose: () => void; onApprove?: (id: number) => void }) {
-  const amount = order.customsValue || (order.quantityRequested * (order.product.pricePerUnit || 0));
+export function ViewOrderModal({ order, onClose, onApprove, onReject }: { order: any; onClose: () => void; onApprove?: (id: number) => void; onReject?: (id: number) => void }) {
+  const amount = order.totalEstimatedCost ? Number(order.totalEstimatedCost) : (order.customsValue || (order.quantityRequested * (order.product.pricePerUnit || 0)));
   const ShipI = shipIcon(order.shippingType || "");
 
   return (
@@ -76,9 +76,9 @@ export function ViewOrderModal({ order, onClose, onApprove }: { order: any; onCl
                 <tbody className="divide-y divide-border">
                   <tr>
                     <td className="px-4 py-3 font-medium">{order.product.name}</td>
-                    <td className="px-4 py-3">USD ${order.product.pricePerUnit} / {order.product.priceUnitType === 'per_kg' ? 'KG' : 'L'}</td>
-                    <td className="px-4 py-3 font-bold">{order.quantityRequested} {order.product.priceUnitType === 'per_kg' ? 'KG' : 'L'}</td>
-                    <td className="px-4 py-3 font-bold text-right text-lg text-[#eea000]">USD ${fmt.format(amount)}</td>
+                    <td className="px-4 py-3">GH₵ {order.product.pricePerUnit} / {order.unitMeasurement || (order.product.priceUnitType === 'per_kg' ? 'KG' : 'L')}</td>
+                    <td className="px-4 py-3 font-bold">{order.quantityRequested} {order.unitMeasurement || (order.product.priceUnitType === 'per_kg' ? 'KG' : 'L')}</td>
+                    <td className="px-4 py-3 font-bold text-right text-lg text-[#eea000]">GH₵ {fmt.format(amount)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -151,10 +151,19 @@ export function ViewOrderModal({ order, onClose, onApprove }: { order: any; onCl
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={onClose}>Close</Button>
-            {order.status === "pending" && onApprove && (
-              <Button onClick={() => { onApprove(order.id); onClose(); }} className="gap-2 bg-success hover:bg-success/90 text-white">
-                <CheckCircle2 className="w-4 h-4" /> Approve Order
-              </Button>
+            {order.status === "pending" && (
+              <>
+                {onReject && (
+                  <Button variant="outline" onClick={() => { onReject(order.id); onClose(); }} className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+                    <X className="w-4 h-4" /> Reject
+                  </Button>
+                )}
+                {onApprove && (
+                  <Button onClick={() => { onApprove(order.id); onClose(); }} className="gap-2 bg-success hover:bg-success/90 text-white">
+                    <CheckCircle2 className="w-4 h-4" /> Approve Order
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>

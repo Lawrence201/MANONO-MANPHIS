@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
-import { products } from "@/lib/mock-data";
+import { getGlobalInventory } from "@/lib/actions/product-actions";
 import { Plus, AlertTriangle, Package, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -10,6 +11,20 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 const fmt = new Intl.NumberFormat("en-US");
 
 export default function InventoryPage() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const res = await getGlobalInventory();
+      if (res.success && res.data) {
+        setProducts(res.data);
+      }
+      setLoading(false);
+    }
+    load();
+  }, []);
+
   const totalStock = products.reduce((s, p) => s + p.stock, 0);
   const totalReserved = products.reduce((s, p) => s + p.reserved, 0);
   const lowStock = products.filter(p => (p.stock - p.reserved) < 3000).length;
@@ -17,7 +32,7 @@ export default function InventoryPage() {
   const chartData = products.map(p => ({
     name: p.name.split(" ").slice(0, 2).join(" "),
     available: p.stock - p.reserved,
-    reserved: p.reserved,
+    ordered: p.reserved,
   }));
 
   return (
@@ -29,9 +44,9 @@ export default function InventoryPage() {
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Stat label="Total Stock" value={`${fmt.format(totalStock)} kg`} hint="across all products" icon={<Package className="w-5 h-5" />} />
-        <Stat label="Available" value={`${fmt.format(totalStock - totalReserved)} kg`} hint="ready for orders" icon={<TrendingUp className="w-5 h-5" />} accent />
-        <Stat label="Reserved" value={`${fmt.format(totalReserved)} kg`} hint="allocated to orders" />
+        <Stat label="Total Stock" value={`${fmt.format(totalStock)}`} hint="across all products" icon={<Package className="w-5 h-5" />} />
+        <Stat label="Available" value={`${fmt.format(totalStock - totalReserved)}`} hint="ready for orders" icon={<TrendingUp className="w-5 h-5" />} accent />
+        <Stat label="Ordered" value={`${fmt.format(totalReserved)}`} hint="allocated to orders" />
         <Stat label="Low Stock Alert" value={lowStock.toString()} hint="products below threshold" warning />
       </div>
 
@@ -39,16 +54,16 @@ export default function InventoryPage() {
       <div className="bg-card rounded-xl border border-border p-6 shadow-card mb-6">
         <div className="mb-5">
           <h3 className="font-display font-semibold text-base">Stock Levels by Product</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Available vs reserved inventory</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Available vs ordered inventory</p>
         </div>
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={chartData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
             <XAxis dataKey="name" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
             <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-            <Tooltip contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px", fontSize: "12px" }} formatter={(v: any) => `${fmt.format(v)} kg`} />
+            <Tooltip contentStyle={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "8px", fontSize: "12px" }} formatter={(v: any) => `${fmt.format(v)}`} />
             <Bar dataKey="available" stackId="a" fill="var(--color-chart-2)" radius={[0, 0, 4, 4]} />
-            <Bar dataKey="reserved" stackId="a" fill="var(--color-chart-3)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="ordered" stackId="a" fill="var(--color-chart-3)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -62,15 +77,27 @@ export default function InventoryPage() {
               <th className="font-medium px-5 py-3">Category</th>
               <th className="font-medium px-5 py-3">Grade</th>
               <th className="font-medium px-5 py-3">Total Stock</th>
-              <th className="font-medium px-5 py-3">Reserved</th>
+              <th className="font-medium px-5 py-3">Ordered</th>
               <th className="font-medium px-5 py-3">Available</th>
               <th className="font-medium px-5 py-3">Stock Level</th>
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => {
+            {loading ? (
+              <tr>
+                <td colSpan={7} className="px-5 py-20 text-center text-muted-foreground text-sm">
+                  Fetching live inventory from database...
+                </td>
+              </tr>
+            ) : products.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-5 py-20 text-center text-muted-foreground text-sm">
+                  No products found. Start by adding stock.
+                </td>
+              </tr>
+            ) : products.map((p) => {
               const available = p.stock - p.reserved;
-              const pct = (available / p.stock) * 100;
+              const pct = p.stock > 0 ? (available / p.stock) * 100 : 0;
               const low = available < 3000;
               return (
                 <tr key={p.id} className="border-b border-black/[0.08] dark:border-white/[0.06] last:border-0 hover:bg-secondary/30 transition-colors">
@@ -87,9 +114,18 @@ export default function InventoryPage() {
                       p.grade === "Premium" ? "bg-accent/15 text-accent" : "bg-muted text-muted-foreground"
                     )}>{p.grade}</span>
                   </td>
-                  <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">{fmt.format(p.stock)} kg</td>
-                  <td className="px-5 py-3.5 tabular-nums text-xs text-muted-foreground">{fmt.format(p.reserved)} kg</td>
-                  <td className={cn("px-5 py-3.5 font-semibold tabular-nums text-xs", low && "text-warning")}>{fmt.format(available)} kg</td>
+                  <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">
+                    <div>{fmt.format(p.stock)} {p.unit}</div>
+                    {p.packagesTotal > 0 && <div className="text-[10px] text-muted-foreground font-normal mt-0.5">{fmt.format(p.packagesTotal)} {p.packageType}{p.packagesTotal !== 1 && 's'}</div>}
+                  </td>
+                  <td className="px-5 py-3.5 tabular-nums text-xs text-muted-foreground">
+                    <div>{fmt.format(p.reserved)} {p.unit}</div>
+                    {p.packagesReserved > 0 && <div className="text-[10px] font-normal mt-0.5">{fmt.format(p.packagesReserved)} {p.packageType}{p.packagesReserved !== 1 && 's'}</div>}
+                  </td>
+                  <td className={cn("px-5 py-3.5 font-semibold tabular-nums text-xs", low && "text-warning")}>
+                    <div>{fmt.format(available)} {p.unit}</div>
+                    {p.packagesAvailable > 0 && <div className={cn("text-[10px] font-normal mt-0.5", !low && "text-muted-foreground")}>{fmt.format(p.packagesAvailable)} {p.packageType}{p.packagesAvailable !== 1 && 's'}</div>}
+                  </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2">
                       <div className="w-24 h-1.5 bg-secondary rounded-full overflow-hidden">

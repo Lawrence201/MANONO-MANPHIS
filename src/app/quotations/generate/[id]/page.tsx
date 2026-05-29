@@ -14,12 +14,12 @@ export default async function GenerateInvoicePage({ params }: { params: Promise<
 
   const order = res.data;
   const product = order.product;
-  const unitPrice = product.pricePerUnit;
   const quantity = order.quantityRequested;
-  const subtotal = quantity * unitPrice;
+  const subtotal = order.totalEstimatedCost ? Number(order.totalEstimatedCost) : (quantity * product.pricePerUnit);
+  const unitPrice = quantity > 0 ? (subtotal / quantity) : product.pricePerUnit;
   const invoiceNumber = `INV-${order.referenceNumber.split('-').pop()}`;
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const unit = product.priceUnitType === 'per_kg' ? 'KG' : 'L';
+  const unit = order.unitMeasurement || (product.priceUnitType === 'per_kg' ? 'KG' : 'L');
 
   return (
     <>
@@ -126,8 +126,8 @@ export default async function GenerateInvoicePage({ params }: { params: Promise<
                     </p>
                   </td>
                   <td style={{ padding: 16, textAlign: 'center', fontWeight: 600 }}>{quantity} {unit}</td>
-                  <td style={{ padding: 16, textAlign: 'right' }}>USD ${unitPrice.toFixed(2)}</td>
-                  <td style={{ padding: 16, textAlign: 'right', fontWeight: 700 }}>USD ${subtotal.toFixed(2)}</td>
+                  <td style={{ padding: 16, textAlign: 'right' }}>GH₵ {unitPrice.toFixed(2)}</td>
+                  <td style={{ padding: 16, textAlign: 'right', fontWeight: 700 }}>GH₵ {subtotal.toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>

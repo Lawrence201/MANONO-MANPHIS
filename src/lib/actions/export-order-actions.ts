@@ -16,6 +16,7 @@ export async function getExportOrders() {
     const serialized = orders.map((o) => ({
       ...o,
       quantityRequested: Number(o.quantityRequested),
+      totalEstimatedCost: o.totalEstimatedCost ? Number(o.totalEstimatedCost) : null,
       customsValue: o.customsValue ? Number(o.customsValue) : null,
       createdAt: o.createdAt.toISOString(),
       updatedAt: o.updatedAt.toISOString(),
@@ -51,6 +52,7 @@ export async function getExportOrderById(id: number) {
     const serialized = {
       ...order,
       quantityRequested: Number(order.quantityRequested),
+      totalEstimatedCost: order.totalEstimatedCost ? Number(order.totalEstimatedCost) : null,
       customsValue: order.customsValue ? Number(order.customsValue) : null,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
@@ -86,6 +88,7 @@ export async function updateExportOrderStatus(id: number, status: string) {
     return { success: true, data: {
       ...order,
       quantityRequested: Number(order.quantityRequested),
+      totalEstimatedCost: order.totalEstimatedCost ? Number(order.totalEstimatedCost) : null,
       customsValue: order.customsValue ? Number(order.customsValue) : null,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
@@ -112,6 +115,7 @@ export async function updateExportOrderDetails(id: number, data: { quantityReque
     return { success: true, data: {
       ...order,
       quantityRequested: Number(order.quantityRequested),
+      totalEstimatedCost: order.totalEstimatedCost ? Number(order.totalEstimatedCost) : null,
       customsValue: order.customsValue ? Number(order.customsValue) : null,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Droplets, Scale, Activity, Filter, Trash2, ChevronRight, Sparkles, MoreVertical, Eye, Pencil, FileText, MapPin, Truck, ShieldCheck } from "lucide-react";
+import { Plus, Search, Droplets, Scale, Activity, Filter, Trash2, ChevronRight, Sparkles, MoreVertical, Eye, Pencil, FileText, MapPin, Truck, ShieldCheck, Users } from "lucide-react";
 import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Input } from "@/components/ui/input";
 import {
@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { getHoneyProducts, deleteProduct } from "@/lib/actions/product-actions";
+import { getHoneyProducts, deleteProduct, getHoneyClientsCount } from "@/lib/actions/product-actions";
 import { toast } from "sonner";
 import Image from "next/image";
 import {
@@ -31,15 +31,25 @@ export default function HoneyListPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [totalClients, setTotalClients] = useState(0);
 
   const fetchProducts = async () => {
     setLoading(true);
-    const result = await getHoneyProducts();
+    const [result, clientsResult] = await Promise.all([
+      getHoneyProducts(),
+      getHoneyClientsCount()
+    ]);
+    
     if (result.success) {
       setProducts(result.data || []);
     } else {
       toast.error(result.error || "Failed to load honey products");
     }
+    
+    if (clientsResult.success) {
+      setTotalClients(clientsResult.count || 0);
+    }
+    
     setLoading(false);
   };
 
@@ -91,10 +101,10 @@ export default function HoneyListPage() {
       <div style={{ fontFamily: "'Inter', sans-serif" }} className="animate-in fade-in duration-700 pb-20">
         
         {/* Honey Export Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-5 mb-10">
           <StatCard 
             label="Total Honey Stock" 
-            value={`${totalVolume.toLocaleString()} L`} 
+            value={`${totalVolume.toLocaleString()} kg`} 
             icon={<Droplets className="w-5 h-5 text-amber-500" />} 
           />
           <StatCard 
@@ -112,6 +122,11 @@ export default function HoneyListPage() {
             label="Wholesale Valuation" 
             value={`GH₵ ${totalValuation.toLocaleString()}`} 
             icon={<DollarSign className="w-5 h-5 text-blue-500" />} 
+          />
+          <StatCard 
+            label="Total Clients (Honey)" 
+            value={totalClients.toString()} 
+            icon={<Users className="w-5 h-5 text-purple-500" />} 
           />
         </div>
 
@@ -202,6 +217,16 @@ function HoneyProductCard({ product, index, onDelete }: { product: any, index: n
     }
   };
 
+  const getStockUnitLabel = (unit: string) => {
+    if (!unit) return 'KG';
+    const lower = unit.toLowerCase();
+    if (lower.includes('kilo') || lower === 'kg') return 'KG';
+    if (lower.includes('liter') || lower === 'l') return 'L';
+    if (lower.includes('gram') && !lower.includes('kilo')) return 'g';
+    if (lower.includes('ton')) return 'Tons';
+    return unit;
+  };
+
   return (
     <div className="group bg-white dark:bg-[#1a1a1a] rounded-[24px] p-3 shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-black/5 transition-all duration-500 hover:shadow-[0_25px_60px_rgba(0,0,0,0.08)] flex flex-col h-full font-inter">
       {/* Product Image & Badges */}
@@ -280,7 +305,7 @@ function HoneyProductCard({ product, index, onDelete }: { product: any, index: n
       {/* Details Specifications */}
       <div className="px-1 pb-1 flex-1 flex flex-col justify-between">
         <div className="grid grid-cols-2 gap-y-4 gap-x-4 mb-4">
-          {/* Rate & MOQ */}
+          {/* Rate & Minimum Order */}
           <div className="space-y-0.5">
             <h2 className="text-[17px] font-bold text-[#1a1a1a] dark:text-white leading-tight">
               ${Number(product.pricePerUnit).toFixed(2)}
@@ -294,13 +319,13 @@ function HoneyProductCard({ product, index, onDelete }: { product: any, index: n
             <h2 className="text-[17px] font-bold text-[#1a1a1a] dark:text-white leading-tight">
               {product.moqValue} <span className="text-xs font-semibold text-gray-400 capitalize">{product.moqUnit}</span>
             </h2>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Min. Order (MOQ)</p>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Minimum Order</p>
           </div>
 
           {/* Stock volume & Packaging */}
           <div className="space-y-0.5">
             <h2 className="text-[17px] font-bold text-[#1a1a1a] dark:text-white leading-tight">
-              {Number(product.stockQuantity).toLocaleString()} L
+              {Number(product.availableStock ?? product.stockQuantity).toLocaleString()} <span className="text-sm">{getStockUnitLabel(product.stockUnit)}</span>
             </h2>
             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Stock Available</p>
           </div>

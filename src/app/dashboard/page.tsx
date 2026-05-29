@@ -178,6 +178,13 @@ export default function DashboardPage() {
       expiredSlots: number;
       maintenanceSlots: number;
     };
+    inventoryStats?: {
+      totalStock: number;
+      available: number;
+      reserved: number;
+      processing: number;
+      shipped: number;
+    };
     exportLocations?: string[];
     exportCountrySummary?: { code: string; units: number; unit: string; revenue: number; percentage: number; share: number }[];
     recentReviews?: any[];
@@ -216,6 +223,7 @@ export default function DashboardPage() {
             totalBookingsCount: json.data.totalBookingsCount || 0,
             monthlyData: json.data.monthlyData,
             slotStats: json.data.slotStats,
+            inventoryStats: json.data.inventoryStats,
             exportLocations: json.data.exportLocations || [],
             exportCountrySummary: json.data.exportCountrySummary || [],
             recentReviews: json.data.recentReviews || []
@@ -678,7 +686,7 @@ export default function DashboardPage() {
           <RevenueChart data={stats.monthlyData} />
         </div>
         <div className="h-full">
-          <PipelineFunnelChart slotStats={stats.slotStats} />
+          <PipelineFunnelChart slotStats={stats.slotStats} inventoryStats={stats.inventoryStats} />
         </div>
       </div>
 

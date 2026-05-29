@@ -88,12 +88,39 @@ export default function CreateShippingPage() {
     }
   }, []);
 
+  const pkgInfo = (() => {
+    if (!productDetails) return { name: "Unit", multiplier: 1, price: 0 };
+    let pkgName = "Unit";
+    if (productDetails.packagingType === "drum") pkgName = "Drum";
+    else if (productDetails.packagingType === "bucket") pkgName = "Bucket";
+    else if (productDetails.packagingType === "container") pkgName = "IBC Tote";
+    else if (productDetails.packagingType === "bottle") pkgName = "Bottle";
+    else if (productDetails.packagingType) pkgName = productDetails.packagingType.charAt(0).toUpperCase() + productDetails.packagingType.slice(1);
+
+    let multiplier = 1;
+    if (productDetails.priceUnitType === 'per_kg' && productDetails.packagingSize) {
+      const matchKg = productDetails.packagingSize.match(/(\d+(?:\.\d+)?)kg/i);
+      if (matchKg) multiplier = Number(matchKg[1]);
+    } else if (productDetails.priceUnitType === 'per_liter' && productDetails.packagingSize) {
+      const matchL = productDetails.packagingSize.match(/(\d+(?:\.\d+)?)L/i);
+      if (matchL) multiplier = Number(matchL[1]);
+    }
+    
+    return {
+      name: pkgName,
+      multiplier,
+      price: (Number(productDetails.pricePerUnit) || 0) * multiplier
+    };
+  })();
+
   const handleSubmitOrder = async () => {
     setIsSubmitting(true);
     try {
       const res = await submitExportOrder({
         ...formData,
-        productId: productIdStr
+        productId: productIdStr,
+        unitMeasurement: pkgInfo.name,
+        totalEstimatedCost: pkgInfo.price * Number(formData.quantityRequested || 0)
       });
       if (res.success) {
         setReferenceNumber(res.reference || "");
@@ -106,6 +133,40 @@ export default function CreateShippingPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const validateStep = (step: number) => {
+    if (step === 2) {
+      if (!formData.buyerType || !formData.companyName || !formData.destinationCountry || !formData.city || !formData.deliveryAddress || !formData.stateRegion || !formData.postalCode || !formData.email || !formData.phone) {
+        return false;
+      }
+    }
+    if (step === 3) {
+      if (!formData.quantityRequested) return false;
+      if (productDetails && Number(formData.quantityRequested) < Number(productDetails.moqValue)) return false;
+      if (productDetails && Number(formData.quantityRequested) > Number(productDetails.stockQuantity)) return false;
+    }
+    if (step === 4) {
+      if (!formData.shippingType || !formData.deliveryType || !formData.pickupOption || !formData.preferredDate || !formData.deliveryPriority) {
+        return false;
+      }
+    }
+    if (step === 5) {
+      // Paperwork handled internally, no validation required
+      return true;
+    }
+    if (step === 6) {
+      if (!formData.paymentMethod || !formData.depositRequired) return false;
+    }
+    return true;
+  };
+
+  const handleContinue = () => {
+    if (!validateStep(currentStep)) {
+      alert("Please fill in all required fields correctly before proceeding.");
+      return;
+    }
+    setCurrentStep(currentStep + 1);
   };
 
   return (
@@ -293,20 +354,20 @@ export default function CreateShippingPage() {
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">Country of Destination<span className="text-red-500">*</span></label>
                       <select 
-                        value={formData.destinationCountry}
-                        onChange={(e) => setFormData({...formData, destinationCountry: e.target.value})}
+                        value={mapCountries.some(c => `${c.name} (${c.code})` === formData.destinationCountry) ? formData.destinationCountry : (formData.destinationCountry ? "Others" : "")}
+                        onChange={(e) => setFormData({...formData, destinationCountry: e.target.value === "Others" ? "" : e.target.value})}
                         className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none bg-[#f9f9f9]"
                       >
                         <option value="" disabled>Select a destination country...</option>
                         {mapCountries.map(country => (
-                          <option key={country.code} value={country.code}>
+                          <option key={country.code} value={`${country.name} (${country.code})`}>
                             {country.name} ({country.code})
                           </option>
                         ))}
                         <option value="Others">Others (Please Specify)</option>
                       </select>
                     </div>
-                    {formData.destinationCountry === "Others" && (
+                    {(!mapCountries.some(c => `${c.name} (${c.code})` === formData.destinationCountry) && formData.destinationCountry !== "") || formData.destinationCountry === "Others" ? (
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700">Specify Country<span className="text-red-500">*</span></label>
                         <input 
@@ -317,7 +378,7 @@ export default function CreateShippingPage() {
                           className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none" 
                         />
                       </div>
-                    )}
+                    ) : null}
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">City<span className="text-red-500">*</span></label>
                       <input 
@@ -424,19 +485,13 @@ export default function CreateShippingPage() {
                       <label className="text-sm font-bold text-gray-700">Unit Measurement</label>
                       <input 
                         type="text" 
-                        value={productDetails ? (
-                          productDetails.priceUnitType === "per_liter" ? "Liters (L)" :
-                          productDetails.priceUnitType === "per_kg" ? "Kilograms (KG)" :
-                          productDetails.priceUnitType === "per_ton" ? "Tons (T)" :
-                          productDetails.priceUnitType === "per_unit" ? "Units" :
-                          "Liters (L)"
-                        ) : ""} 
+                        value={productDetails ? pkgInfo.name : ""}
                         readOnly 
                         className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-700 font-bold outline-none cursor-not-allowed" 
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-gray-700">Quantity Requested<span className="text-red-500">*</span></label>
+                      <label className="text-sm font-bold text-gray-700">Quantity Requested ({pkgInfo.name}s)<span className="text-red-500">*</span></label>
                       <input 
                         type="number" 
                         value={formData.quantityRequested}
@@ -457,11 +512,11 @@ export default function CreateShippingPage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-gray-700">Unit Price</label>
+                      <label className="text-sm font-bold text-gray-700">Total Amount to Pay</label>
                       <div className="relative">
-                        <input type="text" value={productDetails ? `GH₵ ${Number(productDetails.pricePerUnit).toFixed(2)}` : ""} readOnly className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-700 font-bold outline-none cursor-not-allowed" />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">
-                          {productDetails ? (productDetails.priceUnitType === "per_liter" ? "/ liter" : productDetails.priceUnitType === "per_kg" ? "/ kg" : "") : ""}
+                        <input type="text" value={productDetails ? `GH₵ ${(pkgInfo.price * (Number(formData.quantityRequested) || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""} readOnly className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-900 font-black outline-none cursor-not-allowed text-lg" />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs">
+                          {productDetails ? `(GH₵ ${pkgInfo.price.toLocaleString()} / ${pkgInfo.name})` : ""}
                         </span>
                       </div>
                     </div>
@@ -577,25 +632,23 @@ export default function CreateShippingPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-gray-100">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-gray-700">Customs Declaration Value<span className="text-red-500">*</span></label>
+                      <label className="text-sm font-bold text-gray-700">Customs Declaration Value</label>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">GH₵</span>
                         <input 
-                          type="number" 
-                          placeholder="Auto or Manual" 
-                          value={formData.customsValue}
-                          onChange={(e) => setFormData({...formData, customsValue: e.target.value})}
-                          className="w-full h-12 pl-8 pr-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none" 
+                          type="text" 
+                          value="Determined internally by Logistics" 
+                          readOnly
+                          className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-sm outline-none bg-gray-50 text-gray-500 cursor-not-allowed font-bold text-sm" 
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-gray-700">Import Country Requirements <span className="text-gray-400 font-normal">(Optional notes)</span></label>
+                      <label className="text-sm font-bold text-gray-700">Import Country Requirements</label>
                       <textarea 
-                        value={formData.importRequirements}
-                        onChange={(e) => setFormData({...formData, importRequirements: e.target.value})}
-                        className="w-full h-24 p-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none resize-none" 
-                        placeholder="Enter any specific requirements for the destination country..."
+                        value="Handled by our internal export administration team."
+                        readOnly
+                        className="w-full h-24 p-4 border border-gray-200 rounded-sm outline-none resize-none bg-gray-50 text-gray-500 cursor-not-allowed font-bold text-sm pt-4" 
                       />
                     </div>
                   </div>
@@ -620,7 +673,7 @@ export default function CreateShippingPage() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">Invoice Currency</label>
-                      <input type="text" value="USD (Default)" readOnly className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-700 font-bold outline-none cursor-not-allowed" />
+                      <input type="text" value="GH₵ (Ghana Cedi)" readOnly className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-700 font-bold outline-none cursor-not-allowed" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">Deposit Required<span className="text-red-500">*</span></label>
@@ -658,24 +711,24 @@ export default function CreateShippingPage() {
                     <div className="border border-gray-100 p-6 bg-[#fcfcfc] rounded-sm shadow-sm">
                       <h4 className="text-[13px] font-black text-gray-900 mb-4 pb-2 border-b border-gray-100 uppercase tracking-wide">Exporter Details (Ghana)</h4>
                       <div className="space-y-2 text-[13px] text-gray-600">
-                        <p><span className="font-bold">Company:</span> [Auto Filled]</p>
+                        <p><span className="font-bold">Company:</span> Manono Manphis Export Materials Co., Ltd</p>
                         <p><span className="font-bold">Country:</span> Ghana</p>
-                        <p><span className="font-bold">City:</span> [Auto Filled]</p>
+                        <p><span className="font-bold">City:</span> {productLocation || "Accra"}</p>
                       </div>
                     </div>
                     <div className="border border-gray-100 p-6 bg-[#fcfcfc] rounded-sm shadow-sm">
                       <h4 className="text-[13px] font-black text-gray-900 mb-4 pb-2 border-b border-gray-100 uppercase tracking-wide">Buyer Details</h4>
                       <div className="space-y-2 text-[13px] text-gray-600">
                         <p><span className="font-bold">Company:</span> {formData.companyName || "[Auto Filled]"}</p>
-                        <p><span className="font-bold">Destination:</span> {formData.destinationCountry}</p>
+                        <p><span className="font-bold">Destination:</span> {mapCountries.find(c => c.code === formData.destinationCountry)?.name || formData.destinationCountry} ({formData.destinationCountry})</p>
                       </div>
                     </div>
                     <div className="border border-gray-100 p-6 bg-[#fcfcfc] rounded-sm shadow-sm">
                       <h4 className="text-[13px] font-black text-gray-900 mb-4 pb-2 border-b border-gray-100 uppercase tracking-wide">Honey Product & Quantity</h4>
                       <div className="space-y-2 text-[13px] text-gray-600">
                         <p><span className="font-bold">Type:</span> {productDetails?.category === "raw" ? "Raw Forest Honey" : productDetails?.category || "Raw Forest Honey"}</p>
-                        <p><span className="font-bold">Quantity:</span> {formData.quantityRequested} {productDetails?.priceUnitType === "per_kg" ? "KG" : "L"}</p>
-                        <p><span className="font-bold">Price:</span> ${Number(productDetails?.pricePerUnit || 0).toFixed(2)}/{productDetails?.priceUnitType === "per_kg" ? "KG" : "L"}</p>
+                        <p><span className="font-bold">Quantity:</span> {formData.quantityRequested} {pkgInfo.name}(s)</p>
+                        <p><span className="font-bold">Price:</span> GH₵ {pkgInfo.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / {pkgInfo.name}</p>
                       </div>
                     </div>
                     <div className="border border-gray-100 p-6 bg-[#fcfcfc] rounded-sm shadow-sm">
@@ -688,7 +741,7 @@ export default function CreateShippingPage() {
                     <div className="border border-gray-100 p-6 bg-[#fcfcfc] rounded-sm shadow-sm">
                       <h4 className="text-[13px] font-black text-gray-900 mb-4 pb-2 border-b border-gray-100 uppercase tracking-wide">Total Estimated Cost</h4>
                       <div className="space-y-2 text-[13px] text-gray-600">
-                        <p className="text-2xl font-black text-[#535353]">${(Number(productDetails?.pricePerUnit || 0) * Number(formData.quantityRequested || 0)).toFixed(2)}</p>
+                        <p className="text-2xl font-black text-[#535353]">GH₵ {(pkgInfo.price * Number(formData.quantityRequested || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         <p className="text-[11px] text-gray-400 uppercase tracking-wider">Excluding Freight Charges</p>
                       </div>
                     </div>
@@ -733,10 +786,10 @@ export default function CreateShippingPage() {
                 )}
                 {currentStep < 7 ? (
                   <button 
-                    onClick={() => setCurrentStep(currentStep + 1)}
-                    disabled={!productName}
+                    onClick={handleContinue}
+                    disabled={!productName || !validateStep(currentStep)}
                     className={`ml-auto px-10 py-4 font-black text-sm uppercase tracking-widest rounded-sm transition-all shadow-lg ${
-                      productName ? "bg-[#535353] text-white hover:opacity-90 shadow-gray-200" : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                      (productName && validateStep(currentStep)) ? "bg-[#535353] text-white hover:opacity-90 shadow-gray-200" : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
                     }`}
                   >
                     Continue

@@ -101,7 +101,7 @@ const products = [
     image: "/billboards/bill_boards 3.webp",
     category: "Digital Advertising",
     tags: ["LED", "Advertising", "Outdoor"],
-    moq: "10 Pieces (MOQ)",
+    moq: "10 Pieces (Minimum Order)",
     description: "Premium high-resolution LED digital advertising billboard designed for maximum visibility and durability. Featuring low carbon footprint technology and intelligent light sensor for energy efficiency.",
     fullDescription: "Our LED Digital Advertising Billboard is a state-of-the-art solution for modern marketing. It offers superior brightness and color accuracy, ensuring your advertisements stand out even in direct sunlight. Built with high-grade metal materials and advanced LED modules, it is weather-resistant and designed for 24/7 operation.",
     isService: true,
@@ -202,7 +202,28 @@ export default function ProductDetailsPage() {
             setProduct({
             id: h.id,
             name: h.name,
-            price: `GH₵ ${Number(h.pricePerUnit).toFixed(2)}`,
+            price: (function() {
+              const p = Number(h.pricePerUnit) || 0;
+              let multiplier = 1;
+              let pkgName = "Unit";
+              
+              if (h.packagingType === "drum") pkgName = "Drum";
+              else if (h.packagingType === "bucket") pkgName = "Bucket";
+              else if (h.packagingType === "container") pkgName = "IBC Tote";
+              else if (h.packagingType === "bottle") pkgName = "Bottle";
+              else if (h.packagingType) pkgName = h.packagingType.charAt(0).toUpperCase() + h.packagingType.slice(1);
+              
+              if (h.priceUnitType === 'per_kg' && h.packagingSize) {
+                const matchKg = h.packagingSize.match(/(\d+(?:\.\d+)?)kg/i);
+                if (matchKg) multiplier = Number(matchKg[1]);
+              } else if (h.priceUnitType === 'per_liter' && h.packagingSize) {
+                const matchL = h.packagingSize.match(/(\d+(?:\.\d+)?)L/i);
+                if (matchL) multiplier = Number(matchL[1]);
+              }
+              
+              const finalPrice = p * multiplier;
+              return `GH₵ ${finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${pkgName}`;
+            })(),
             rating: 5,
             reviews: 0,
             sku: h.slug,
@@ -233,7 +254,7 @@ export default function ProductDetailsPage() {
                   h.packagingType
               },
               { label: "Size",          value: h.packagingSize },
-              { label: "MOQ",           value: `${h.moqValue} ${h.moqUnit}` },
+              { label: "Minimum Order",           value: `${h.moqValue} ${h.moqUnit}` },
               {
                 label: "Stock Status",
                 value:
@@ -242,16 +263,32 @@ export default function ProductDetailsPage() {
                   h.stockStatus === "out_of_stock" ? "Out of Stock" :
                   h.stockStatus
               },
-              {
-                label: "Price",
-                value: `GH₵ ${Number(h.pricePerUnit).toFixed(2)} ${
-                  h.priceUnitType === "per_liter" ? "per liter" :
-                  h.priceUnitType === "per_kg" ? "per kg" :
-                  h.priceUnitType === "per_ton" ? "per ton" :
-                  h.priceUnitType === "per_unit" ? "per unit" :
-                  h.priceUnitType
-                }`
-              },
+              (function() {
+                const p = Number(h.pricePerUnit) || 0;
+                let multiplier = 1;
+                let pkgName = "Unit";
+                
+                if (h.packagingType === "drum") pkgName = "Drum";
+                else if (h.packagingType === "bucket") pkgName = "Bucket";
+                else if (h.packagingType === "container") pkgName = "IBC Tote";
+                else if (h.packagingType === "bottle") pkgName = "Bottle";
+                else if (h.packagingType) pkgName = h.packagingType.charAt(0).toUpperCase() + h.packagingType.slice(1);
+                
+                // Extract numeric weight/volume to calculate full package price
+                if (h.priceUnitType === 'per_kg' && h.packagingSize) {
+                  const matchKg = h.packagingSize.match(/(\d+(?:\.\d+)?)kg/i);
+                  if (matchKg) multiplier = Number(matchKg[1]);
+                } else if (h.priceUnitType === 'per_liter' && h.packagingSize) {
+                  const matchL = h.packagingSize.match(/(\d+(?:\.\d+)?)L/i);
+                  if (matchL) multiplier = Number(matchL[1]);
+                }
+                
+                const finalPrice = p * multiplier;
+                return {
+                  label: `Unit Price/${pkgName}`,
+                  value: `GH₵ ${finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                };
+              })(),
               {
                 label: "Warehouse",
                 value:
@@ -536,7 +573,7 @@ export default function ProductDetailsPage() {
                              spec.label === "Category"         ? <Tag className="w-4 h-4 text-[#eea000]" /> :
                              spec.label === "Packaging"        ? <Package className="w-4 h-4 text-[#eea000]" /> :
                              spec.label === "Size"             ? <Hash className="w-4 h-4 text-[#eea000]" /> :
-                             spec.label === "MOQ"              ? <ShoppingCart className="w-4 h-4 text-[#eea000]" /> :
+                             spec.label === "Minimum Order"              ? <ShoppingCart className="w-4 h-4 text-[#eea000]" /> :
                              spec.label === "Stock"            ? <Activity className="w-4 h-4 text-[#eea000]" /> :
                              spec.label === "Stock Status"     ? <CheckCircle2 className="w-4 h-4 text-[#eea000]" /> :
                              spec.label === "Price"            ? <DollarSign className="w-4 h-4 text-[#eea000]" /> :
@@ -554,7 +591,10 @@ export default function ProductDetailsPage() {
 
                 {product.isService ? (
                   <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                    <Link href={`/billboard-booking?hallId=${product.id}`} className="flex-1">
+                    <Link 
+                      href={session ? `/billboard-booking?hallId=${product.id}` : `/login?callbackUrl=${encodeURIComponent(`/billboard-booking?hallId=${product.id}`)}`} 
+                      className="flex-1"
+                    >
                       <button className="w-full h-14 bg-[#b8b3b4] text-white px-8 font-bold text-[15px] rounded-full transition-all hover:opacity-90 flex items-center justify-center whitespace-nowrap">
                         BOOK NOW
                       </button>
@@ -574,7 +614,10 @@ export default function ProductDetailsPage() {
                         <ShoppingCart className="w-4 h-4" />
                         Add to Cart
                       </button>
-                      <Link href={`/shipping?productName=${encodeURIComponent(product.name)}&productImage=${encodeURIComponent(product.image)}&productLocation=${encodeURIComponent(product.specs?.find((s: any) => s.label === "Warehouse")?.value || "Kumasi")}&productId=${product.id}`} className="flex-1 flex">
+                      <Link 
+                        href={session ? `/shipping?productName=${encodeURIComponent(product.name)}&productImage=${encodeURIComponent(product.image)}&productLocation=${encodeURIComponent(product.specs?.find((s: any) => s.label === "Warehouse")?.value || "Kumasi")}&productId=${product.id}` : `/login?callbackUrl=${encodeURIComponent(`/shipping?productName=${encodeURIComponent(product.name)}&productImage=${encodeURIComponent(product.image)}&productLocation=${encodeURIComponent(product.specs?.find((s: any) => s.label === "Warehouse")?.value || "Kumasi")}&productId=${product.id}`)}`} 
+                        className="flex-1 flex"
+                      >
                         <button className="w-full h-14 bg-black hover:bg-[#1a1a1a] text-white font-black text-[13px] uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center gap-2">
                           <MessageCircle className="w-4 h-4" />
                           Request Quote
@@ -909,7 +952,7 @@ export default function ProductDetailsPage() {
                           body: "We ship to over 30 countries across Europe, Asia, North America, and the Middle East. International orders are shipped via sea freight or air freight depending on order volume and destination. Estimated transit times range from 7 to 30 business days."
                         },
                         {
-                          title: "Minimum Order Quantity (MOQ)",
+                          title: "Minimum Order",
                           body: "Export orders must meet the minimum order quantity stated on the product listing. Smaller quantities may be accommodated for sample orders — please contact us directly to arrange a sample shipment."
                         },
                         {

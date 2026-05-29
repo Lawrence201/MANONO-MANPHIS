@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, MapPin, Monitor, Activity, Filter, Trash2, ChevronRight, Star, MoreVertical, Eye, Pencil, Navigation2, ChevronLeft, Zap, Calendar, Clock, Phone } from "lucide-react";
+import { Plus, Search, MapPin, Monitor, Activity, Filter, Trash2, ChevronRight, Star, MoreVertical, Eye, Pencil, Navigation2, ChevronLeft, Zap, Calendar, Clock, Phone, Users } from "lucide-react";
 import { CediSign as DollarSign } from "@/components/CediSign";;
 import { Input } from "@/components/ui/input";
 import {
@@ -64,6 +64,14 @@ export default function BillboardsListPage() {
     b.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const uniqueClients = new Set();
+  billboards.forEach(b => {
+    b.bookings?.forEach((bk: any) => {
+      if (bk.email) uniqueClients.add(bk.email.toLowerCase());
+    });
+  });
+  const totalClients = uniqueClients.size;
+
 
   return (
     <AppLayout
@@ -93,9 +101,9 @@ export default function BillboardsListPage() {
             accent 
           />
           <StatCard 
-            label="Cities" 
-            value={Array.from(new Set(billboards.map(b => b.city))).length.toString()} 
-            icon={<MapPin className="w-5 h-5 text-purple-500" />} 
+            label="Total Clients (Billboards)" 
+            value={totalClients.toString()} 
+            icon={<Users className="w-5 h-5 text-purple-500" />} 
           />
         </div>
 

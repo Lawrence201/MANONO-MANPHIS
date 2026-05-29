@@ -41,15 +41,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           </div>
           <div className="flex justify-between gap-6">
             <span className="text-[#10b981]">Cashew :</span>
-            <span className="text-[#10b981] tabular-nums">$ {cashewVal.toLocaleString()}</span>
+            <span className="text-[#10b981] tabular-nums">GH₵ {cashewVal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between gap-6">
             <span className="text-[#f59e0b]">Honey :</span>
-            <span className="text-[#f59e0b] tabular-nums">$ {honeyVal.toLocaleString()}</span>
+            <span className="text-[#f59e0b] tabular-nums">GH₵ {honeyVal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between gap-6">
             <span className="text-[#ea580c]">Shea :</span>
-            <span className="text-[#ea580c] tabular-nums">$ {sheaVal.toLocaleString()}</span>
+            <span className="text-[#ea580c] tabular-nums">GH₵ {sheaVal.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -141,10 +141,10 @@ export function RevenueChart({ data }: {
               tickFormatter={tickFormatter} 
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="Billboards" stackId="1" stroke="#3b82f6" strokeWidth={2.5} fill="url(#colorBillboards)" />
-            <Area type="monotone" dataKey="Honey" stackId="1" stroke="#f59e0b" strokeWidth={2.5} fill="url(#colorHoney)" />
-            <Area type="monotone" dataKey="Shea" stackId="1" stroke="#ea580c" strokeWidth={2.5} fill="url(#colorShea)" />
-            <Area type="monotone" dataKey="Cashew" stackId="1" stroke="#10b981" strokeWidth={2.5} fill="url(#colorCashew)" />
+            <Area type="monotone" dataKey="Billboards" stroke="#3b82f6" strokeWidth={2.5} fill="url(#colorBillboards)" />
+            <Area type="monotone" dataKey="Honey" stroke="#f59e0b" strokeWidth={2.5} fill="url(#colorHoney)" />
+            <Area type="monotone" dataKey="Shea" stroke="#ea580c" strokeWidth={2.5} fill="url(#colorShea)" />
+            <Area type="monotone" dataKey="Cashew" stroke="#10b981" strokeWidth={2.5} fill="url(#colorCashew)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -335,15 +335,37 @@ export function CountryDistributionChart({
   );
 }
 
-export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlots: number, reservedSlots: number, activeSlots: number, expiredSlots: number, maintenanceSlots: number } }) {
-  const [mode, setMode] = useState<"trade" | "advertising">("trade");
+export function PipelineFunnelChart({ 
+  slotStats,
+  inventoryStats 
+}: { 
+  slotStats?: { availableSlots: number, reservedSlots: number, activeSlots: number, expiredSlots: number, maintenanceSlots: number },
+  inventoryStats?: { totalStock: number, available: number, reserved: number, processing: number, shipped: number }
+}) {
+  const [mode, setMode] = useState<"advertising" | "honey" | "cashew" | "shea">("advertising");
 
-  const tradePipeline = [
-    { stage: "New Leads", value: 487 },
-    { stage: "Contacted", value: 342 },
-    { stage: "Qualified", value: 218 },
-    { stage: "Negotiating", value: 124 },
-    { stage: "Won", value: 75 }, // ~15.4%
+  const honeyPipeline = [
+    { stage: "Total Capacity (KG)", value: inventoryStats?.totalStock || 0 },
+    { stage: "Available In-Stock", value: inventoryStats?.available || 0 },
+    { stage: "Ordered (Pending)", value: inventoryStats?.reserved || 0 },
+    { stage: "Processing Orders", value: inventoryStats?.processing || 0 },
+    { stage: "Shipped & Delivered", value: inventoryStats?.shipped || 0 },
+  ];
+
+  const cashewPipeline = [
+    { stage: "Total Capacity (Bags)", value: 5000 },
+    { stage: "Available In-Stock", value: 4200 },
+    { stage: "Ordered (Pending)", value: 300 },
+    { stage: "Processing Orders", value: 500 },
+    { stage: "Shipped & Delivered", value: 0 },
+  ];
+
+  const sheaPipeline = [
+    { stage: "Total Capacity (KG)", value: 10000 },
+    { stage: "Available In-Stock", value: 8500 },
+    { stage: "Ordered (Pending)", value: 1000 },
+    { stage: "Processing Orders", value: 500 },
+    { stage: "Shipped & Delivered", value: 0 },
   ];
 
   const adPipeline = [
@@ -354,13 +376,15 @@ export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlot
     { stage: "Maintenance", value: slotStats?.maintenanceSlots || 0 },
   ];
 
-  const currentData = mode === "trade" ? tradePipeline : adPipeline;
+  const currentData = mode === "honey" ? honeyPipeline : mode === "cashew" ? cashewPipeline : mode === "shea" ? sheaPipeline : adPipeline;
   
   // Custom logic for the funnel chart math
-  const max = mode === "trade" ? currentData[0].value : Math.max(...currentData.map(d => d.value), 1);
-  const totalWon = currentData[4].value;
-  const totalLeads = currentData[0].value;
-  const conversionRate = mode === "trade" ? ((totalWon / totalLeads) * 100).toFixed(1) : ((slotStats?.activeSlots || 0) / Math.max((slotStats?.availableSlots || 0) + (slotStats?.activeSlots || 0), 1) * 100).toFixed(1);
+  const max = mode !== "advertising" ? Math.max(...currentData.map(d => d.value), 1) : Math.max(...currentData.map(d => d.value), 1);
+  const totalStock = currentData[0].value;
+  const availableStock = currentData[1].value;
+  const conversionRate = mode !== "advertising" 
+    ? ((availableStock / Math.max(totalStock, 1)) * 100).toFixed(1) 
+    : ((slotStats?.activeSlots || 0) / Math.max((slotStats?.availableSlots || 0) + (slotStats?.activeSlots || 0), 1) * 100).toFixed(1);
 
   const tradeColors = [
     "linear-gradient(90deg, #f59e0b, #f59e0b 60%, transparent)",
@@ -378,7 +402,7 @@ export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlot
     "linear-gradient(90deg, #06b6d4, #06b6d4 60%, transparent)",
   ];
 
-  const colors = mode === "trade" ? tradeColors : adColors;
+  const colors = mode !== "advertising" ? tradeColors : adColors;
 
   return (
     <div className="bg-card rounded-xl border border-border p-6 shadow-card flex flex-col justify-between h-full">
@@ -386,23 +410,16 @@ export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlot
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="font-display font-semibold text-base">
-              {mode === "trade" ? "Sales Pipeline Funnel" : "Billboard Activity Tracker"}
+              {mode === "advertising" ? "Billboard Activity Tracker" : 
+               mode === "honey" ? "Honey Inventory Tracker" :
+               mode === "cashew" ? "Cashew Inventory Tracker" :
+               "Shea Butter Inventory Tracker"}
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {mode === "trade" ? "Lead conversion by stage" : "Current slot utilization and status"}
+              {mode !== "advertising" ? "Live stock levels & order allocations" : "Current slot utilization and status"}
             </p>
           </div>
           <div className="flex bg-secondary p-1 rounded-lg border border-border shrink-0 select-none">
-            <button
-              onClick={() => setMode("trade")}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
-                mode === "trade"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Trade
-            </button>
             <button
               onClick={() => setMode("advertising")}
               className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
@@ -411,7 +428,37 @@ export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlot
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Advertising
+              Billboards
+            </button>
+            <button
+              onClick={() => setMode("honey")}
+              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
+                mode === "honey"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Honey
+            </button>
+            <button
+              onClick={() => setMode("cashew")}
+              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
+                mode === "cashew"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Cashew
+            </button>
+            <button
+              onClick={() => setMode("shea")}
+              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${
+                mode === "shea"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Shea Butter
             </button>
           </div>
         </div>
@@ -424,7 +471,7 @@ export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlot
                 <div className="flex items-center justify-between text-xs mb-1.5">
                   <span className="font-medium">{stage.stage}</span>
                   <div className="flex items-center gap-2 font-semibold">
-                    {mode === "trade" && conversion && <span className="text-muted-foreground font-medium">→ {conversion}%</span>}
+                    {mode !== "advertising" && i > 0 && <span className="text-muted-foreground font-medium">({pct.toFixed(0)}%)</span>}
                     <span className="tabular-nums">{stage.value}</span>
                   </div>
                 </div>
@@ -443,7 +490,7 @@ export function PipelineFunnelChart({ slotStats }: { slotStats?: { availableSlot
         </div>
       </div>
       <div className="mt-5 pt-5 border-t border-border flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{mode === "trade" ? "Overall Conversion" : "Slot Utilization"}</span>
+        <span className="text-xs text-muted-foreground">{mode !== "advertising" ? "Availability Rate" : "Slot Utilization"}</span>
         <span className="text-lg font-bold font-display text-gradient-accent">
           {conversionRate}%
         </span>

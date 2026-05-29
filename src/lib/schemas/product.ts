@@ -7,7 +7,7 @@ export const ProductSchema = z.object({
   packagingType: z.string().min(1, "Packaging type is required"),
   packagingSize: z.string().min(1, "Packaging size is required"),
   moqValue: z.union([z.string(), z.number()]).transform(v => Number(v) || 0),
-  moqUnit: z.string().min(1, "MOQ unit is required"),
+  moqUnit: z.string().min(1, "Minimum Order unit is required"),
   stockQuantity: z.union([z.string(), z.number()]).transform(v => Number(v) || 0),
   stockUnit: z.string().min(1, "Stock unit is required"),
   stockStatus: z.string().default("in_stock"),

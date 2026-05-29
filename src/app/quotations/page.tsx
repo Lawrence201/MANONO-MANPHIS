@@ -15,7 +15,7 @@ export default async function QuotationsPage() {
   const pendingOrders = allOrders.filter(o => o.status === "pending");
   
   const totalValue = pendingOrders.reduce((sum, o) => {
-    return sum + (Number(o.quantityRequested) * Number(o.product?.pricePerUnit || 0));
+    return sum + (o.totalEstimatedCost ? Number(o.totalEstimatedCost) : (Number(o.quantityRequested) * Number(o.product?.pricePerUnit || 0)));
   }, 0);
 
   return (
@@ -50,7 +50,7 @@ export default async function QuotationsPage() {
             </thead>
             <tbody>
               {pendingOrders.map((order) => {
-                const estimatedValue = Number(order.quantityRequested) * Number(order.product?.pricePerUnit || 0);
+                const estimatedValue = order.totalEstimatedCost ? Number(order.totalEstimatedCost) : (Number(order.quantityRequested) * Number(order.product?.pricePerUnit || 0));
                 return (
                   <tr key={order.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
                     <td className="px-5 py-3.5 font-mono text-xs font-semibold">{order.referenceNumber}</td>
@@ -60,10 +60,10 @@ export default async function QuotationsPage() {
                     </td>
                     <td className="px-5 py-3.5 text-xs">
                       <div className="truncate max-w-[200px]">{order.product?.name}</div>
-                      <div className="text-[10px] text-muted-foreground">{order.quantityRequested} {order.product?.priceUnitType === "per_kg" ? "KG" : "Liters"}</div>
+                      <div className="text-[10px] text-muted-foreground">{order.quantityRequested} {order.unitMeasurement || (order.product?.priceUnitType === "per_kg" ? "KG" : "Liters")}</div>
                     </td>
                     <td className="px-5 py-3.5 font-semibold tabular-nums text-xs text-[#eea000]">
-                      USD ${fmt.format(estimatedValue)}
+                      GH₵ {fmt.format(estimatedValue)}
                     </td>
                     <td className="px-5 py-3.5 text-xs">
                       {order.destinationCountry}

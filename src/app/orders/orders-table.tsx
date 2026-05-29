@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { PaymentBadge, StatusBadge } from "@/components/dashboard/badges";
-import { Plane, Ship, Package as PackageIcon, CheckCircle2, XCircle, Edit3, Eye } from "lucide-react";
+import { Plane, Ship, Package as PackageIcon, CheckCircle2, XCircle, Edit3, Eye, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { updateExportOrderStatus } from "@/lib/actions/export-order-actions";
 import { EditOrderModal } from "@/components/dashboard/edit-order-modal";
 import { ViewOrderModal } from "@/components/dashboard/view-order-modal";
@@ -20,11 +22,13 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
   const handleApprove = async (id: number) => {
     setOrders(orders.map(o => o.id === id ? { ...o, status: "approved" } : o));
     await updateExportOrderStatus(id, "approved");
+    toast.success("Order Approved successfully!");
   };
 
   const handleReject = async (id: number) => {
     setOrders(orders.map(o => o.id === id ? { ...o, status: "rejected" } : o));
     await updateExportOrderStatus(id, "rejected");
+    toast.error("Order Rejected.");
   };
 
   return (
@@ -55,7 +59,7 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
               ) : (
                 orders.map((o) => {
                   const ShipI = shipIcon(o.shippingType);
-                  const amount = o.customsValue || (o.quantityRequested * (o.product.pricePerUnit || 0));
+                  const amount = o.totalEstimatedCost ? Number(o.totalEstimatedCost) : (o.customsValue || (o.quantityRequested * (o.product.pricePerUnit || 0)));
                   const date = new Date(o.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                   
                   return (
@@ -70,9 +74,9 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
                       </td>
                       <td className="px-5 py-3.5 text-xs">
                         <div className="font-medium">{o.product.name}</div>
-                        <div className="text-[10px] text-muted-foreground">{o.quantityRequested} {o.product.moqUnit}</div>
+                        <div className="text-[10px] text-muted-foreground">{o.quantityRequested} {o.unitMeasurement || o.product.moqUnit || "Units"}</div>
                       </td>
-                      <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">USD {fmt.format(amount)}</td>
+                      <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">GH₵ {fmt.format(amount)}</td>
                       <td className="px-5 py-3.5"><PaymentBadge status={o.status === "paid" || o.status === "approved" ? "paid" : "pending"} /></td>
                       <td className="px-5 py-3.5"><StatusBadge status={o.status} /></td>
                       <td className="px-5 py-3.5">
@@ -83,24 +87,34 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
                       </td>
                       <td className="px-5 py-3.5 text-xs text-muted-foreground tabular-nums">{o.preferredDate || "N/A"}</td>
                       <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => setViewingOrder(o)} className="p-1.5 text-muted-foreground hover:text-info hover:bg-info/10 rounded-md transition-colors" title="View Details">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          {o.status === "pending" && (
-                            <>
-                              <button onClick={() => handleApprove(o.id)} className="p-1.5 text-success hover:bg-success/10 rounded-md transition-colors" title="Confirm Payment">
-                                <CheckCircle2 className="w-4 h-4" />
-                              </button>
-                              <button onClick={() => handleReject(o.id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md transition-colors" title="Reject">
-                                <XCircle className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                          <button onClick={() => setEditingOrder(o)} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors" title="Edit Order">
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-[160px]">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => setViewingOrder(o)} className="cursor-pointer">
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEditingOrder(o)} className="cursor-pointer">
+                              <Edit3 className="mr-2 h-4 w-4" />
+                              Edit Order
+                            </DropdownMenuItem>
+                            {o.status === "pending" && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => setViewingOrder(o)} className="cursor-pointer text-blue-600 focus:bg-blue-50 focus:text-blue-700">
+                                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                                  Review to Approve...
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     </tr>
                   );
@@ -116,6 +130,7 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
           order={viewingOrder} 
           onClose={() => setViewingOrder(null)} 
           onApprove={handleApprove}
+          onReject={handleReject}
         />
       )}
 

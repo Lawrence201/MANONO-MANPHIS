@@ -198,7 +198,39 @@ export async function getHoneyProducts() {
       },
     });
 
-    const serialized = products.map((p) => ({
+    const activeOrders = await prisma.exportOrder.findMany({
+      select: { productId: true, quantityRequested: true, unitMeasurement: true },
+      where: {
+        status: { in: ['pending', 'processing', 'approved', 'paid', 'shipped', 'delivered', 'in_transit'] }
+      }
+    });
+
+    const orderSumMap: Record<number, number> = {};
+    activeOrders.forEach(o => {
+      let qty = Number(o.quantityRequested || 0);
+      const product = products.find(p => p.id === o.productId);
+      if (product) {
+        const orderUnit = (o.unitMeasurement || '').toLowerCase();
+        const stockUnit = (product.stockUnit || '').toLowerCase();
+        
+        if (orderUnit && stockUnit && orderUnit !== stockUnit && !orderUnit.includes(stockUnit) && !stockUnit.includes(orderUnit)) {
+           if (product.packagingSize) {
+             const match = product.packagingSize.match(/(\d+(?:\.\d+)?)/);
+             if (match) {
+                qty = qty * Number(match[1]);
+             }
+           }
+        }
+      }
+      orderSumMap[o.productId] = (orderSumMap[o.productId] || 0) + qty;
+    });
+
+    const serialized = products.map((p) => {
+      const totalStock = Number(p.stockQuantity);
+      const reserved = orderSumMap[p.id] || 0;
+      const availableStock = Math.max(0, totalStock - reserved);
+
+      return {
       ...p,
       moqValue: Number(p.moqValue),
       stockQuantity: Number(p.stockQuantity),
@@ -208,12 +240,31 @@ export async function getHoneyProducts() {
       sheaFatContent: p.sheaFatContent ? Number(p.sheaFatContent) : null,
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString(),
-    }));
+      availableStock: availableStock,
+    };
+    });
 
     return { success: true, data: serialized };
   } catch (error: any) {
     console.error("Failed to fetch honey products:", error);
     return { success: false, error: "Failed to fetch honey inventory" };
+  }
+}
+
+export async function getHoneyClientsCount() {
+  try {
+    const orders = await prisma.exportOrder.findMany({
+      where: { product: { name: { contains: 'Honey', mode: 'insensitive' } } },
+      select: { email: true }
+    });
+    const uniqueEmails = new Set();
+    orders.forEach(o => {
+      if (o.email) uniqueEmails.add(o.email.toLowerCase());
+    });
+    return { success: true, count: uniqueEmails.size };
+  } catch (error) {
+    console.error("Failed to fetch honey clients count:", error);
+    return { success: false, count: 0 };
   }
 }
 
@@ -370,5 +421,98 @@ export async function updateProduct(id: number, data: ProductInput) {
   } catch (error: any) {
     console.error("Failed to update product:", error);
     return { success: false, error: error.message || "Failed to update product" };
+  }
+}
+
+export async function getGlobalInventory() {
+  try {
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    const activeOrders = await prisma.exportOrder.findMany({
+      select: { productId: true, quantityRequested: true, unitMeasurement: true },
+      where: {
+        status: { in: ['pending', 'processing', 'approved', 'paid', 'shipped', 'delivered', 'in_transit'] }
+      }
+    });
+
+    const orderSumMap: Record<number, number> = {};
+    activeOrders.forEach(o => {
+      let qty = Number(o.quantityRequested || 0);
+      const product = products.find(p => p.id === o.productId);
+      if (product) {
+        const orderUnit = (o.unitMeasurement || '').toLowerCase();
+        const stockUnit = (product.stockUnit || '').toLowerCase();
+        
+        if (orderUnit && stockUnit && orderUnit !== stockUnit && !orderUnit.includes(stockUnit) && !stockUnit.includes(orderUnit)) {
+           if (product.packagingSize) {
+             const match = product.packagingSize.match(/(\d+(?:\.\d+)?)/);
+             if (match) {
+                qty = qty * Number(match[1]);
+             }
+           }
+        }
+      }
+      orderSumMap[o.productId] = (orderSumMap[o.productId] || 0) + qty;
+    });
+
+    const serialized = products.map((p) => {
+      const totalStock = Number(p.stockQuantity);
+      const reserved = orderSumMap[p.id] || 0;
+      const availableStock = Math.max(0, totalStock - reserved);
+
+      let packageMultiplier = 1;
+      if (p.packagingSize) {
+         const match = p.packagingSize.match(/(\d+(?:\.\d+)?)/);
+         if (match) {
+            packageMultiplier = Number(match[1]) || 1;
+         }
+      }
+      
+      let grade = "Standard";
+      if (p.category === "organic" || p.isOrganic || p.cashewGrade?.toLowerCase().includes("w320") || p.sheaGrade === "Grade A") {
+        grade = "Premium";
+      } else if (p.category === "raw" || p.cashewGrade?.toLowerCase().includes("w240")) {
+        grade = "Premium";
+      }
+
+      const getCategoryLabel = (cat: string) => {
+         if (cat.toLowerCase().includes('honey')) return 'Honey';
+         if (cat.toLowerCase().includes('cashew')) return 'Cashew';
+         if (cat.toLowerCase().includes('shea')) return 'Shea';
+         if (p.name.toLowerCase().includes('honey')) return 'Honey';
+         if (p.name.toLowerCase().includes('cashew')) return 'Cashew';
+         if (p.name.toLowerCase().includes('shea')) return 'Shea';
+         return cat.charAt(0).toUpperCase() + cat.slice(1);
+      };
+
+      const unitMap = (u: string) => {
+         if (!u) return 'kg';
+         if (u.toLowerCase().includes('kilo') || u.toLowerCase() === 'kg') return 'kg';
+         if (u.toLowerCase().includes('liter') || u.toLowerCase() === 'l') return 'L';
+         return u;
+      };
+
+      return {
+        id: p.id,
+        name: p.name,
+        category: getCategoryLabel(p.category),
+        grade,
+        stock: totalStock,
+        reserved,
+        available: availableStock,
+        unit: unitMap(p.stockUnit),
+        packageType: p.packagingType || 'Units',
+        packagesAvailable: Math.floor(availableStock / packageMultiplier),
+        packagesTotal: Math.floor(totalStock / packageMultiplier),
+        packagesReserved: Math.floor(reserved / packageMultiplier)
+      };
+    });
+
+    return { success: true, data: serialized };
+  } catch (error: any) {
+    console.error("Failed to fetch global inventory:", error);
+    return { success: false, error: "Failed to load global inventory" };
   }
 }

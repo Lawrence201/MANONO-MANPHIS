@@ -33,6 +33,7 @@ const navGroups = [
     label: "Trade Operations",
     items: [
       { title: "Orders", url: "/orders", icon: ShoppingCart, badge: "8" },
+      { title: "Quotations", url: "/quotations", icon: FileText },
       { title: "Customers", url: "/customers", icon: Globe2 },
       { title: "Inventory", url: "/inventory", icon: Layers },
       { title: "Logistics", url: "/logistics", icon: Truck },
@@ -42,7 +43,6 @@ const navGroups = [
   {
     label: "Communication",
     items: [
-      { title: "Quotations", url: "/quotations", icon: FileText },
       { title: "Leads & CRM", url: "/leads", icon: Users, badge: "12" },
       { title: "Communications", url: "/communications", icon: MessageSquare, badge: "2" },
     ],

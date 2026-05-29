@@ -8,14 +8,21 @@ export async function GET() {
     try {
         // 1. Calculate Total Revenue from Billboards
         const billboardRevenueAgg = await prisma.billboardBooking.aggregate({
-            _sum: {
-                totalPrice: true
-            },
-            where: {
-                status: { in: ['approved', 'active', 'paused'] }
-            }
+            _sum: { totalPrice: true },
+            where: { status: { in: ['approved', 'active', 'paused'] } }
         });
         const billboardRevenue = Number(billboardRevenueAgg._sum.totalPrice || 0);
+
+        const exportRevenueAgg = await prisma.exportOrder.findMany({
+            where: { status: { in: ['approved', 'processing', 'in_transit', 'shipped', 'delivered', 'paid'] } },
+            select: { totalEstimatedCost: true, customsValue: true, quantityRequested: true, product: { select: { pricePerUnit: true } } }
+        });
+        const exportRevenue = exportRevenueAgg.reduce((acc, order) => {
+            const val = Number(order.totalEstimatedCost) || Number(order.customsValue) || (Number(order.quantityRequested) * Number(order.product.pricePerUnit || 0));
+            return acc + val;
+        }, 0);
+
+        const globalTotalRevenue = billboardRevenue + exportRevenue;
 
         // 2. Count Active Billboards (billboards with at least one booking)
         const totalBillboards = await prisma.billboard.count();
@@ -64,6 +71,7 @@ export async function GET() {
                 createdAt: true,
                 quantityRequested: true,
                 customsValue: true,
+                totalEstimatedCost: true,
                 product: { select: { name: true, pricePerUnit: true } }
             }
         });
@@ -80,7 +88,7 @@ export async function GET() {
 
         allExportForChart.forEach(o => {
             const idx = new Date(o.createdAt).getMonth();
-            const rev = Number(o.customsValue) || (Number(o.quantityRequested) * Number(o.product.pricePerUnit || 0));
+            const rev = Number(o.totalEstimatedCost) || Number(o.customsValue) || (Number(o.quantityRequested) * Number(o.product.pricePerUnit || 0));
             const name = o.product.name.toLowerCase();
             if (name.includes('honey'))  monthlyData[idx].Honey  += rev;
             else if (name.includes('shea'))   monthlyData[idx].Shea   += rev;
@@ -152,7 +160,7 @@ export async function GET() {
         });
 
         const formattedExportOrders = recentExportOrders.map(o => {
-            const calculatedAmount = Number(o.customsValue) || (Number(o.quantityRequested) * Number(o.product.pricePerUnit || 0));
+            const calculatedAmount = Number(o.totalEstimatedCost) || Number(o.customsValue) || (Number(o.quantityRequested) * Number(o.product.pricePerUnit || 0));
             
             return {
                 id: o.referenceNumber,
@@ -230,24 +238,32 @@ export async function GET() {
                 destinationCountry: true,
                 quantityRequested: true,
                 customsValue: true,
+                totalEstimatedCost: true,
                 product: { select: { pricePerUnit: true, moqUnit: true } }
             }
         });
 
+        // Normalize "Country Name (ISO)" → "ISO" (e.g. "Russia (RU)" → "RU")
+        const toIso = (raw: string): string => {
+            const m = raw.match(/\(([A-Z]{2})\)\s*$/);
+            return m ? m[1] : raw;
+        };
+
         // Unique destination ISO codes (for map markers)
-        const exportLocations = [...new Set(activeExportOrders.map(d => d.destinationCountry))];
+        const exportLocations = [...new Set(activeExportOrders.map(d => toIso(d.destinationCountry)))];
 
         // Per-country summary: total units, revenue, and unit label
         const countryMap: Record<string, { units: number; revenue: number; unit: string }> = {};
         activeExportOrders.forEach(o => {
+            const iso   = toIso(o.destinationCountry);
             const qty   = Number(o.quantityRequested) || 0;
-            const rev   = Number(o.customsValue) || (qty * Number(o.product.pricePerUnit || 0));
+            const rev   = Number(o.totalEstimatedCost) || Number(o.customsValue) || (qty * Number(o.product.pricePerUnit || 0));
             const unit  = o.product.moqUnit || 'units';
-            if (!countryMap[o.destinationCountry]) {
-                countryMap[o.destinationCountry] = { units: 0, revenue: 0, unit };
+            if (!countryMap[iso]) {
+                countryMap[iso] = { units: 0, revenue: 0, unit };
             }
-            countryMap[o.destinationCountry].units   += qty;
-            countryMap[o.destinationCountry].revenue += rev;
+            countryMap[iso].units   += qty;
+            countryMap[iso].revenue += rev;
         });
 
         const maxUnits       = Math.max(...Object.values(countryMap).map(v => v.units), 1);
@@ -271,10 +287,60 @@ export async function GET() {
             take: 5
         });
 
+        // 11. Calculate Inventory Pipeline (Honey Focus)
+        const honeyProduct = await prisma.product.findFirst({
+            where: { name: { contains: 'Honey', mode: 'insensitive' } }
+        });
+        
+        const honeyTotal = honeyProduct ? (Number(honeyProduct.stockQuantity) || 1000) : 1000;
+
+        const honeyOrders = await prisma.exportOrder.findMany({
+            where: { product: { name: { contains: 'Honey', mode: 'insensitive' } } },
+            select: { 
+              status: true, 
+              quantityRequested: true, 
+              unitMeasurement: true, 
+              product: { select: { packagingSize: true, stockUnit: true } } 
+            }
+        });
+
+        let honeyReserved = 0;
+        let honeyProcessing = 0;
+        let honeyShipped = 0;
+
+        honeyOrders.forEach(o => {
+            let qty = Number(o.quantityRequested) || 0;
+            
+            if (o.product) {
+              const orderUnit = (o.unitMeasurement || '').toLowerCase();
+              const stockUnit = (o.product.stockUnit || '').toLowerCase();
+              if (orderUnit && stockUnit && orderUnit !== stockUnit && !orderUnit.includes(stockUnit) && !stockUnit.includes(orderUnit)) {
+                 if (o.product.packagingSize) {
+                   const match = o.product.packagingSize.match(/(\d+(?:\.\d+)?)/);
+                   if (match) {
+                      qty = qty * Number(match[1]);
+                   }
+                 }
+              }
+            }
+
+            if (o.status === 'pending') honeyReserved += qty;
+            else if (['processing', 'approved', 'paid'].includes(o.status)) honeyProcessing += qty;
+            else if (['shipped', 'delivered', 'in_transit'].includes(o.status)) honeyShipped += qty;
+        });
+
+        const inventoryStats = {
+            totalStock: honeyTotal,
+            available: Math.max(0, honeyTotal - honeyReserved - honeyProcessing - honeyShipped),
+            reserved: honeyReserved,
+            processing: honeyProcessing,
+            shipped: honeyShipped
+        };
+
         return NextResponse.json({
             success: true,
             data: {
-                totalRevenue: billboardRevenue,
+                totalRevenue: globalTotalRevenue,
                 activeBillboardsCount,
                 totalBillboards,
                 pendingApprovalsCount,
@@ -284,6 +350,7 @@ export async function GET() {
                 monthlyData,
                 recentBookings: allRecentActivity,
                 slotStats,
+                inventoryStats,
                 exportLocations,
                 exportCountrySummary,
                 recentReviews

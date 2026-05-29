@@ -672,7 +672,7 @@ export default function AddHoneyPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Minimum Order Quantity (MOQ)</Label>
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Minimum Order</Label>
                 <div className="flex gap-2">
                   <Input 
                     type="number"

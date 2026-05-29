@@ -618,6 +618,8 @@ model ExportOrder {
   
   // Step 3: Product Info (quantity)
   quantityRequested   Decimal  @map("quantity_requested") @db.Decimal(10, 2)
+  unitMeasurement     String?  @map("unit_measurement") @db.VarChar(50)
+  totalEstimatedCost  Decimal? @map("total_estimated_cost") @db.Decimal(15, 2)
   
   // Step 4: Shipping
   shippingType        String   @map("shipping_type") @db.VarChar(100)

@@ -26,6 +26,8 @@ export async function submitExportOrder(data: any) {
         taxId: data.taxId || null,
         
         quantityRequested: Number(data.quantityRequested),
+        unitMeasurement: data.unitMeasurement || null,
+        totalEstimatedCost: data.totalEstimatedCost ? Number(data.totalEstimatedCost) : null,
         
         shippingType: data.shippingType,
         deliveryType: data.deliveryType,

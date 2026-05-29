@@ -88,7 +88,7 @@ export function ProductCard({ product }: { product: any }) {
               {[
                 { icon: MapPin,   label: "Origin",     value: product.warehouse    },
                 { icon: Package,  label: "Packaging", value: product.packagingType },
-                { icon: Hash,     label: "MOQ",       value: product.moq           },
+                { icon: Hash,     label: "Minimum Order",       value: product.moq           },
                 { icon: Activity, label: "Stock",     value: product.stockStatus   },
               ].map(({ icon: Icon, label, value }, i) => (
                 <div key={label} className={`flex items-center justify-between px-4 py-2.5 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/60"}`}>

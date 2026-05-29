@@ -45,7 +45,12 @@ function LoginForm() {
       if (res?.error) {
         setError("Invalid email or password");
       } else {
-        router.push("/");
+        const callbackUrl = searchParams.get("callbackUrl");
+        if (callbackUrl && callbackUrl.startsWith("/")) {
+          router.push(callbackUrl);
+        } else {
+          router.push("/");
+        }
         router.refresh();
       }
     } catch (err) {

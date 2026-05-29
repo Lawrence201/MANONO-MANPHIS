@@ -1,23 +1,37 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Mail, Phone, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const customers = [
-  { id: "C-001", name: "Bremen Trading GmbH", contact: "Hans Mueller", country: "Germany", flag: "🇩🇪", revenue: 685000, orders: 18, type: "VIP", tier: "Premium", since: "2021" },
-  { id: "C-002", name: "Atlantic Foods Inc.", contact: "John Whitman", country: "USA", flag: "🇺🇸", revenue: 542000, orders: 14, type: "VIP", tier: "Premium", since: "2020" },
-  { id: "C-003", name: "Provence Naturals", contact: "Marie Dubois", country: "France", flag: "🇫🇷", revenue: 428000, orders: 12, type: "Trusted", tier: "Standard", since: "2022" },
-  { id: "C-004", name: "London Spice Co.", contact: "Oliver Smith", country: "UK", flag: "🇬🇧", revenue: 385000, orders: 11, type: "Trusted", tier: "Standard", since: "2022" },
-  { id: "C-005", name: "Rotterdam Commodities", contact: "Emma Bakker", country: "Netherlands", flag: "🇳🇱", revenue: 295000, orders: 9, type: "Trusted", tier: "Standard", since: "2023" },
-  { id: "C-006", name: "Gulf Trade LLC", contact: "Ahmed Al-Rashid", country: "UAE", flag: "🇦🇪", revenue: 248000, orders: 7, type: "VIP", tier: "Premium", since: "2023" },
-  { id: "C-007", name: "Osaka Imports Co.", contact: "Yuki Tanaka", country: "Japan", flag: "🇯🇵", revenue: 165000, orders: 5, type: "New", tier: "Standard", since: "2024" },
-  { id: "C-008", name: "Madrid Organics", contact: "Carlos Mendez", country: "Spain", flag: "🇪🇸", revenue: 142000, orders: 6, type: "Trusted", tier: "Standard", since: "2023" },
-];
+import { getAggregatedCustomers } from "@/lib/actions/crm-actions";
 
 const fmt = new Intl.NumberFormat("en-US");
 
 export default function CustomersPage() {
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const res = await getAggregatedCustomers();
+      if (res.success && res.data) {
+        setCustomers(res.data);
+      }
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const filtered = customers.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.country.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <AppLayout
       title="Customer CRM"
@@ -34,16 +48,25 @@ export default function CustomersPage() {
       </div>
 
       <div className="mb-4">
-        <Input placeholder="Search customers by name, contact, country..." className="max-w-sm h-9 bg-card" />
+        <Input 
+          placeholder="Search customers by name, contact, country..." 
+          className="max-w-sm h-9 bg-card"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        {customers.map((c) => (
+        {loading ? (
+          <div className="col-span-full py-20 text-center text-muted-foreground">Loading customers from database...</div>
+        ) : filtered.length === 0 ? (
+          <div className="col-span-full py-20 text-center text-muted-foreground">No customers found.</div>
+        ) : filtered.map((c) => (
           <div key={c.id} className="bg-card rounded-xl border border-border p-5 shadow-card hover:shadow-elegant hover:-translate-y-0.5 transition-all group">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
-                  {c.name.split(" ").slice(0, 2).map(w => w[0]).join("")}
+                  {c.name.split(" ").slice(0, 2).map((w: string) => w[0]).join("")}
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-sm truncate">{c.name}</div>
