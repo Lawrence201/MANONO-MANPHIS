@@ -9,6 +9,7 @@ export async function getExportOrders(params?: {
   pageSize?: number;
   search?: string;
   type?: string;
+  status?: string;
 }) {
   try {
     const page = params?.page || 1;
@@ -16,6 +17,7 @@ export async function getExportOrders(params?: {
     const pageSize = params?.pageSize || 1000; 
     const search = params?.search || '';
     const type = params?.type || 'all';
+    const status = params?.status || 'all';
 
     const whereClause: any = {};
     
@@ -31,6 +33,10 @@ export async function getExportOrders(params?: {
       whereClause.product = {
         name: { contains: type, mode: 'insensitive' }
       };
+    }
+
+    if (status !== 'all') {
+      whereClause.status = status;
     }
 
     const [orders, total] = await prisma.$transaction([

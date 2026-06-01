@@ -310,7 +310,7 @@ export default function AdBookingsPage() {
               <div className="overflow-x-auto overflow-y-auto h-full">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border bg-muted/30 sticky top-0 z-10">
+                    <tr className="border-b border-border bg-card sticky top-0 z-10">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Client</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Campaign</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Billboard</th>

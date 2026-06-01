@@ -190,6 +190,7 @@ export default function DashboardPage() {
     recentReviews?: any[];
     commodityPerformance?: { product: string; revenue: number }[];
     adPerformance?: { product: string; revenue: number }[];
+    topAdLocations?: { name: string; revenue: number; share: number }[];
   }>({
     totalRevenue: 0,
     activeBillboardsCount: 0,
@@ -204,7 +205,8 @@ export default function DashboardPage() {
     exportCountrySummary: [],
     recentReviews: [],
     commodityPerformance: [],
-    adPerformance: []
+    adPerformance: [],
+    topAdLocations: []
   });
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [svgHtml, setSvgHtml] = useState<string>("");
@@ -232,7 +234,8 @@ export default function DashboardPage() {
             exportCountrySummary: json.data.exportCountrySummary || [],
             recentReviews: json.data.recentReviews || [],
             commodityPerformance: json.data.commodityPerformance || [],
-            adPerformance: json.data.adPerformance || []
+            adPerformance: json.data.adPerformance || [],
+            topAdLocations: json.data.topAdLocations || []
           });
           setRecentBookings(json.data.recentBookings || []);
         }
@@ -879,7 +882,7 @@ export default function DashboardPage() {
           commodityData={stats.commodityPerformance} 
           adData={stats.adPerformance} 
         />
-        <CountryDistributionChart exportData={exportPieData} />
+        <CountryDistributionChart exportData={exportPieData} adLocationData={stats.topAdLocations} />
         <ActivityFeed />
       </div>
 

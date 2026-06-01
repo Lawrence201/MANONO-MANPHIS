@@ -57,8 +57,8 @@ export function ActivityFeed() {
   }, []);
 
   return (
-    <div className="bg-card rounded-xl border border-border p-6 shadow-card h-full">
-      <div className="flex items-center justify-between mb-5">
+    <div className="bg-card rounded-xl border border-border p-6 shadow-card flex flex-col">
+      <div className="flex items-center justify-between mb-5 shrink-0">
         <div>
           <h3 className="font-display font-semibold text-base">Recent Activity</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Live feed across the platform</p>
@@ -73,23 +73,25 @@ export function ActivityFeed() {
           Loading live feed...
         </div>
       ) : (
-        <ul className="space-y-1">
-          {activities.map((a) => {
-            const cfg = iconMap[a.icon as keyof typeof iconMap] || iconMap.order;
-            const Icon = cfg.icon;
-            return (
-              <li key={a.id} className="flex items-start gap-3 py-2.5 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", cfg.color)}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs leading-relaxed">{a.text}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{formatRelativeTime(a.createdAt)}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="overflow-y-auto custom-scrollbar pr-2" style={{ maxHeight: "320px" }}>
+          <ul className="space-y-1">
+            {activities.map((a) => {
+              const cfg = iconMap[a.icon as keyof typeof iconMap] || iconMap.order;
+              const Icon = cfg.icon;
+              return (
+                <li key={a.id} className="flex items-start gap-3 py-2.5 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", cfg.color)}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs leading-relaxed">{a.text}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{formatRelativeTime(a.createdAt)}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </div>
   );

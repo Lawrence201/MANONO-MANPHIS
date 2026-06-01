@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plane, Ship, Package, MapPin, Calendar, FileText, Download, ChevronDown, CheckCircle2, Factory, CheckSquare, PackageCheck, Waves, Cloud } from "lucide-react";
+import { Plane, Ship, Package, MapPin, Calendar, FileText, Download, ChevronDown, CheckCircle2, Factory, CheckSquare, PackageCheck, Waves, Cloud, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateExportOrderStatus } from "@/lib/actions/export-order-actions";
 import { toast } from "sonner";
@@ -34,7 +34,7 @@ const STATUS_STAGES = [
   { id: "delivered", label: "Delivered" },
 ];
 
-export function LogisticsClient({ initialShipments }: { initialShipments: any[] }) {
+export function LogisticsClient({ initialShipments, pagination }: { initialShipments: any[], pagination?: any }) {
   const [shipments, setShipments] = useState(initialShipments);
   const [selectedUpdate, setSelectedUpdate] = useState<{ id: number; status: string; label: string } | null>(null);
   const [updateDate, setUpdateDate] = useState<string>("");
@@ -62,6 +62,12 @@ export function LogisticsClient({ initialShipments }: { initialShipments: any[] 
       case "delivered": return 100;
       default: return 0;
     }
+  };
+
+  const updateUrlParams = (key: string, value: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set(key, value);
+    window.location.href = url.toString();
   };
 
   return (
@@ -229,6 +235,32 @@ export function LogisticsClient({ initialShipments }: { initialShipments: any[] 
           <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-semibold">No Active Shipments</h3>
           <p className="text-muted-foreground text-sm mt-1">Approve pending export orders to move them into logistics.</p>
+        </div>
+      )}
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6 px-2">
+          <p className="text-xs text-muted-foreground">
+            Page {pagination.page} of {pagination.totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={pagination.page <= 1}
+              onClick={() => updateUrlParams('page', String(pagination.page - 1))}
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={pagination.page >= pagination.totalPages}
+              onClick={() => updateUrlParams('page', String(pagination.page + 1))}
+            >
+              Next <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
         </div>
       )}
       {/* Status Update Modal */}

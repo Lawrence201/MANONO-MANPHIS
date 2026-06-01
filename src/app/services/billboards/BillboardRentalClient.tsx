@@ -39,6 +39,14 @@ const billboardFeatures = [
 export default function BillboardRentalClient({ dynamicBillboards }: { dynamicBillboards: any[] }) {
   const [expandedId, setExpandedId] = useState("advantage");
   const [activeImageIndices, setActiveImageIndices] = useState<Record<string, number>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  const totalPages = Math.ceil((dynamicBillboards?.length || 0) / ITEMS_PER_PAGE);
+  const currentBillboards = (dynamicBillboards || []).slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -237,7 +245,7 @@ export default function BillboardRentalClient({ dynamicBillboards }: { dynamicBi
             </div>
 
             <div className="space-y-16 min-[1029px]:space-y-20">
-              {dynamicBillboards.map((ad, i) => (
+              {currentBillboards.map((ad, i) => (
                 <div key={ad.id || i} className="group cursor-pointer">
                   <div className="relative aspect-[21/9] max-[450px]:aspect-[4/3] min-[1029px]:aspect-[21/7] w-full overflow-hidden mb-5 min-[1029px]:mb-10 group/img border border-gray-100 rounded-[8px]">
                     <Link href={`/products/${ad.id}`}>
@@ -331,6 +339,63 @@ export default function BillboardRentalClient({ dynamicBillboards }: { dynamicBi
                 </div>
               ))}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-12 min-[1029px]:mt-20">
+                <button 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                
+                <div className="flex gap-1 flex-wrap justify-center">
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const pageNumber = i + 1;
+                    // Show first, last, current, and adjacent pages
+                    if (
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      Math.abs(pageNumber - currentPage) <= 1
+                    ) {
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setCurrentPage(pageNumber);
+                            window.scrollTo({ top: 800, behavior: 'smooth' });
+                          }}
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold transition-colors ${
+                            currentPage === pageNumber 
+                              ? "bg-[#1a1a1a] text-white border border-[#1a1a1a]" 
+                              : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                          }`}
+                          style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    } else if (
+                      pageNumber === currentPage - 2 ||
+                      pageNumber === currentPage + 2
+                    ) {
+                      return <span key={i} className="w-10 h-10 flex items-center justify-center text-gray-400">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
+            )}
           </div>
 
         </div>

@@ -26,11 +26,21 @@ export default function CustomersPage() {
     load();
   }, []);
 
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
   const filtered = customers.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     c.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.country.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <AppLayout
@@ -56,12 +66,12 @@ export default function CustomersPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {loading ? (
           <div className="col-span-full py-20 text-center text-muted-foreground">Loading customers from database...</div>
-        ) : filtered.length === 0 ? (
+        ) : paginated.length === 0 ? (
           <div className="col-span-full py-20 text-center text-muted-foreground">No customers found.</div>
-        ) : filtered.map((c) => (
+        ) : paginated.map((c) => (
           <div key={c.id} className="bg-card rounded-xl border border-border p-5 shadow-card hover:shadow-elegant hover:-translate-y-0.5 transition-all group">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -112,6 +122,32 @@ export default function CustomersPage() {
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-2 mb-4">
+          <p className="text-xs text-muted-foreground">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={page <= 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Prev
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={page >= totalPages}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

@@ -10,7 +10,7 @@ export default async function LogisticsPage({ searchParams }: { searchParams: Pr
   const page = params.page ? parseInt(params.page) : 1;
   const filter = params.filter || 'all';
 
-  const { success, data, stats, error } = await getActiveShipments({ page, pageSize: 15, filter });
+  const { success, data, stats, error, pagination } = await getActiveShipments({ page, pageSize: 10, filter });
 
   if (!success) {
     return (
@@ -33,7 +33,7 @@ export default async function LogisticsPage({ searchParams }: { searchParams: Pr
         <Stat label="Avg Transit" value={stats?.avgTransit || "22 days"} hint="port to port" />
       </div>
 
-      <LogisticsClient initialShipments={data || []} />
+      <LogisticsClient initialShipments={data || []} pagination={pagination} />
       
     </AppLayout>
   );

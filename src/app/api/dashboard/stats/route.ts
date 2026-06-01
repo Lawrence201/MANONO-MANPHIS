@@ -64,7 +64,7 @@ export async function GET() {
         // 6. Monthly revenue — Billboards (GH₵) + Export streams (GH₵)
         const allBookings = await prisma.billboardBooking.findMany({
             where: { status: { in: ['approved', 'active'] } },
-            select: { totalPrice: true, createdAt: true, billboard: { select: { name: true } } }
+            select: { totalPrice: true, createdAt: true, billboard: { select: { name: true, city: true } } }
         });
 
         const allExportForChart = await prisma.exportOrder.findMany({
@@ -300,7 +300,7 @@ export async function GET() {
             }
         });
         
-        const honeyTotal = honeyProducts.reduce((sum, p) => sum + (Number(p.stockQuantity) || 0), 0) || 1000;
+        const honeyTotal = honeyProducts.reduce((sum, p) => sum + (Number(p.stockQuantity) || 0), 0);
 
         const honeyOrders = await prisma.exportOrder.findMany({
             where: { product: { name: { contains: 'Honey', mode: 'insensitive' } } },
@@ -372,6 +372,26 @@ export async function GET() {
             .map(([product, revenue]) => ({ product, revenue }))
             .sort((a, b) => b.revenue - a.revenue);
 
+        // --- AD LOCATION PERFORMANCE COMPUTATION ---
+        const adLocationMap: Record<string, number> = {};
+        allBookings.forEach(b => {
+            const rev = Number(b.totalPrice || 0);
+            const city = b.billboard?.city || 'Others';
+            const formattedCity = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
+            if (!adLocationMap[formattedCity]) adLocationMap[formattedCity] = 0;
+            adLocationMap[formattedCity] += rev;
+        });
+        
+        const totalAdRevenue = Object.values(adLocationMap).reduce((s, v) => s + v, 0) || 1;
+        const topAdLocations = Object.entries(adLocationMap)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5) // top 5
+            .map(([name, revenue]) => ({
+                name,
+                revenue,
+                share: Math.round((revenue / totalAdRevenue) * 100)
+            }));
+
         return NextResponse.json({
             success: true,
             data: {
@@ -390,7 +410,8 @@ export async function GET() {
                 exportCountrySummary,
                 recentReviews,
                 commodityPerformance,
-                adPerformance
+                adPerformance,
+                topAdLocations
             }
         });
     } catch (error: any) {

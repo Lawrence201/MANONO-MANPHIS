@@ -13,8 +13,9 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
   const page = typeof resolvedParams.page === 'string' ? parseInt(resolvedParams.page, 10) : 1;
   const search = typeof resolvedParams.search === 'string' ? resolvedParams.search : '';
   const type = typeof resolvedParams.type === 'string' ? resolvedParams.type : 'all';
+  const status = typeof resolvedParams.status === 'string' ? resolvedParams.status : 'all';
 
-  const result = await getExportOrders({ page, pageSize: 15, search, type });
+  const result = await getExportOrders({ page, pageSize: 15, search, type, status });
   let paginatedOrders = result.success && result.data ? result.data : [];
   const pagination = result.pagination;
 
@@ -51,6 +52,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         pagination={pagination} 
         currentSearch={search}
         currentType={type}
+        currentStatus={status}
       />
     </AppLayout>
   );

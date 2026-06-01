@@ -124,7 +124,7 @@ export function ProductsGrid({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-          {items.slice(0, 3).map((item) => (
+          {items.slice(0, 6).map((item) => (
             type === "billboards" ? (
               <BillboardCatalogCard key={item.id} item={item} />
             ) : (
@@ -151,7 +151,7 @@ export function ProductsGrid({
 
 export async function BillboardCatalog() {
   const billboards = await prisma.billboard.findMany({
-    take: 3,
+    take: 6,
     include: { galleryImages: true, bookings: true },
     orderBy: { createdAt: 'desc' }
   });

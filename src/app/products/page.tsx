@@ -235,6 +235,15 @@ export default function ShopPage() {
 }
 
 function ShopSection({ title, subtitle, products, loading = false, categories, highlights = [], sizes = [] }: { title: string, subtitle: string, products: any[], loading?: boolean, categories: string[], highlights?: string[], sizes?: string[] }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+  
+  const totalPages = Math.ceil((products?.length || 0) / ITEMS_PER_PAGE);
+  const currentProducts = (products || []).slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <div className="container mx-auto px-4 max-w-[1400px] mt-20">
       <div className="flex flex-col lg:flex-row gap-8">
@@ -322,11 +331,67 @@ function ShopSection({ title, subtitle, products, loading = false, categories, h
                 <p className="text-[13px] font-black uppercase tracking-widest">No products available yet</p>
               </div>
             ) : (
-              products.map((product) => (
+              currentProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {!loading && totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-12">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              
+              <div className="flex gap-1 flex-wrap justify-center">
+                {Array.from({ length: totalPages }).map((_, i) => {
+                  const pageNumber = i + 1;
+                  if (
+                    pageNumber === 1 ||
+                    pageNumber === totalPages ||
+                    Math.abs(pageNumber - currentPage) <= 1
+                  ) {
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setCurrentPage(pageNumber);
+                          window.scrollTo({ top: 400, behavior: 'smooth' });
+                        }}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold transition-colors ${
+                          currentPage === pageNumber 
+                            ? "bg-[#1a1a1a] text-white border border-[#1a1a1a]" 
+                            : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                        }`}
+                        style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  } else if (
+                    pageNumber === currentPage - 2 ||
+                    pageNumber === currentPage + 2
+                  ) {
+                    return <span key={i} className="w-10 h-10 flex items-center justify-center text-gray-400">...</span>;
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

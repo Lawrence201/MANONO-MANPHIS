@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { updateExportOrderStatus, deleteExportOrder } from "@/lib/actions/export-order-actions";
 import { EditOrderModal } from "@/components/dashboard/edit-order-modal";
 import { ViewOrderModal } from "@/components/dashboard/view-order-modal";
@@ -21,12 +22,14 @@ export function OrdersTable({
   initialOrders, 
   pagination, 
   currentSearch, 
-  currentType 
+  currentType,
+  currentStatus
 }: { 
   initialOrders: any[],
   pagination?: { total: number, page: number, pageSize: number, totalPages: number },
   currentSearch?: string,
-  currentType?: string
+  currentType?: string,
+  currentStatus?: string
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -46,6 +49,7 @@ export function OrdersTable({
     // Keep search and type if they exist, unless we're changing them
     if (currentSearch && key !== 'search') params.set('search', currentSearch);
     if (currentType && currentType !== 'all' && key !== 'type') params.set('type', currentType);
+    if (currentStatus && currentStatus !== 'all' && key !== 'status') params.set('status', currentStatus);
     
     // Set the new value
     if (value && value !== 'all') {
@@ -110,13 +114,34 @@ export function OrdersTable({
         <Button onClick={() => updateUrlParams('type', 'honey')} variant={currentType === 'honey' ? 'default' : 'outline'} size="sm" className={cn("h-9", currentType === 'honey' && "bg-[#eea000] text-white")}>Honey</Button>
         <Button onClick={() => updateUrlParams('type', 'cashew')} variant={currentType === 'cashew' ? 'default' : 'outline'} size="sm" className={cn("h-9", currentType === 'cashew' && "bg-[#e5d5b5] text-amber-900")}>Cashew nut</Button>
         <Button onClick={() => updateUrlParams('type', 'shea')} variant={currentType === 'shea' ? 'default' : 'outline'} size="sm" className={cn("h-9", currentType === 'shea' && "bg-[#e1ceb6] text-amber-900")}>Sheabutter</Button>
+        
+        <div className="ml-auto flex items-center">
+          <Select 
+            value={currentStatus || 'all'} 
+            onValueChange={(val) => updateUrlParams('status', val)}
+          >
+            <SelectTrigger className="w-[140px] h-9 bg-card text-xs">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="shipped">Shipped</SelectItem>
+              <SelectItem value="in_transit">In Transit</SelectItem>
+              <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden flex flex-col h-[calc(100vh-280px)] min-h-[400px]">
+        <div className="overflow-auto flex-1 relative scrollbar-thin">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs text-muted-foreground border-b border-border bg-secondary/30">
+            <thead className="sticky top-0 z-20 bg-secondary shadow-sm">
+              <tr className="text-left text-xs text-muted-foreground border-b border-border">
                 <th className="font-medium px-5 py-3">Order</th>
                 <th className="font-medium px-5 py-3">Customer</th>
                 <th className="font-medium px-5 py-3">Product & Qty</th>

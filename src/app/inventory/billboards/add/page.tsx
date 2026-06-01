@@ -22,7 +22,6 @@ import { toast } from "sonner";
 import { resolveGoogleMapsLink } from "@/lib/actions/location-actions";
 import { createBillboard } from "@/lib/actions/billboard-actions";
 import { useRouter } from "next/navigation";
-import { uploadBillboardMedia } from "@/lib/actions/upload-actions";
 
 export default function AddBillboardPage() {
   const router = useRouter();
@@ -722,11 +721,11 @@ export default function AddBillboardPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Est. Monthly Revenue:</span>
-                    <span className="font-bold text-foreground">GH₵ 0.00</span>
+                    <span className="font-bold text-foreground">GH₵ {((Number(formData.weeklyRate) || 0) * 4 * (Number(formData.maxSlots) || 12)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Max Utilization:</span>
-                    <span className="font-bold text-foreground">100% (12 slots)</span>
+                    <span className="font-bold text-foreground">100% ({Number(formData.maxSlots) || 12} slots)</span>
                   </div>
                 </div>
               </div>

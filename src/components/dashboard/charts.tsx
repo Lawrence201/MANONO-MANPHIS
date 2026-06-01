@@ -230,12 +230,14 @@ export function ProductPerformanceChart({
 
 export function CountryDistributionChart({
   exportData,
+  adLocationData,
 }: {
   exportData?: { name: string; revenue: number; share: number }[];
+  adLocationData?: { name: string; revenue: number; share: number }[];
 }) {
   const [mode, setMode] = useState<"exports" | "ads">("exports");
 
-  const adLocationData = [
+  const fallbackAdLocationData = [
     { name: "Accra Central", revenue: 420000, share: 35 },
     { name: "Tema Motorway", revenue: 264000, share: 22 },
     { name: "Kumasi City", revenue: 216000, share: 18 },
@@ -247,7 +249,7 @@ export function CountryDistributionChart({
 
   const currentData = mode === "exports"
     ? (exportData && exportData.length > 0 ? exportData : fallbackExportData)
-    : adLocationData;
+    : (adLocationData && adLocationData.length > 0 ? adLocationData : fallbackAdLocationData);
 
   const palette = ["var(--color-chart-1)", "var(--color-chart-2)", "var(--color-chart-3)", "var(--color-chart-4)", "var(--color-chart-5)", "#8b5cf6", "#ec4899", "#94a3b8"];
 

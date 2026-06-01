@@ -65,9 +65,14 @@ export default function BillboardsListPage() {
   );
 
   const uniqueClients = new Set();
+  let totalRevenue = 0;
+
   billboards.forEach(b => {
     b.bookings?.forEach((bk: any) => {
       if (bk.email) uniqueClients.add(bk.email.toLowerCase());
+      if (bk.status === 'approved' || bk.status === 'active' || bk.status === 'completed') {
+        totalRevenue += Number(bk.totalPrice) || 0;
+      }
     });
   });
   const totalClients = uniqueClients.size;
@@ -88,22 +93,22 @@ export default function BillboardsListPage() {
       <TooltipProvider>
       <div style={{ fontFamily: "'Inter', sans-serif" }} className="animate-in fade-in duration-700 pb-20">
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
           <StatCard 
             label="Total Billboards" 
             value={billboards.length.toString()} 
-            icon={<Monitor className="w-5 h-5 text-blue-500" />} 
           />
           <StatCard 
             label="Active Billboards" 
             value={billboards.length.toString()} 
-            icon={<Activity className="w-5 h-5 text-emerald-500" />} 
-            accent 
           />
           <StatCard 
             label="Total Clients (Billboards)" 
             value={totalClients.toString()} 
-            icon={<Users className="w-5 h-5 text-purple-500" />} 
+          />
+          <StatCard 
+            label="Billboard Revenue" 
+            value={`GH₵${totalRevenue.toLocaleString()}`} 
           />
         </div>
 
@@ -359,19 +364,13 @@ function PremiumBillboardCard({ billboard, index, onDelete }: { billboard: any, 
   );
 }
 
-function StatCard({ label, value, icon, accent }: { label: string; value: string; icon: React.ReactNode; accent?: boolean }) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-transparent rounded-xl border border-black/5 dark:border-white/5 p-6 shadow-none transition-all group overflow-hidden relative text-inter">
-      {accent && (
-        <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
-      )}
       <div className="flex items-start justify-between relative z-10">
         <div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] leading-tight">{label}</p>
           <h3 className="text-2xl font-bold mt-2 tracking-tight text-black dark:text-white">{value}</h3>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-secondary/50 dark:bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-          {icon}
         </div>
       </div>
     </div>
