@@ -248,7 +248,28 @@ export async function HoneyCatalog() {
         packagingType: PACKAGING_LABELS[db.packagingType] || db.packagingType || "—",
         moq: `${db.moqValue} ${db.moqUnit}`,
         stockStatus: STOCK_LABELS[db.stockStatus] || db.stockStatus || "—",
-        price: `GH₵ ${Number(db.pricePerUnit).toFixed(2)}${db.priceUnitType === "per_liter" ? "/Liter" : db.priceUnitType === "per_kg" ? "/kg" : db.priceUnitType === "per_ton" ? "/ton" : db.priceUnitType === "per_unit" ? "/unit" : `/${db.priceUnitType}`}`,
+        price: (function() {
+          const p = Number(db.pricePerUnit) || 0;
+          let multiplier = 1;
+          let pkgName = "Unit";
+          
+          if (db.packagingType === "drum" || db.packagingType?.toLowerCase().startsWith("dru")) pkgName = "Drum";
+          else if (db.packagingType === "bucket") pkgName = "Bucket";
+          else if (db.packagingType === "container") pkgName = "IBC Tote";
+          else if (db.packagingType === "bottle") pkgName = "Bottle";
+          else if (db.packagingType) pkgName = db.packagingType.charAt(0).toUpperCase() + db.packagingType.slice(1);
+          
+          if (db.priceUnitType === 'per_kg' && db.packagingSize) {
+            const matchKg = db.packagingSize.match(/(\d+(?:\.\d+)?)kg/i);
+            if (matchKg) multiplier = Number(matchKg[1]);
+          } else if (db.priceUnitType === 'per_liter' && db.packagingSize) {
+            const matchL = db.packagingSize.match(/(\d+(?:\.\d+)?)L/i);
+            if (matchL) multiplier = Number(matchL[1]);
+          }
+          
+          const finalPrice = p * multiplier;
+          return `GH₵ ${finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${pkgName}`;
+        })(),
       };
     });
   }

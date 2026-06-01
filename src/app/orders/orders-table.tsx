@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { PaymentBadge, StatusBadge } from "@/components/dashboard/badges";
-import { Plane, Ship, Package as PackageIcon, CheckCircle2, XCircle, Edit3, Eye, MoreHorizontal } from "lucide-react";
+import { Plane, Ship, Package as PackageIcon, CheckCircle2, XCircle, Edit3, Eye, MoreHorizontal, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
-import { updateExportOrderStatus } from "@/lib/actions/export-order-actions";
+import { updateExportOrderStatus, deleteExportOrder } from "@/lib/actions/export-order-actions";
 import { EditOrderModal } from "@/components/dashboard/edit-order-modal";
 import { ViewOrderModal } from "@/components/dashboard/view-order-modal";
 
@@ -14,10 +17,53 @@ const fmt = new Intl.NumberFormat("en-US");
 
 const shipIcon = (s: string) => s.toLowerCase().includes("air") ? Plane : s.toLowerCase().includes("sea") ? Ship : PackageIcon;
 
-export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
+export function OrdersTable({ 
+  initialOrders, 
+  pagination, 
+  currentSearch, 
+  currentType 
+}: { 
+  initialOrders: any[],
+  pagination?: { total: number, page: number, pageSize: number, totalPages: number },
+  currentSearch?: string,
+  currentType?: string
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  
   const [orders, setOrders] = useState(initialOrders);
   const [editingOrder, setEditingOrder] = useState<any | null>(null);
   const [viewingOrder, setViewingOrder] = useState<any | null>(null);
+
+  // Sync state when props change
+  useEffect(() => {
+    setOrders(initialOrders);
+  }, [initialOrders]);
+
+  // Update URL parameters for search and filtering
+  const updateUrlParams = (key: string, value: string) => {
+    const params = new URLSearchParams();
+    // Keep search and type if they exist, unless we're changing them
+    if (currentSearch && key !== 'search') params.set('search', currentSearch);
+    if (currentType && currentType !== 'all' && key !== 'type') params.set('type', currentType);
+    
+    // Set the new value
+    if (value && value !== 'all') {
+      params.set(key, value);
+    }
+    
+    // Reset to page 1 on search/filter changes unless we're explicitly changing pages
+    if (key === 'page') {
+      params.set('page', value);
+    } else {
+      params.set('page', '1');
+    }
+    
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  // The orders are already filtered on the server!
+  const filteredOrders = orders;
 
   const handleApprove = async (id: number) => {
     setOrders(orders.map(o => o.id === id ? { ...o, status: "approved" } : o));
@@ -31,8 +77,41 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
     toast.error("Order Rejected.");
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm(`Are you sure you want to permanently delete order EXP-${id}?`)) return;
+    
+    // Optimistic update
+    setOrders(orders.filter(o => o.id !== id));
+    
+    const res = await deleteExportOrder(id);
+    if (res.success) {
+      toast.success(`Order EXP-${id} deleted successfully!`);
+    } else {
+      toast.error("Failed to delete order");
+      setOrders(orders); // Revert
+    }
+  };
+
   return (
     <>
+      {/* Filters */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <Input 
+          placeholder="Search orders..." 
+          defaultValue={currentSearch} 
+          onChange={e => {
+            const val = e.target.value;
+            const t = setTimeout(() => updateUrlParams('search', val), 500);
+            return () => clearTimeout(t);
+          }} 
+          className="max-w-xs h-9 bg-card" 
+        />
+        <Button onClick={() => updateUrlParams('type', 'all')} variant={(!currentType || currentType === 'all') ? 'default' : 'outline'} size="sm" className={cn("h-9", (!currentType || currentType === 'all') && "bg-[#6aabfc] text-white")}>All Orders</Button>
+        <Button onClick={() => updateUrlParams('type', 'honey')} variant={currentType === 'honey' ? 'default' : 'outline'} size="sm" className={cn("h-9", currentType === 'honey' && "bg-[#eea000] text-white")}>Honey</Button>
+        <Button onClick={() => updateUrlParams('type', 'cashew')} variant={currentType === 'cashew' ? 'default' : 'outline'} size="sm" className={cn("h-9", currentType === 'cashew' && "bg-[#e5d5b5] text-amber-900")}>Cashew nut</Button>
+        <Button onClick={() => updateUrlParams('type', 'shea')} variant={currentType === 'shea' ? 'default' : 'outline'} size="sm" className={cn("h-9", currentType === 'shea' && "bg-[#e1ceb6] text-amber-900")}>Sheabutter</Button>
+      </div>
+
       <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -50,14 +129,14 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
               </tr>
             </thead>
             <tbody>
-              {orders.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-5 py-8 text-center text-muted-foreground text-sm">
                     No export orders found.
                   </td>
                 </tr>
               ) : (
-                orders.map((o) => {
+                filteredOrders.map((o) => {
                   const ShipI = shipIcon(o.shippingType);
                   const amount = o.totalEstimatedCost ? Number(o.totalEstimatedCost) : (o.customsValue || (o.quantityRequested * (o.product.pricePerUnit || 0)));
                   const date = new Date(o.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -113,6 +192,11 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
                                 </DropdownMenuItem>
                               </>
                             )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleDelete(o.id)} className="cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Order
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
@@ -124,6 +208,32 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
           </table>
         </div>
       </div>
+
+      {pagination && (
+        <div className="flex items-center justify-between mt-4 px-2">
+          <p className="text-xs text-muted-foreground">
+            Page {pagination.page} of {pagination.totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={pagination.page <= 1}
+              onClick={() => updateUrlParams('page', String(pagination.page - 1))}
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={pagination.page >= pagination.totalPages}
+              onClick={() => updateUrlParams('page', String(pagination.page + 1))}
+            >
+              Next <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
       
       {viewingOrder && (
         <ViewOrderModal 

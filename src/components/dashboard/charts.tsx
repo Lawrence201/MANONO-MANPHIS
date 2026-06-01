@@ -131,7 +131,7 @@ export function RevenueChart({ data }: {
                 <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#888888" strokeOpacity={0.25} vertical={false} />
             <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
             <YAxis 
               stroke="var(--color-muted-foreground)" 
@@ -152,25 +152,16 @@ export function RevenueChart({ data }: {
   );
 }
 
-export function ProductPerformanceChart() {
+export function ProductPerformanceChart({
+  commodityData = [],
+  adData = []
+}: {
+  commodityData?: { product: string; revenue: number }[];
+  adData?: { product: string; revenue: number }[];
+}) {
   const [mode, setMode] = useState<"commodities" | "advertising">("commodities");
 
-  const commodityData = [
-    { product: "W320 Cashew", revenue: 1250000 },
-    { product: "W240 Cashew", revenue: 890000 },
-    { product: "Premium Honey", revenue: 850000 },
-    { product: "Refined Shea", revenue: 480000 },
-    { product: "Raw Honey", revenue: 420000 },
-    { product: "Raw Shea", revenue: 240000 },
-  ];
-
-  const adPackageData = [
-    { product: "Digital LED Screens", revenue: 650000 },
-    { product: "Static Billboards", revenue: 450000 },
-    { product: "Transit Media", revenue: 280000 },
-  ];
-
-  const currentData = mode === "commodities" ? commodityData : adPackageData;
+  const currentData = mode === "commodities" ? commodityData : adData;
   const barColor = mode === "commodities" ? "#f59e0b" : "#3b82f6"; // Gold vs. Blue
 
   return (
@@ -205,8 +196,8 @@ export function ProductPerformanceChart() {
           </div>
         </div>
         <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={currentData} layout="vertical" margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+          <BarChart data={currentData} layout="vertical" margin={{ top: 0, right: 5, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#888888" strokeOpacity={0.25} horizontal={false} />
             <XAxis 
               type="number" 
               stroke="var(--color-muted-foreground)" 
@@ -222,14 +213,14 @@ export function ProductPerformanceChart() {
               fontSize={11} 
               tickLine={false} 
               axisLine={false} 
-              width={120} 
+              width={75} 
             />
             <Tooltip 
               contentStyle={tooltipStyle} 
               formatter={(v: any) => [`GH₵ ${v.toLocaleString()}`, "Revenue"]} 
               cursor={{ fill: "var(--color-secondary)" }} 
             />
-            <Bar dataKey="revenue" fill={barColor} radius={[0, 6, 6, 0]} barSize={22} />
+            <Bar dataKey="revenue" fill={barColor} radius={[0, 6, 6, 0]} barSize={28} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -472,7 +463,10 @@ export function PipelineFunnelChart({
                   <span className="font-medium">{stage.stage}</span>
                   <div className="flex items-center gap-2 font-semibold">
                     {mode !== "advertising" && i > 0 && <span className="text-muted-foreground font-medium">({pct.toFixed(0)}%)</span>}
-                    <span className="tabular-nums">{stage.value}</span>
+                    <span className="tabular-nums">
+                      {stage.value.toLocaleString()} {mode === "cashew" ? "Bags" : mode === "advertising" ? "Slots" : "KG"}
+                      {mode === "honey" && stage.value > 0 ? ` (~${Math.round(stage.value / 20).toLocaleString()} Drums)` : ""}
+                    </span>
                   </div>
                 </div>
                 <div className="h-9 rounded-md bg-secondary overflow-hidden relative">

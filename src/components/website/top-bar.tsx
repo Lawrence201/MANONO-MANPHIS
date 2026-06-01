@@ -1,11 +1,24 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Mail, Phone, Clock, LogIn, UserPlus, Globe, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 
 export function TopBar() {
   const { data: session } = useSession();
+  const [countryCode, setCountryCode] = useState<string | null>(null);
+  
+  useEffect(() => {
+    fetch('https://api.country.is/')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.country) {
+          setCountryCode(data.country);
+        }
+      })
+      .catch(e => console.error("Could not fetch country", e));
+  }, []);
   
   const firstName = session?.user?.name ? session.user.name.split(" ")[0] : "";
   return (
@@ -54,8 +67,16 @@ export function TopBar() {
           )}
           <div className="w-px h-3 bg-white/20 max-[1028px]:hidden" />
           <div className="flex items-center gap-2 cursor-pointer hover:text-[#eea000] transition-colors group">
-            <Globe className="w-3.5 h-3.5" />
-            <span className="uppercase">en</span>
+            {countryCode ? (
+              <img 
+                src={`https://flagcdn.com/w20/${countryCode.toLowerCase()}.png`} 
+                alt={countryCode} 
+                className="h-3 w-auto object-contain rounded-[2px]" 
+              />
+            ) : (
+              <Globe className="w-3.5 h-3.5" />
+            )}
+            <span className="uppercase">{countryCode || "en"}</span>
             <span className="text-[8px] opacity-50 group-hover:opacity-100 transition-opacity">▼</span>
           </div>
         </div>

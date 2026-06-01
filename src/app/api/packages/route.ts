@@ -6,32 +6,26 @@ import { uploadToCloudinary } from '@/lib/cloudinary';
 // GET - Fetch all packages with add-ons
 export async function GET() {
     try {
-        const packages = await prisma.$queryRaw`
-            SELECT * FROM packages ORDER BY created_at DESC
-        ` as any[];
+        const packages = await prisma.package.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: { addOns: true }
+        });
 
-        // Fetch add-ons for each package
-        const formattedPackages = await Promise.all(packages.map(async (p: any) => {
-            const addOns = await prisma.$queryRaw`
-                SELECT id, name, price, unit FROM package_addons WHERE package_id = ${p.id}
-            ` as any[];
-
-            return {
-                id: p.id,
-                name: p.name,
-                description: p.description,
-                packageType: p.package_type, // Add package type
-                capacity: p.capacity,
-                price: p.price,
-                duration: p.duration,
-                mainImagePath: p.main_image_path,
-                addOns: addOns.map((addon: any) => ({
-                    id: addon.id,
-                    name: addon.name,
-                    price: addon.price,
-                    unit: addon.unit
-                }))
-            };
+        const formattedPackages = packages.map(p => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            packageType: p.packageType,
+            capacity: p.capacity,
+            price: p.price,
+            duration: p.duration,
+            mainImagePath: p.mainImagePath,
+            addOns: p.addOns.map(addon => ({
+                id: addon.id,
+                name: addon.name,
+                price: addon.price,
+                unit: addon.unit
+            }))
         }));
 
         return NextResponse.json({ packages: formattedPackages });

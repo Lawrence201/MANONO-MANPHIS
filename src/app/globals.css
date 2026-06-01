@@ -316,24 +316,26 @@
 }
 
 /* Row-specific Explicit Backgrounds (Alternating blocks to match WooCommerce screenshot) */
-.comparison-table tr.row-names,
-.comparison-table tr.row-names .cell-label,
 .comparison-table tr.row-images,
 .comparison-table tr.row-images .cell-label,
 .comparison-table tr.row-prices,
 .comparison-table tr.row-prices .cell-label,
 .comparison-table tr.row-availability,
-.comparison-table tr.row-availability .cell-label {
-  background-color: #f5f5f5;
+.comparison-table tr.row-availability .cell-label,
+.comparison-table tr.row-package-type,
+.comparison-table tr.row-package-type .cell-label {
+  background-color: #ffffff;
 }
 
+.comparison-table tr.row-names,
+.comparison-table tr.row-names .cell-label,
 .comparison-table tr.row-ratings,
 .comparison-table tr.row-ratings .cell-label,
 .comparison-table tr.row-buttons,
 .comparison-table tr.row-buttons .cell-label,
 .comparison-table tr.row-additional,
 .comparison-table tr.row-additional .cell-label {
-  background-color: #ffffff;
+  background-color: #f5f5f5;
 }
 
 /* Sticky Label Column */

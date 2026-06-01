@@ -54,7 +54,7 @@ const reviews = [
 
 const renderStars = (rating: number) => {
   const stars = [];
-  const rounded = rating >= 4.8 ? 5 : 4.5;
+  const rounded = Math.round(rating * 2) / 2;
   for (let i = 1; i <= 5; i++) {
     if (i <= Math.floor(rounded)) {
       stars.push(<Star key={i} className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />);
@@ -188,6 +188,8 @@ export default function DashboardPage() {
     exportLocations?: string[];
     exportCountrySummary?: { code: string; units: number; unit: string; revenue: number; percentage: number; share: number }[];
     recentReviews?: any[];
+    commodityPerformance?: { product: string; revenue: number }[];
+    adPerformance?: { product: string; revenue: number }[];
   }>({
     totalRevenue: 0,
     activeBillboardsCount: 0,
@@ -200,7 +202,9 @@ export default function DashboardPage() {
     slotStats: { availableSlots: 0, reservedSlots: 0, activeSlots: 0, expiredSlots: 0, maintenanceSlots: 0 },
     exportLocations: [],
     exportCountrySummary: [],
-    recentReviews: []
+    recentReviews: [],
+    commodityPerformance: [],
+    adPerformance: []
   });
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [svgHtml, setSvgHtml] = useState<string>("");
@@ -226,7 +230,9 @@ export default function DashboardPage() {
             inventoryStats: json.data.inventoryStats,
             exportLocations: json.data.exportLocations || [],
             exportCountrySummary: json.data.exportCountrySummary || [],
-            recentReviews: json.data.recentReviews || []
+            recentReviews: json.data.recentReviews || [],
+            commodityPerformance: json.data.commodityPerformance || [],
+            adPerformance: json.data.adPerformance || []
           });
           setRecentBookings(json.data.recentBookings || []);
         }
@@ -652,7 +658,7 @@ export default function DashboardPage() {
           sparkline={[25, 32, 38, 42, 50, 58, 70, 82]}
         />
         <KpiCard
-          label="Pending Orders"
+          label="Pending Orders (Trade)"
           value={String(stats.pendingOrdersCount || 0)}
           change={15.3}
           trend="up"
@@ -661,7 +667,7 @@ export default function DashboardPage() {
           sparkline={[60, 55, 62, 58, 65, 70, 68, 72]}
         />
         <KpiCard
-          label="Pending Approvals"
+          label="Pending Approvals (Billboard)"
           value={stats.pendingApprovalsCount.toString()}
           change={-2.1}
           trend="down"
@@ -869,7 +875,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <ProductPerformanceChart />
+        <ProductPerformanceChart 
+          commodityData={stats.commodityPerformance} 
+          adData={stats.adPerformance} 
+        />
         <CountryDistributionChart exportData={exportPieData} />
         <ActivityFeed />
       </div>

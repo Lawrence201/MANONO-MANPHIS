@@ -104,6 +104,8 @@ export async function getHoneyPackagingSizes() {
         OR: [
           { category: { in: ["raw", "processed", "wild"] } },
           { category: "organic", cashewGrade: null, sheaGrade: null },
+          { name: { contains: "honey", mode: "insensitive" } },
+          { category: { contains: "honey", mode: "insensitive" } },
         ],
         status: "published",
       },
@@ -132,6 +134,8 @@ export async function getHoneyPackagingTypes() {
         OR: [
           { category: { in: ["raw", "processed", "wild"] } },
           { category: "organic", cashewGrade: null, sheaGrade: null },
+          { name: { contains: "honey", mode: "insensitive" } },
+          { category: { contains: "honey", mode: "insensitive" } },
         ],
         status: "published",
       },
@@ -160,6 +164,8 @@ export async function getHoneyCategories() {
         OR: [
           { category: { in: ["raw", "processed", "wild"] } },
           { category: "organic", cashewGrade: null, sheaGrade: null },
+          { name: { contains: "honey", mode: "insensitive" } },
+          { category: { contains: "honey", mode: "insensitive" } },
         ],
         status: "published",
       },
@@ -187,7 +193,9 @@ export async function getHoneyProducts() {
             category: 'organic',
             cashewGrade: null,
             sheaGrade: null,
-          }
+          },
+          { name: { contains: 'honey', mode: 'insensitive' } },
+          { category: { contains: 'honey', mode: 'insensitive' } }
         ]
       },
       include: {
@@ -270,9 +278,37 @@ export async function getHoneyClientsCount() {
 
 export async function deleteProduct(id: number) {
   try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: { galleryImages: true }
+    });
+
+    if (!product) {
+      return { success: false, error: "Product not found" };
+    }
+
+    // Delete related export orders to avoid foreign key constraint errors
+    await prisma.exportOrder.deleteMany({
+      where: { productId: id },
+    });
+
     await prisma.product.delete({
       where: { id },
     });
+
+    // Clean up media from Cloudinary
+    const filesToDelete = [];
+    if (product.featureImage) filesToDelete.push(product.featureImage);
+    if (product.videoShowcase) filesToDelete.push(product.videoShowcase);
+    product.galleryImages.forEach(img => filesToDelete.push(img.imagePath));
+
+    for (const path of filesToDelete) {
+      try {
+        await deleteFromCloudinary(path);
+      } catch (err) {
+        console.error("Failed to delete file from Cloudinary:", path, err);
+      }
+    }
 
     revalidatePath("/inventory/honey");
     revalidatePath("/inventory/cashew");
@@ -296,11 +332,40 @@ export async function getProduct(id: number) {
 
     if (!product) return { success: false, error: "Product not found" };
 
+    const activeOrders = await prisma.exportOrder.findMany({
+      select: { quantityRequested: true, unitMeasurement: true },
+      where: {
+        productId: id,
+        status: { in: ['approved', 'processing', 'shipped', 'delivered', 'in_transit', 'paid'] }
+      }
+    });
+
+    let reserved = 0;
+    activeOrders.forEach(o => {
+      let qty = Number(o.quantityRequested || 0);
+      const orderUnit = (o.unitMeasurement || '').toLowerCase();
+      const stockUnit = (product.stockUnit || '').toLowerCase();
+      
+      if (orderUnit && stockUnit && orderUnit !== stockUnit && !orderUnit.includes(stockUnit) && !stockUnit.includes(orderUnit)) {
+         if (product.packagingSize) {
+           const match = product.packagingSize.match(/(\d+(?:\.\d+)?)/);
+           if (match) {
+              qty = qty * Number(match[1]);
+           }
+         }
+      }
+      reserved += qty;
+    });
+
+    const totalStock = Number(product.stockQuantity);
+    const availableStock = Math.max(0, totalStock - reserved);
+
     // Serialize Decimal fields to Numbers for Client Component parsing
     const serialized = {
       ...product,
       moqValue: Number(product.moqValue),
-      stockQuantity: Number(product.stockQuantity),
+      stockQuantity: availableStock,
+      originalStock: totalStock,
       pricePerUnit: Number(product.pricePerUnit),
       moistureContent: product.moistureContent ? Number(product.moistureContent) : null,
       defectRate: product.defectRate ? Number(product.defectRate) : null,
@@ -433,7 +498,7 @@ export async function getGlobalInventory() {
     const activeOrders = await prisma.exportOrder.findMany({
       select: { productId: true, quantityRequested: true, unitMeasurement: true },
       where: {
-        status: { in: ['pending', 'processing', 'approved', 'paid', 'shipped', 'delivered', 'in_transit'] }
+        status: { in: ['processing', 'approved', 'paid', 'shipped', 'delivered', 'in_transit'] }
       }
     });
 
@@ -478,13 +543,9 @@ export async function getGlobalInventory() {
       }
 
       const getCategoryLabel = (cat: string) => {
-         if (cat.toLowerCase().includes('honey')) return 'Honey';
-         if (cat.toLowerCase().includes('cashew')) return 'Cashew';
-         if (cat.toLowerCase().includes('shea')) return 'Shea';
-         if (p.name.toLowerCase().includes('honey')) return 'Honey';
-         if (p.name.toLowerCase().includes('cashew')) return 'Cashew';
-         if (p.name.toLowerCase().includes('shea')) return 'Shea';
-         return cat.charAt(0).toUpperCase() + cat.slice(1);
+         if (!cat) return 'Unknown';
+         if (cat.toLowerCase() === 'others') return 'Other';
+         return cat.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
       };
 
       const unitMap = (u: string) => {

@@ -1,20 +1,29 @@
-"use client";
-
-import { useState } from "react";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { WebsiteHeader } from "@/components/website/header";
 import { WebsiteFooter } from "@/components/website/footer";
 import { TopBar } from "@/components/website/top-bar";
-import { Search, ChevronRight, HelpCircle, List } from "lucide-react";
+import { Package, Truck, Calendar, ChevronRight, FileText } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-const freightTypes = [
-  { id: "air", label: "AIR FREIGHT TRACKING" },
-  { id: "ocean", label: "OCEAN FREIGHT TRACKING" },
-  { id: "road", label: "ROAD & RAIL FREIGHT TRACKING" },
-];
+export default async function TrackingDashboardPage() {
+  const session = await getServerSession(authOptions);
 
-export default function TrackingPage() {
-  const [activeTab, setActiveTab] = useState("number");
-  const [activeFreight, setActiveFreight] = useState("air");
+  if (!session?.user) {
+    redirect("/login?callbackUrl=/tracking");
+  }
+
+  const orders = await prisma.exportOrder.findMany({
+    where: { 
+      // Ensure we only match if they logged in with the same email they ordered with
+      email: { equals: session.user.email as string, mode: "insensitive" } 
+    },
+    include: { product: true },
+    orderBy: { createdAt: 'desc' }
+  });
 
   return (
     <div className="min-h-screen bg-[#fdfaf7]">
@@ -25,144 +34,86 @@ export default function TrackingPage() {
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header Section */}
           <div className="text-center mb-16 space-y-4">
-            <h1 className="text-4xl font-black text-[#1a1a1a] tracking-tight uppercase">Track a Shipment</h1>
+            <h1 
+              className="text-[80px] md:text-[110px] font-bold text-[#1a1a1a] tracking-[-0.04em] uppercase leading-[1.0] md:scale-x-[0.85] transform origin-center"
+              style={{ fontFamily: "var(--font-antonio)" }}
+            >
+              Your Shipments
+            </h1>
             <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed text-sm">
-              Track your LTL, truckload, or intermodal shipment by entering your <span className="font-bold text-gray-900">Track number</span> below 
-              to get instant freight tracking information.
+              Welcome back, <span className="font-bold text-gray-900">{session.user.name}</span>. 
+              Here you can track all your active and past orders in real-time.
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Main Tracking Box */}
-            <div className="flex-1">
-              {/* Tabs */}
-              <div className="flex">
-                <button 
-                  onClick={() => setActiveTab("number")}
-                  className={`px-8 py-4 text-xs font-black uppercase tracking-widest transition-all rounded-t-sm border-t border-l border-r ${
-                    activeTab === "number" 
-                      ? "bg-white border-gray-100 text-gray-900" 
-                      : "bg-transparent border-transparent text-[#0066cc] hover:text-[#004499]"
-                  }`}
-                >
-                  Track by Number
-                </button>
-                <button 
-                  onClick={() => setActiveTab("reference")}
-                  className={`px-8 py-4 text-xs font-black uppercase tracking-widest transition-all rounded-t-sm border-t border-l border-r ml-1 ${
-                    activeTab === "reference" 
-                      ? "bg-white border-gray-100 text-gray-900" 
-                      : "bg-transparent border-transparent text-[#0066cc] hover:text-[#004499]"
-                  }`}
-                >
-                  Track by Reference
-                </button>
-              </div>
-
-              {/* Content Card */}
-              <div className="bg-white border border-gray-100 p-8 md:p-12 shadow-xl shadow-gray-200/50 rounded-b-sm rounded-tr-sm">
-                <h2 className="text-xl md:text-2xl font-black text-[#1a1a1a] mb-10 uppercase tracking-tight">
-                  {freightTypes.find(f => f.id === activeFreight)?.label}
-                </h2>
-
-                {activeTab === "number" ? (
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 relative">
-                      <input 
-                        type="text" 
-                        placeholder="Track ID"
-                        className="w-full h-14 px-6 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none text-gray-600 transition-all shadow-sm"
-                      />
-                    </div>
-                    <button className="bg-[#ff4444] text-white px-10 py-4 font-black text-sm uppercase tracking-widest rounded-sm hover:opacity-90 transition-all shadow-lg shadow-red-100">
-                      Track
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-gray-700">Shipment Reference (BOL or PO):</label>
-                        <input type="text" className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none text-sm" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-gray-700">Shipment Date Start:</label>
-                        <input type="date" className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none text-sm" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-gray-700">Shipment Date End:</label>
-                        <input type="date" className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none text-sm" />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-gray-700">Origin Country:</label>
-                        <select className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none bg-[#f9f9f9] text-sm">
-                          <option>United State</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-gray-700">Origin ZIP/Postal Code:</label>
-                        <input type="text" className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none text-sm" />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-gray-700">Destination Country:</label>
-                        <select className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none bg-[#f9f9f9] text-sm">
-                          <option>United State</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-gray-700">Destination ZIP/Postal Code:</label>
-                        <input type="text" className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none text-sm" />
-                      </div>
-                    </div>
-
-                    <div className="pt-4">
-                      <button className="bg-[#ff4444] text-white px-8 py-3 font-black text-xs uppercase tracking-widest rounded-sm hover:opacity-90 transition-all shadow-lg shadow-red-100">
-                        Track
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-8 flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-[#0066cc]">
-                  <button className="hover:underline flex items-center gap-1">
-                    Need Help?
-                  </button>
-                  <span className="text-gray-300 font-normal">|</span>
-                  <button className="hover:underline flex items-center gap-1">
-                    Your Order List
-                  </button>
+          <div className="w-full">
+            {orders.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Package className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 uppercase tracking-widest mb-2">No Active Orders</h3>
+                <p className="text-gray-500 text-sm max-w-md mx-auto">
+                  You don't have any export orders linked to this email address yet. Once you place an order, it will appear here for tracking.
+                </p>
+                <div className="mt-8">
+                  <Link href="/services" className="bg-[#b1afae] text-white px-8 py-3 font-black text-xs uppercase tracking-widest rounded-sm hover:opacity-90 transition-all shadow-lg shadow-[#b1afae]/30 inline-block">
+                    Explore Services
+                  </Link>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {orders.map((order) => {
+                  const isDelivered = order.status === "delivered";
+                  const isPending = order.status === "pending";
+                  const statusColor = isDelivered ? "text-green-600 bg-green-50" : isPending ? "text-orange-600 bg-orange-50" : "text-[#0066cc] bg-blue-50";
 
-            {/* Sidebar */}
-            <div className="lg:w-[350px] space-y-1">
-              <div className="bg-[#ff4444] p-5 rounded-t-sm">
-                <h3 className="text-white font-black text-sm uppercase tracking-widest">Select Your Freight</h3>
+                  return (
+                    <div key={order.id} className="border border-gray-100 rounded-xl overflow-hidden hover:border-[#ff4444]/30 hover:shadow-xl hover:shadow-red-500/5 transition-all group bg-white flex flex-col">
+                      <div className="p-6 flex-1">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest", statusColor)}>
+                            {order.status}
+                          </div>
+                          <span className="text-xs font-bold text-gray-400 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        
+                        <h3 className="text-lg font-black text-[#1a1a1a] mb-1 line-clamp-1">
+                          {order.product.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-6">
+                          {order.quantityRequested.toString()} {order.unitMeasurement} • {order.shippingType}
+                        </p>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <Truck className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium line-clamp-1 text-xs uppercase tracking-wider">{order.destinationCountry}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <FileText className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium text-xs uppercase tracking-wider text-gray-900">REF: {order.referenceNumber}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 bg-gray-50 border-t border-gray-100 mt-auto">
+                        <Link 
+                          href={`/tracking/process?ref=${order.referenceNumber}`}
+                          className="flex items-center justify-center gap-2 w-full text-xs font-black uppercase tracking-widest text-[#ff4444] group-hover:text-red-700 transition-colors"
+                        >
+                          Track Shipment <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="bg-white border border-gray-100 shadow-lg shadow-gray-200/20 rounded-b-sm overflow-hidden">
-                {freightTypes.map((type) => (
-                  <button
-                    key={type.id}
-                    onClick={() => setActiveFreight(type.id)}
-                    className={`w-full flex items-center justify-between p-5 text-left transition-all border-b border-gray-50 last:border-0 ${
-                      activeFreight === type.id 
-                        ? "bg-gray-500 text-white" 
-                        : "text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    <span className="text-xs font-black uppercase tracking-widest">{type.label}</span>
-                    <ChevronRight className={`w-4 h-4 ${activeFreight === type.id ? "text-white" : "text-gray-400"}`} />
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </main>

@@ -79,18 +79,25 @@ export default function CustomersPage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xl">{c.flag}</span>
               <span className="text-xs text-muted-foreground">{c.country}</span>
-              <span className={cn(
-                "ml-auto text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded",
-                c.type === "VIP" && "bg-warning/15 text-warning",
-                c.type === "Trusted" && "bg-success/10 text-success",
-                c.type === "New" && "bg-info/10 text-info",
-              )}>{c.type}</span>
+              <div className="ml-auto flex items-center gap-1.5">
+                {c.hasDeliveredOrder && (
+                  <span className="bg-green-100/50 text-green-600 border border-green-200/50 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">
+                    Delivered
+                  </span>
+                )}
+                <span className={cn(
+                  "text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded",
+                  c.type === "VIP" && "bg-warning/15 text-warning",
+                  c.type === "Trusted" && "bg-success/10 text-success",
+                  c.type === "New" && "bg-info/10 text-info",
+                )}>{c.type}</span>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border">
               <div>
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Revenue</div>
-                <div className="text-sm font-bold tabular-nums mt-0.5">${fmt.format(c.revenue)}</div>
+                <div className="text-sm font-bold tabular-nums mt-0.5">GH₵ {fmt.format(c.revenue)}</div>
               </div>
               <div>
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Orders</div>

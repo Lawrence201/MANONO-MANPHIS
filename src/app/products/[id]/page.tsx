@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { getBillboard, getBillboards } from "@/lib/actions/billboard-actions";
 import { getProduct, getHoneyProducts } from "@/lib/actions/product-actions";
 import { submitReview, getReviews } from "@/lib/actions/review-actions";
+import { ProductComparisonRating } from "@/components/ProductComparisonRating";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { 
@@ -310,6 +311,7 @@ export default function ProductDetailsPage() {
             }
           });
 
+          await fetchReviewsData("product", Number(id));
           setLoading(false);
           return;
         }
@@ -542,7 +544,7 @@ export default function ProductDetailsPage() {
                   <div className="flex items-center gap-1 ml-4 border-l border-gray-200 pl-4">
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(reviewsData.averageRating) ? "text-[#ffcc00] fill-[#ffcc00]" : "text-gray-200"}`} />
+                        <Star key={i} className={`w-3.5 h-3.5 ${i < (reviewsData.totalReviews > 0 ? Math.round(reviewsData.averageRating) : 5) ? "text-[#ffcc00] fill-[#ffcc00]" : "text-gray-200"}`} />
                       ))}
                     </div>
                     <span className="text-[13px] text-gray-400 font-medium">({reviewsData.totalReviews} reviews)</span>
@@ -785,7 +787,7 @@ export default function ProductDetailsPage() {
                         <div>
                           <div className="flex gap-1 mb-1">
                             {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`w-4 h-4 ${i < Math.round(reviewsData.averageRating) ? "fill-[#eea000] text-[#eea000]" : "text-gray-200"}`} />
+                              <Star key={i} className={`w-4 h-4 ${i < (reviewsData.totalReviews > 0 ? Math.round(reviewsData.averageRating) : 5) ? "fill-[#eea000] text-[#eea000]" : "text-gray-200"}`} />
                             ))}
                           </div>
                           <div className="text-sm text-gray-400 font-bold uppercase tracking-wider">out of 5 stars</div>
@@ -1028,43 +1030,58 @@ export default function ProductDetailsPage() {
                     price: currentPrice,
                     originalPrice: currentOrigPrice,
                     rating: product.rating || 5,
-                    stockQuantity: product.specs?.find((s: any) => s.label === "Stock")?.value || "",
+                    stockQuantity: product.specs?.find((s: any) => s.label === "Stock Status")?.value || "",
                     packagingSize: product.specs?.find((s: any) => s.label === "Size")?.value || "",
+                    packagingUnit: currentPrice.includes('/') ? currentPrice.split('/').pop()?.trim() : "Unit",
+                    packagingType: product.specs?.find((s: any) => s.label === "Packaging")?.value || "",
                     sku: product.sku || "",
                     isCurrent: true,
                   },
                   ...relatedHoneyProducts.map((p) => {
-                    let priceVal = `GH₵ ${Number(p.pricePerUnit).toFixed(2)}`;
-                    let origPrice = "";
-                    let customRating = 5;
+                    const pricePerUnit = Number(p.pricePerUnit) || 0;
+                    let multiplier = 1;
+                    let pkgName = "Unit";
                     
-                    if (p.name.includes("24 Mantra")) {
-                      priceVal = "GH₵ 18.00 - GH₵ 20.00";
-                    } else if (p.name.includes("Zandu")) {
-                      origPrice = "GH₵ 25.00";
-                      priceVal = "GH₵ 22.00";
-                    } else if (p.name.includes("World'S No.1")) {
-                      priceVal = "GH₵ 17.00 - GH₵ 24.00";
-                    } else if (p.name.includes("Glass Jar")) {
-                      priceVal = "GH₵ 29.00";
-                      customRating = 4;
-                    } else if (p.name.includes("Coorg Essence")) {
-                      priceVal = "GH₵ 35.00";
-                      customRating = 4;
-                    } else if (p.name.includes("Lion Kashmir")) {
-                      origPrice = "GH₵ 30.00";
-                      priceVal = "GH₵ 28.00";
+                    if (p.packagingType === "drum" || p.packagingType?.toLowerCase().startsWith("dru")) pkgName = "Drum";
+                    else if (p.packagingType === "bucket") pkgName = "Bucket";
+                    else if (p.packagingType === "container") pkgName = "IBC Tote";
+                    else if (p.packagingType === "bottle") pkgName = "Bottle";
+                    else if (p.packagingType) pkgName = p.packagingType.charAt(0).toUpperCase() + p.packagingType.slice(1);
+                    
+                    let pkgFull = p.packagingType;
+                    if (p.packagingType === "bottle") pkgFull = "Glass Bottles";
+                    else if (p.packagingType === "jerrycan") pkgFull = "Plastic Jerrycans";
+                    else if (p.packagingType === "bucket") pkgFull = "Food-grade Buckets";
+                    else if (p.packagingType === "drum") pkgFull = "Steel Drums";
+                    else if (p.packagingType === "container") pkgFull = "IBC Totes";
+                    
+                    if (p.priceUnitType === 'per_kg' && p.packagingSize) {
+                      const matchKg = p.packagingSize.match(/(\d+(?:\.\d+)?)kg/i);
+                      if (matchKg) multiplier = Number(matchKg[1]);
+                    } else if (p.priceUnitType === 'per_liter' && p.packagingSize) {
+                      const matchL = p.packagingSize.match(/(\d+(?:\.\d+)?)L/i);
+                      if (matchL) multiplier = Number(matchL[1]);
                     }
                     
+                    const finalPrice = pricePerUnit * multiplier;
+                    const priceVal = `GH₵ ${finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${pkgName}`;
+                    
+                    let stockStatusLabel = "In Stock";
+                    if (p.stockStatus === "low_stock") stockStatusLabel = "Low Stock";
+                    else if (p.stockStatus === "out_of_stock") stockStatusLabel = "Out of Stock";
+                    else if (p.stockStatus) stockStatusLabel = p.stockStatus.charAt(0).toUpperCase() + p.stockStatus.slice(1).replace('_', ' ');
+
                     return {
                       id: p.id,
                       name: p.name,
                       image: p.featureImage || "/product_honey_card.png",
                       price: priceVal,
-                      originalPrice: origPrice,
-                      rating: customRating,
-                      stockQuantity: `${p.stockQuantity} ${p.stockUnit || ""}`,
+                      originalPrice: "",
+                      rating: 5,
+                      stockQuantity: stockStatusLabel,
                       packagingSize: p.packagingSize || "",
+                      packagingUnit: pkgName,
+                      packagingType: pkgFull || "",
                       sku: p.slug || "",
                       isCurrent: false,
                     };
@@ -1140,14 +1157,7 @@ export default function ProductDetailsPage() {
                           <td className="cell-label">Rating</td>
                           {compareList.map((p) => (
                             <td key={p.id} className="cell-value text-center">
-                              <div className="comparison-stars">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star 
-                                    key={i} 
-                                    className={`w-[18px] h-[18px] ${i < p.rating ? "text-[#ffcc00] fill-[#ffcc00]" : "text-[#ffcc00] fill-transparent"}`} 
-                                  />
-                                ))}
-                              </div>
+                              <ProductComparisonRating productId={p.id} />
                             </td>
                           ))}
                         </tr>
@@ -1231,9 +1241,9 @@ export default function ProductDetailsPage() {
                           })}
                         </tr>
 
-                        {/* Additional information row */}
+                        {/* Weight row */}
                         <tr className="row-odd row-additional">
-                          <td className="cell-label">Additional information</td>
+                          <td className="cell-label">Weight</td>
                           {compareList.map((p) => {
                             const sizeStr = p.packagingSize || "";
                             const sizes = sizeStr ? sizeStr.split(",").map((s: string) => s.trim()) : [];
@@ -1248,11 +1258,10 @@ export default function ProductDetailsPage() {
                               <td key={p.id} className="cell-value text-center">
                                 {sizesToUse.length > 0 ? (
                                   <div>
-                                    <span className="comparison-weight-label">Weight</span>
                                     <span className="comparison-weight-value">
                                       {sizesToUse.map((s: string, idx: number) => (
                                         <span key={s}>
-                                          <Link href="#">{s}</Link>
+                                          <Link href="#">{s} / {p.packagingUnit}</Link>
                                           {idx < sizesToUse.length - 1 ? ", " : ""}
                                         </span>
                                       ))}
@@ -1262,6 +1271,20 @@ export default function ProductDetailsPage() {
                               </td>
                             );
                           })}
+                        </tr>
+
+                        {/* Package type row */}
+                        <tr className="row-even row-package-type">
+                          <td className="cell-label">Package type</td>
+                          {compareList.map((p) => (
+                            <td key={p.id} className="cell-value text-center text-gray-500 text-sm">
+                              {p.packagingType === "drum" ? "Drums" : 
+                               p.packagingType === "bucket" ? "Buckets" : 
+                               p.packagingType === "container" ? "IBC Totes" : 
+                               p.packagingType === "bottle" ? "Bottles" : 
+                               p.packagingType ? p.packagingType.charAt(0).toUpperCase() + p.packagingType.slice(1) : "—"}
+                            </td>
+                          ))}
                         </tr>
                       </tbody>
                     </table>

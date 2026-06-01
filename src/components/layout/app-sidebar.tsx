@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, FileText, ShoppingCart, CreditCard,
   Receipt, Package, Truck, BarChart3, Globe2, Settings,
   Sparkles, FileBarChart, ShieldCheck, Map, Ship, UserCog,
-  ScrollText, Bell, Workflow, Factory, MessageSquare, Monitor, Layers, Calendar,
+  ScrollText, Bell, Workflow, Factory, MessageSquare, Monitor, Layers, Calendar, Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ const navGroups = [
     label: "Advertising Services",
     items: [
       { title: "Billboard Manager", url: "/inventory/billboard-manager", icon: Monitor },
-      { title: "Ad Bookings", url: "/inventory/bookings", icon: Sparkles, badge: "5" },
+      { title: "Ad Bookings", url: "/inventory/bookings", icon: Megaphone, badge: "5" },
       { title: "Campaign Schedule", url: "/inventory/schedule", icon: Calendar },
     ],
   },
@@ -70,7 +70,7 @@ const navGroups = [
   {
     label: "Administration Console",
     items: [
-      { title: "User Management", url: "/users", icon: UserCog },
+      { title: "Client Management", url: "/clients", icon: UserCog },
       { title: "System Settings", url: "/settings", icon: Settings },
     ],
   },

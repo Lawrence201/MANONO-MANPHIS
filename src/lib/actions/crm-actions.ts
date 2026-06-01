@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 export async function getAggregatedCustomers() {
   try {
     const exportOrders = await prisma.exportOrder.findMany({
+      where: {
+        status: { in: ['processing', 'approved', 'paid', 'shipped', 'delivered', 'in_transit'] }
+      },
       select: { 
         email: true, 
         companyName: true, 
@@ -14,11 +17,15 @@ export async function getAggregatedCustomers() {
         totalEstimatedCost: true, 
         quantityRequested: true, 
         product: { select: { pricePerUnit: true } }, 
+        status: true,
         createdAt: true 
       }
     });
 
     const billboardBookings = await prisma.billboardBooking.findMany({
+      where: {
+        status: { in: ['approved', 'active', 'paused', 'completed'] }
+      },
       select: { 
         email: true, 
         companyName: true, 
@@ -76,6 +83,7 @@ export async function getAggregatedCustomers() {
           flag: getFlag(cleanCountry),
           revenue: 0,
           orders: 0,
+          hasDeliveredOrder: false,
           type: "New",
           since: new Date(o.createdAt).getFullYear().toString()
         });
@@ -83,6 +91,9 @@ export async function getAggregatedCustomers() {
       const c = customerMap.get(key);
       c.revenue += rev;
       c.orders += 1;
+      if (o.status === "delivered") {
+        c.hasDeliveredOrder = true;
+      }
       const year = new Date(o.createdAt).getFullYear().toString();
       if (year < c.since) c.since = year;
     }

@@ -89,6 +89,38 @@ export default function AddHoneyPage() {
 
       if (result.success) {
         toast.success("Honey product registered successfully!");
+        setFormData({
+          name: "",
+          category: "organic",
+          description: "",
+          packagingType: "bottle",
+          packagingSize: "",
+          moqValue: "",
+          moqUnit: "bottles",
+          stockQuantity: "",
+          stockUnit: "liters",
+          stockStatus: "in_stock",
+          pricePerUnit: "",
+          priceUnitType: "per_liter",
+          isExportReady: true,
+          exportCountries: ["USA", "UK", "Canada"],
+          shippingMethods: ["sea", "air"],
+          isOrganic: true,
+          certificates: [],
+          featureImage: "",
+          videoShowcase: "",
+          galleryImages: [],
+          processingTime: "3-5 business days",
+          warehouse: "accra_warehouse",
+          status: "published"
+        });
+        setCustomMoqUnit("");
+        setCustomStockUnit("");
+        setCustomPriceUnitType("");
+        setCustomPackagingType("");
+        setCustomCategory("");
+        setCustomWarehouse("");
+        setNewCountry("");
       } else {
         toast.error(result.error || "Failed to publish product.");
       }

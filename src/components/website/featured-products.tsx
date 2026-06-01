@@ -1,7 +1,8 @@
 import Image from "next/image";
-import { ShoppingBasket } from "lucide-react";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-const products = [
+const fallbackProducts = [
   {
     id: 1,
     name: "HEATHER HONEY",
@@ -28,7 +29,51 @@ const products = [
   }
 ];
 
-export function FeaturedProducts() {
+export async function FeaturedProducts() {
+  const dbProducts = await prisma.product.findMany({
+    take: 3,
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const now = new Date();
+  
+  const mappedProducts = dbProducts.map(p => {
+    // Treat as "NEW" if created in the last 7 days
+    const isNew = (now.getTime() - new Date(p.createdAt).getTime()) < 7 * 24 * 60 * 60 * 1000;
+    
+    return {
+      id: p.id,
+      name: p.name.toUpperCase(),
+      price: (function() {
+        const pricePerUnit = Number(p.pricePerUnit) || 0;
+        let multiplier = 1;
+        let pkgName = "Unit";
+        
+        if (p.packagingType === "drum" || p.packagingType?.toLowerCase().startsWith("dru")) pkgName = "Drum";
+        else if (p.packagingType === "bucket") pkgName = "Bucket";
+        else if (p.packagingType === "container") pkgName = "IBC Tote";
+        else if (p.packagingType === "bottle") pkgName = "Bottle";
+        else if (p.packagingType) pkgName = p.packagingType.charAt(0).toUpperCase() + p.packagingType.slice(1);
+        
+        if (p.priceUnitType === 'per_kg' && p.packagingSize) {
+          const matchKg = p.packagingSize.match(/(\d+(?:\.\d+)?)kg/i);
+          if (matchKg) multiplier = Number(matchKg[1]);
+        } else if (p.priceUnitType === 'per_liter' && p.packagingSize) {
+          const matchL = p.packagingSize.match(/(\d+(?:\.\d+)?)L/i);
+          if (matchL) multiplier = Number(matchL[1]);
+        }
+        
+        const finalPrice = pricePerUnit * multiplier;
+        return `GH₵ ${finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${pkgName}`;
+      })(),
+      description: p.description || "Premium natural product.",
+      image: p.featureImage || "/honey_jar_dark_transparent.png",
+      isNew
+    };
+  });
+
+  const displayProducts = mappedProducts.length > 0 ? mappedProducts : fallbackProducts;
+
   return (
     <section className="py-24 bg-[#fdfaf7]">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -45,16 +90,16 @@ export function FeaturedProducts() {
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {products.map((product) => (
+          {displayProducts.map((product) => (
             <div key={product.id} className="flex flex-col items-center text-center group">
               {/* Product Image Container */}
-              <div className="relative w-full aspect-square mb-8 flex items-center justify-center">
+              <div className="relative w-full h-[220px] mb-5 flex items-center justify-center">
                 {product.isNew && (
-                  <span className="absolute top-0 right-1/4 z-10 bg-[#eea000] text-white text-[10px] font-black px-2 py-0.5 rounded-sm shadow-sm">
+                  <span className="absolute top-0 right-4 z-10 bg-[#eea000] text-white text-[10px] font-black px-2 py-0.5 rounded-sm shadow-sm">
                     NEW
                   </span>
                 )}
-                <div className="relative w-4/5 h-4/5 transition-transform duration-500 group-hover:scale-110 drop-shadow-2xl">
+                <div className="relative w-[90%] h-[90%] transition-transform duration-500 group-hover:scale-105 drop-shadow-xl">
                   <Image 
                     src={product.image} 
                     alt={product.name} 
@@ -66,21 +111,24 @@ export function FeaturedProducts() {
 
               {/* Product Info */}
               <div className="space-y-3">
-                <h3 className="text-xl font-black text-[#1a1a1a] tracking-tight">
+                <h3 className="text-xl font-semibold text-[#1a1a1a] tracking-tight truncate w-full px-4">
                   {product.name}
                 </h3>
                 <p className="text-[#eea000] font-bold text-lg">
                   {product.price}
                 </p>
-                <p className="text-gray-400 text-[13px] leading-relaxed max-w-[240px] mx-auto">
+                <p className="text-gray-400 text-[13px] leading-relaxed max-w-[240px] mx-auto line-clamp-3">
                   {product.description}
                 </p>
 
-                {/* Add to Cart Button */}
-                <button className="flex items-center gap-2 mx-auto pt-4 text-[#1a1a1a] font-black text-[11px] uppercase tracking-widest hover:text-[#eea000] transition-colors group/btn">
-                  <ShoppingBasket className="w-4 h-4 transition-transform group-hover/btn:-translate-y-0.5" />
-                  Add to Cart
-                </button>
+                {/* View Details Button */}
+                <div className="flex justify-center w-full pt-4">
+                  <Link href={`/products/${product.id}`} className="inline-block">
+                    <button className="flex items-center justify-center text-[#1a1a1a] font-black text-[11px] uppercase tracking-widest hover:text-[#eea000] transition-colors group/btn">
+                      View Details
+                    </button>
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

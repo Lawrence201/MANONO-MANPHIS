@@ -56,13 +56,15 @@ export async function GET() {
         });
         const totalClientsCount = uniqueClients.length;
 
-        // 5. Total bookings count (Export Orders)
-        const totalBookingsCount = await prisma.exportOrder.count();
+        // 5. Total export orders count (Approved/Processing)
+        const totalBookingsCount = await prisma.exportOrder.count({
+            where: { status: { in: ['approved', 'processing', 'in_transit', 'shipped', 'delivered', 'paid'] } }
+        });
 
         // 6. Monthly revenue — Billboards (GH₵) + Export streams (GH₵)
         const allBookings = await prisma.billboardBooking.findMany({
             where: { status: { in: ['approved', 'active'] } },
-            select: { totalPrice: true, createdAt: true }
+            select: { totalPrice: true, createdAt: true, billboard: { select: { name: true } } }
         });
 
         const allExportForChart = await prisma.exportOrder.findMany({
@@ -170,7 +172,7 @@ export async function GET() {
                 product: o.product.name,
                 quantity: `${Number(o.quantityRequested)} ${o.product.moqUnit}`,
                 amount: calculatedAmount,
-                currency: "USD",
+                currency: "GH₵",
                 payment: o.status === 'paid' || o.status === 'approved' ? 'paid' : 'pending',
                 status: o.status,
                 progress: o.status === 'pending' ? 10 : (o.status === 'approved' || o.status === 'paid') ? 50 : o.status === 'shipped' ? 80 : 100,
@@ -288,11 +290,17 @@ export async function GET() {
         });
 
         // 11. Calculate Inventory Pipeline (Honey Focus)
-        const honeyProduct = await prisma.product.findFirst({
-            where: { name: { contains: 'Honey', mode: 'insensitive' } }
+        const honeyProducts = await prisma.product.findMany({
+            where: { 
+                OR: [
+                    { name: { contains: 'Honey', mode: 'insensitive' } },
+                    { category: { contains: 'Honey', mode: 'insensitive' } },
+                    { category: { in: ['raw', 'processed', 'wild', 'organic'] } }
+                ]
+            }
         });
         
-        const honeyTotal = honeyProduct ? (Number(honeyProduct.stockQuantity) || 1000) : 1000;
+        const honeyTotal = honeyProducts.reduce((sum, p) => sum + (Number(p.stockQuantity) || 0), 0) || 1000;
 
         const honeyOrders = await prisma.exportOrder.findMany({
             where: { product: { name: { contains: 'Honey', mode: 'insensitive' } } },
@@ -331,11 +339,38 @@ export async function GET() {
 
         const inventoryStats = {
             totalStock: honeyTotal,
-            available: Math.max(0, honeyTotal - honeyReserved - honeyProcessing - honeyShipped),
+            available: Math.max(0, honeyTotal - honeyProcessing - honeyShipped),
             reserved: honeyReserved,
             processing: honeyProcessing,
             shipped: honeyShipped
         };
+
+        // --- PRODUCT PERFORMANCE COMPUTATION ---
+        const commodityMap: Record<string, number> = {};
+        allExportForChart.forEach(o => {
+            const rev = Number(o.totalEstimatedCost) || Number(o.customsValue) || (Number(o.quantityRequested) * Number(o.product.pricePerUnit || 0));
+            let name = o.product.name;
+            if (name.toLowerCase().includes('honey')) name = 'Honey';
+            else if (name.toLowerCase().includes('shea')) name = 'Shea Butter';
+            else if (name.toLowerCase().includes('cashew')) name = 'Cashew';
+            
+            if (!commodityMap[name]) commodityMap[name] = 0;
+            commodityMap[name] += rev;
+        });
+        const commodityPerformance = Object.entries(commodityMap)
+            .map(([product, revenue]) => ({ product, revenue }))
+            .sort((a, b) => b.revenue - a.revenue);
+
+        const adMap: Record<string, number> = {};
+        allBookings.forEach(b => {
+            const rev = Number(b.totalPrice || 0);
+            const name = b.billboard?.name || 'Unknown Billboard';
+            if (!adMap[name]) adMap[name] = 0;
+            adMap[name] += rev;
+        });
+        const adPerformance = Object.entries(adMap)
+            .map(([product, revenue]) => ({ product, revenue }))
+            .sort((a, b) => b.revenue - a.revenue);
 
         return NextResponse.json({
             success: true,
@@ -353,7 +388,9 @@ export async function GET() {
                 inventoryStats,
                 exportLocations,
                 exportCountrySummary,
-                recentReviews
+                recentReviews,
+                commodityPerformance,
+                adPerformance
             }
         });
     } catch (error: any) {

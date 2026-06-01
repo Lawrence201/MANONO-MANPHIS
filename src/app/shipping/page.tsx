@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import { WebsiteHeader } from "@/components/website/header";
 import { WebsiteFooter } from "@/components/website/footer";
 import { TopBar } from "@/components/website/top-bar";
@@ -144,7 +146,7 @@ export default function CreateShippingPage() {
     if (step === 3) {
       if (!formData.quantityRequested) return false;
       if (productDetails && Number(formData.quantityRequested) < Number(productDetails.moqValue)) return false;
-      if (productDetails && Number(formData.quantityRequested) > Number(productDetails.stockQuantity)) return false;
+      if (productDetails && Number(formData.quantityRequested) > Math.floor(Number(productDetails.stockQuantity) / pkgInfo.multiplier)) return false;
     }
     if (step === 4) {
       if (!formData.shippingType || !formData.deliveryType || !formData.pickupOption || !formData.preferredDate || !formData.deliveryPriority) {
@@ -426,11 +428,13 @@ export default function CreateShippingPage() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">Phone / WhatsApp<span className="text-red-500">*</span></label>
-                      <input 
-                        type="tel" 
+                      <PhoneInput
+                        country={'gh'}
                         value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        className="w-full h-12 px-4 border border-gray-200 rounded-sm focus:border-[#eea000] outline-none" 
+                        onChange={(phone) => setFormData({...formData, phone})}
+                        inputClass="!w-full !h-12 !px-12 !border !border-gray-200 !rounded-sm focus:!border-[#eea000] !outline-none !bg-white"
+                        containerClass="!w-full"
+                        buttonClass="!border-gray-200 !bg-gray-50 !rounded-l-sm"
                       />
                     </div>
                     <div className="md:col-span-2 space-y-2">
@@ -504,9 +508,9 @@ export default function CreateShippingPage() {
                           <p className="text-red-500 text-xs font-bold mt-1">
                             Minimum order of {productDetails.moqValue} and above
                           </p>
-                        ) : Number(formData.quantityRequested) > Number(productDetails.stockQuantity) ? (
+                        ) : Number(formData.quantityRequested) > Math.floor(Number(productDetails.stockQuantity) / pkgInfo.multiplier) ? (
                           <p className="text-red-500 text-xs font-bold mt-1">
-                            Maximum available stock is {productDetails.stockQuantity}
+                            Maximum available stock is {Math.floor(Number(productDetails.stockQuantity) / pkgInfo.multiplier)}
                           </p>
                         ) : null
                       )}

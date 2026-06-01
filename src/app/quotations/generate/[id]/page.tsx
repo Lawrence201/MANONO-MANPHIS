@@ -42,7 +42,7 @@ export default async function GenerateInvoicePage({ params }: { params: Promise<
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ color: '#6b7280', fontSize: 12 }}>{invoiceNumber}</span>
-          <PrintInvoiceButton invoiceId={invoiceNumber} />
+          <PrintInvoiceButton invoiceId={invoiceNumber} orderId={order.id} />
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export default async function GenerateInvoicePage({ params }: { params: Promise<
           {/* Logo + Company + Invoice Meta */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #e5e7eb', paddingBottom: 24, marginBottom: 32, marginTop: 12 }}>
             <div>
-              <Image src="/logo.png" alt="Manphis Logo" width={72} height={72} style={{ display: 'block', marginBottom: 10 }} />
+              <img src="/logo.png" alt="Manphis Logo" width={72} height={72} style={{ display: 'block', marginBottom: 10 }} crossOrigin="anonymous" />
               <p style={{ fontWeight: 700, fontSize: 13, margin: '0 0 2px 0', color: '#1f2937' }}>MANONO MANPHIS LTD.</p>
               <p style={{ color: '#6b7280', fontSize: 11, margin: 0 }}>Plot 45, Industrial Area, Accra, Ghana</p>
               <p style={{ color: '#6b7280', fontSize: 11, margin: 0 }}>exports@manphis.com | +233 50 000 0000</p>

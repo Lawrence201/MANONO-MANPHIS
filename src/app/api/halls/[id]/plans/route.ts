@@ -29,35 +29,16 @@ export async function GET(
             );
         }
 
-        // Fetch plans using raw SQL since Prisma client might not be synced
-        const plans = await prisma.$queryRaw<{
-            id: number;
-            name: string;
-            description: string | null;
-            price: string;
-            validity: string | null;
-        }[]>`
-            SELECT id, name, description, price, validity 
-            FROM hall_plans 
-            WHERE hall_id = ${hallId}
-            ORDER BY id ASC
-        `;
-
-        // Fetch features for each plan
-        const plansWithFeatures = await Promise.all(
-            plans.map(async (plan) => {
-                const features = await prisma.$queryRaw<{
-                    id: number;
-                    featureText: string;
-                }[]>`
-                    SELECT id, feature_text as "featureText" 
-                    FROM hall_plan_features 
-                    WHERE plan_id = ${plan.id}
-                    ORDER BY id ASC
-                `;
-                return { ...plan, features };
-            })
-        );
+        // Fetch plans using Prisma client
+        const plansWithFeatures = await prisma.hallPlan.findMany({
+            where: { hallId },
+            orderBy: { id: 'asc' },
+            include: {
+                features: {
+                    orderBy: { id: 'asc' }
+                }
+            }
+        });
 
         return NextResponse.json({
             hall,

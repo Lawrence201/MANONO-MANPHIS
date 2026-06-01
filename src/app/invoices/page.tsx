@@ -1,23 +1,11 @@
 import { AppLayout } from "@/components/layout/app-layout";
-import { orders } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
-import { Download, Plus, FileText } from "lucide-react";
+import { Download, Plus, FileText, ExternalLink, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getExportOrders } from "@/lib/actions/export-order-actions";
+import Link from "next/link";
 
 const fmt = new Intl.NumberFormat("en-US");
-
-const invoices = orders.map((o, i) => ({
-  number: `INV-${(2024100 + i).toString()}`,
-  order: o.id,
-  customer: o.company,
-  country: o.country,
-  amount: o.amount,
-  currency: o.currency,
-  status: o.payment,
-  issued: o.date,
-  due: new Date(new Date(o.date).getTime() + 30 * 86400000).toISOString().slice(0, 10),
-  terms: i % 2 === 0 ? "50% upfront / 50% on shipment" : "Net 30",
-}));
 
 const statusMap: Record<string, string> = {
   paid: "bg-success/10 text-success",
@@ -26,7 +14,13 @@ const statusMap: Record<string, string> = {
   overdue: "bg-destructive/10 text-destructive",
 };
 
-export default function InvoicesPage() {
+export default async function InvoicesPage() {
+  const res = await getExportOrders();
+  const allOrders = res.success ? (res.data as any[]) : [];
+  
+  // Only show orders that have an invoice generated
+  const invoicedOrders = allOrders.filter(o => o.invoicePdfPath);
+
   return (
     <AppLayout
       title="Invoices"
@@ -50,33 +44,52 @@ export default function InvoicesPage() {
               </tr>
             </thead>
             <tbody>
-              {invoices.map((inv) => (
-                <tr key={inv.number} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-3.5 h-3.5 text-accent" />
-                      <span className="font-mono text-xs font-semibold">{inv.number}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 font-mono text-xs text-muted-foreground">{inv.order}</td>
-                  <td className="px-5 py-3.5">
-                    <div className="text-xs font-medium">{inv.customer}</div>
-                    <div className="text-[10px] text-muted-foreground">{inv.country}</div>
-                  </td>
-                  <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">{inv.currency} {fmt.format(inv.amount)}</td>
-                  <td className="px-5 py-3.5 text-[11px] text-muted-foreground">{inv.terms}</td>
-                  <td className="px-5 py-3.5 text-xs text-muted-foreground tabular-nums">{inv.issued}</td>
-                  <td className="px-5 py-3.5 text-xs text-muted-foreground tabular-nums">{inv.due}</td>
-                  <td className="px-5 py-3.5">
-                    <span className={cn("inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide", statusMap[inv.status])}>
-                      {inv.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"><Download className="w-3 h-3" /> PDF</Button>
+              {invoicedOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-12 text-muted-foreground">
+                    <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
+                    <p>No invoices have been generated yet.</p>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                invoicedOrders.map((inv) => {
+                  const invoiceNumber = `INV-${inv.referenceNumber.split('-').pop()}`;
+                  const amount = inv.totalEstimatedCost ? Number(inv.totalEstimatedCost) : (Number(inv.quantityRequested) * Number(inv.product?.pricePerUnit || 0));
+                  const issuedDate = new Date(inv.invoiceDate || inv.createdAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+                  
+                  return (
+                    <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-3.5 h-3.5 text-accent" />
+                          <span className="font-mono text-xs font-semibold">{invoiceNumber}</span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 font-mono text-xs text-muted-foreground">{inv.referenceNumber}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="text-xs font-medium">{inv.companyName || inv.buyerType}</div>
+                        <div className="text-[10px] text-muted-foreground">{inv.destinationCountry}</div>
+                      </td>
+                      <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">GH₵ {fmt.format(amount)}</td>
+                      <td className="px-5 py-3.5 text-[11px] text-muted-foreground">{inv.depositRequired}</td>
+                      <td className="px-5 py-3.5 text-xs text-muted-foreground tabular-nums">{issuedDate}</td>
+                      <td className="px-5 py-3.5 text-xs text-muted-foreground tabular-nums">-</td>
+                      <td className="px-5 py-3.5">
+                        <span className={cn("inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide", statusMap[inv.status] || statusMap.pending)}>
+                          {inv.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <Link href={inv.invoicePdfPath} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+                            <ExternalLink className="w-3 h-3" /> View PDF
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

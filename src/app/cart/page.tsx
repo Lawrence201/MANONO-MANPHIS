@@ -257,7 +257,7 @@ function CartPageContent() {
             <div className="w-12 h-12 border-4 border-[#eea000] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : cartItems.length === 0 ? (
-          <div className="max-w-md mx-auto text-center py-16 bg-white border border-gray-100 rounded-2xl shadow-sm p-8 my-8">
+          <div className="max-w-md mx-auto text-center py-16 w-full">
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -267,7 +267,7 @@ function CartPageContent() {
             <p className="text-gray-500 mb-8">Looks like you haven't added anything to your cart yet.</p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 bg-[#eea000] hover:bg-[#eea000]/90 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-md shadow-amber-500/10 text-sm"
+              className="inline-flex items-center gap-2 bg-[#b1afae] hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-md shadow-[#b1afae]/30 text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               Return To Shop

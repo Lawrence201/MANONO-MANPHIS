@@ -535,6 +535,10 @@ model BillboardBooking {
   billboard        Billboard @relation(fields: [billboardId], references: [id])
 
   @@index([billboardId])
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([email])
+  @@index([companyName])
   @@map("billboard_bookings")
 }
 
@@ -643,6 +647,14 @@ model ExportOrder {
 
   // System Flags
   status              String   @default("pending") @db.VarChar(50)
+  invoicePdfPath      String?  @map("invoice_pdf_path") @db.VarChar(500)
+  invoiceDate         DateTime? @map("invoice_date")
+  
+  // Tracking Timestamps
+  approvedAt          DateTime? @map("approved_at")
+  processingAt        DateTime? @map("processing_at")
+  shippedAt           DateTime? @map("shipped_at")
+  deliveredAt         DateTime? @map("delivered_at")
 
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
@@ -650,6 +662,10 @@ model ExportOrder {
   product             Product  @relation(fields: [productId], references: [id])
 
   @@index([productId])
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([email])
+  @@index([companyName])
   @@map("export_orders")
 }
 
@@ -694,6 +710,10 @@ model Lead {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
 
+  @@index([stage, createdAt])
+  @@index([createdAt])
+  @@index([email])
+  @@index([company])
   @@map("leads")
 }
 

@@ -1,17 +1,30 @@
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Filter, Download } from "lucide-react";
+import { Plus, Download } from "lucide-react";
 import { getExportOrders } from "@/lib/actions/export-order-actions";
 import { OrdersTable } from "./orders-table";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-export default async function OrdersPage() {
-  const result = await getExportOrders();
-  const orders = result.success && result.data ? result.data : [];
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const resolvedParams = await searchParams;
+  const page = typeof resolvedParams.page === 'string' ? parseInt(resolvedParams.page, 10) : 1;
+  const search = typeof resolvedParams.search === 'string' ? resolvedParams.search : '';
+  const type = typeof resolvedParams.type === 'string' ? resolvedParams.type : 'all';
 
-  const honeyOrders = orders.filter(o => o.product?.name.toLowerCase().includes("honey")).length;
-  const cashewOrders = orders.filter(o => o.product?.name.toLowerCase().includes("cashew")).length;
-  const sheaOrders = orders.filter(o => o.product?.name.toLowerCase().includes("shea")).length;
+  const result = await getExportOrders({ page, pageSize: 15, search, type });
+  let paginatedOrders = result.success && result.data ? result.data : [];
+  const pagination = result.pagination;
+
+  // We need to fetch exact total counts from the database to keep summaries accurate across all pages
+  const [totalOrders, honeyOrders, cashewOrders, sheaOrders] = await Promise.all([
+    prisma.exportOrder.count(),
+    prisma.exportOrder.count({ where: { product: { name: { contains: "honey", mode: 'insensitive' } } } }),
+    prisma.exportOrder.count({ where: { product: { name: { contains: "cashew", mode: 'insensitive' } } } }),
+    prisma.exportOrder.count({ where: { product: { name: { contains: "shea", mode: 'insensitive' } } } })
+  ]);
 
   return (
     <AppLayout
@@ -26,22 +39,19 @@ export default async function OrdersPage() {
     >
       {/* Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <SummaryCard label="Total Orders" value={orders.length.toString()} hint="all time" />
+        <SummaryCard label="Total Orders" value={totalOrders.toString()} hint="all time" />
         <SummaryCard label="Honey Orders" value={honeyOrders.toString()} hint="across all stages" accent />
         <SummaryCard label="Cashew Orders" value={cashewOrders.toString()} hint="across all stages" />
         <SummaryCard label="Sheabutter Orders" value={sheaOrders.toString()} hint="across all stages" warning />
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <Input placeholder="Search orders..." className="max-w-xs h-9 bg-card" />
-        <Button variant="outline" size="sm" className="gap-2 h-9"><Filter className="w-3.5 h-3.5" /> Status</Button>
-        <Button variant="outline" size="sm" className="gap-2 h-9"><Filter className="w-3.5 h-3.5" /> Shipping</Button>
-        <Button variant="outline" size="sm" className="gap-2 h-9"><Filter className="w-3.5 h-3.5" /> Country</Button>
-      </div>
-
       {/* Table Component */}
-      <OrdersTable initialOrders={orders} />
+      <OrdersTable 
+        initialOrders={paginatedOrders} 
+        pagination={pagination} 
+        currentSearch={search}
+        currentType={type}
+      />
     </AppLayout>
   );
 }

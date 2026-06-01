@@ -177,7 +177,7 @@ export function WebsiteHeader() {
           </Link>
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="bg-white border border-gray-200 text-[#1a1a1a] p-2 rounded-xl hover:border-[#eea000] transition-all shadow-sm flex items-center justify-center z-[100] relative"
+            className={`bg-white border border-gray-200 text-[#1a1a1a] p-2 rounded-xl hover:border-[#eea000] transition-all shadow-sm flex items-center justify-center z-[100] ${isMenuOpen ? "fixed top-4 right-4 max-[380px]:top-2" : "relative"}`}
           >
             <div className={`relative w-6 h-6 max-[380px]:w-5 max-[380px]:h-5 transition-all duration-500 ${isMenuOpen ? "rotate-180" : "rotate-0"}`}>
               {/* X Icon (appears with delay as menu slides in) */}

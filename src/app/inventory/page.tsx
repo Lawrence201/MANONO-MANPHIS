@@ -39,9 +39,6 @@ export default function InventoryPage() {
     <AppLayout
       title="Inventory Management"
       subtitle="Track stock levels, reservations, and product grades across your warehouse"
-      actions={
-        <Button size="sm" className="gap-2 bg-[#6aabfc] hover:bg-[#6aabfc]/90 text-white border-0 font-semibold shadow-sm"><Plus className="w-4 h-4" /> Add Stock</Button>
-      }
     >
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Stat label="Total Stock" value={`${fmt.format(totalStock)}`} hint="across all products" icon={<Package className="w-5 h-5" />} />
@@ -75,7 +72,7 @@ export default function InventoryPage() {
             <tr className="text-left text-xs text-muted-foreground border-b border-border bg-[#f8f9fa] dark:bg-[#181818] transition-colors">
               <th className="font-medium px-5 py-3">Product</th>
               <th className="font-medium px-5 py-3">Category</th>
-              <th className="font-medium px-5 py-3">Grade</th>
+              <th className="font-medium px-5 py-3">Package Unit</th>
               <th className="font-medium px-5 py-3">Total Stock</th>
               <th className="font-medium px-5 py-3">Ordered</th>
               <th className="font-medium px-5 py-3">Available</th>
@@ -99,6 +96,11 @@ export default function InventoryPage() {
               const available = p.stock - p.reserved;
               const pct = p.stock > 0 ? (available / p.stock) * 100 : 0;
               const low = available < 3000;
+              
+              const displayPackage = p.packageType?.toLowerCase() === 'drum' || p.packageType?.toLowerCase() === 'drums' 
+                ? 'Steel Drums' 
+                : p.packageType;
+
               return (
                 <tr key={p.id} className="border-b border-black/[0.08] dark:border-white/[0.06] last:border-0 hover:bg-secondary/30 transition-colors">
                   <td className="px-5 py-3.5">
@@ -109,10 +111,9 @@ export default function InventoryPage() {
                   </td>
                   <td className="px-5 py-3.5 text-xs text-muted-foreground">{p.category}</td>
                   <td className="px-5 py-3.5">
-                    <span className={cn(
-                      "text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider",
-                      p.grade === "Premium" ? "bg-accent/15 text-accent" : "bg-muted text-muted-foreground"
-                    )}>{p.grade}</span>
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider bg-muted text-muted-foreground">
+                      {displayPackage}
+                    </span>
                   </td>
                   <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">
                     <div>{fmt.format(p.stock)} {p.unit}</div>

@@ -79,10 +79,15 @@ export default function HoneyListPage() {
   });
 
   // Calculate statistics
-  const totalVolume = products.reduce((acc, curr) => acc + Number(curr.stockQuantity), 0);
   const organicCount = products.filter(p => p.isOrganic).length;
   const exportReadyCount = products.filter(p => p.isExportReady).length;
   const totalValuation = products.reduce((acc, curr) => acc + (Number(curr.stockQuantity) * Number(curr.pricePerUnit)), 0);
+  const totalVolume = products.reduce((acc, curr) => acc + Number(curr.stockQuantity), 0);
+  const totalWeightOrdered = products.reduce((acc, curr) => {
+    const stock = Number(curr.stockQuantity) || 0;
+    const available = curr.availableStock || 0;
+    return acc + Math.max(0, stock - available);
+  }, 0);
 
   return (
     <AppLayout
@@ -104,24 +109,24 @@ export default function HoneyListPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-5 mb-10">
           <StatCard 
             label="Total Honey Stock" 
-            value={`${totalVolume.toLocaleString()} kg`} 
+            value={`${products.length.toLocaleString()}`} 
             icon={<Droplets className="w-5 h-5 text-amber-500" />} 
           />
           <StatCard 
-            label="Organic Certified" 
-            value={`${organicCount} Batches`} 
-            icon={<Sparkles className="w-5 h-5 text-yellow-500" />} 
+            label="Amount Expected" 
+            value={`GH₵ ${totalValuation.toLocaleString()}`} 
+            icon={<DollarSign className="w-5 h-5 text-amber-500" />} 
             accent 
           />
           <StatCard 
-            label="Export Cleared" 
-            value={`${exportReadyCount} Batches`} 
-            icon={<Truck className="w-5 h-5 text-emerald-500" />} 
+            label="Total Weight" 
+            value={`${totalVolume.toLocaleString()} kg`} 
+            icon={<Droplets className="w-5 h-5 text-blue-500" />} 
           />
           <StatCard 
-            label="Wholesale Valuation" 
-            value={`GH₵ ${totalValuation.toLocaleString()}`} 
-            icon={<DollarSign className="w-5 h-5 text-blue-500" />} 
+            label="Total Weight Ordered" 
+            value={`${totalWeightOrdered.toLocaleString()} kg`} 
+            icon={<Truck className="w-5 h-5 text-emerald-500" />} 
           />
           <StatCard 
             label="Total Clients (Honey)" 
@@ -246,12 +251,13 @@ function HoneyProductCard({ product, index, onDelete }: { product: any, index: n
 
         {/* Top Badges */}
         <div className="absolute top-3 left-3 z-10 scale-90 origin-top-left flex flex-col gap-1.5">
-          {product.isOrganic && (
-            <div className="bg-yellow-500/20 backdrop-blur-xl px-3 py-1.5 rounded-full flex items-center border border-yellow-500/30 shadow-xl">
-              <Sparkles className="w-3 h-3 text-yellow-500 mr-1" />
-              <span className="text-[9px] font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">Organic</span>
-            </div>
-          )}
+          <div className="bg-yellow-500/20 backdrop-blur-xl px-3 py-1.5 rounded-full flex items-center border border-yellow-500/30 shadow-xl">
+            <span className="text-[9px] font-bold text-white uppercase tracking-wider">
+              {product.stockUnit?.toLowerCase().includes(product.packagingType?.toLowerCase() || 'box') 
+                ? Number(product.availableStock ?? product.stockQuantity).toLocaleString()
+                : Math.floor(Number(product.availableStock ?? product.stockQuantity) / (parseFloat(product.packagingSize) || 1)).toLocaleString()} {product.packagingType}s in stock
+            </span>
+          </div>
           {product.isExportReady && (
             <div className="bg-emerald-500/20 backdrop-blur-xl px-3 py-1.5 rounded-full flex items-center border border-emerald-500/30 shadow-xl">
               <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Export Ready</span>
@@ -308,10 +314,10 @@ function HoneyProductCard({ product, index, onDelete }: { product: any, index: n
           {/* Rate & Minimum Order */}
           <div className="space-y-0.5">
             <h2 className="text-[17px] font-bold text-[#1a1a1a] dark:text-white leading-tight">
-              ${Number(product.pricePerUnit).toFixed(2)}
+              GH₵ {(Number(product.pricePerUnit) * (product.priceUnitType === 'per_unit' ? 1 : (parseFloat(product.packagingSize) || 1))).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h2>
             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
-              Price / {product.priceUnitType === 'per_liter' ? 'L' : product.priceUnitType === 'per_kg' ? 'kg' : product.priceUnitType === 'per_ton' ? 'Ton' : product.priceUnitType === 'per_unit' ? 'Unit' : (product.priceUnitType || 'L')}
+              Price / {product.packagingType ? product.packagingType.charAt(0).toUpperCase() + product.packagingType.slice(1) : 'Unit'}
             </p>
           </div>
 
@@ -332,10 +338,12 @@ function HoneyProductCard({ product, index, onDelete }: { product: any, index: n
 
           <div className="space-y-0.5">
             <h2 className="text-[14px] font-bold text-[#1a1a1a] dark:text-white leading-tight capitalize truncate">
-              {product.packagingType}
+              {product.stockUnit?.toLowerCase().includes(product.packagingType?.toLowerCase() || 'box') 
+                ? Number(product.availableStock ?? product.stockQuantity).toLocaleString()
+                : Math.floor(Number(product.availableStock ?? product.stockQuantity) / (parseFloat(product.packagingSize) || 1)).toLocaleString()} {product.packagingType === 'drum' ? 'Drums' : product.packagingType === 'bucket' ? 'Buckets' : product.packagingType === 'container' ? 'IBC Totes' : product.packagingType ? product.packagingType + 's' : 'Units'}
             </h2>
             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
-              {product.packagingSize || 'Bulk'} Pack
+              Total {product.packagingType === 'drum' ? 'Drums' : product.packagingType === 'bucket' ? 'Buckets' : product.packagingType === 'container' ? 'IBC Totes' : product.packagingType ? product.packagingType + 's' : 'Units'}
             </p>
           </div>
         </div>

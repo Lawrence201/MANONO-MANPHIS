@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { saveInvoicePdf } from "@/lib/actions/export-order-actions";
 
-export function PrintInvoiceButton({ invoiceId }: { invoiceId: string }) {
+export function PrintInvoiceButton({ invoiceId, orderId }: { invoiceId: string, orderId: number }) {
   const [loading, setLoading] = useState(false);
 
   const handleDownload = async () => {
@@ -52,6 +54,20 @@ export function PrintInvoiceButton({ invoiceId }: { invoiceId: string }) {
 
       pdf.addImage(imgData, 'PNG', 0, 0, a4WidthMM, contentHeightMM);
       pdf.save(`${invoiceId}.pdf`);
+
+      // Upload to server
+      const pdfBlob = pdf.output('blob');
+      const file = new File([pdfBlob], `${invoiceId}.pdf`, { type: 'application/pdf' });
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const res = await saveInvoicePdf(orderId, formData);
+      if (!res.success) {
+        console.error("Failed to sync invoice to server:", res.error);
+        toast.error("Invoice generated, but failed to sync to the server.");
+      } else {
+        toast.success("Invoice generated and saved successfully!");
+      }
     } catch (error) {
       console.error("PDF generation failed:", error);
       alert("Failed to generate PDF. Please try again.");
