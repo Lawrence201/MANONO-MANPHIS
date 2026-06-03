@@ -40,12 +40,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             <span className="text-[#3b82f6] tabular-nums">GH₵{billboardsVal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between gap-6">
-            <span className="text-[#10b981]">Cashew :</span>
-            <span className="text-[#10b981] tabular-nums">GH₵ {cashewVal.toLocaleString()}</span>
+            <span className="text-[#9c4921]">Cashew :</span>
+            <span className="text-[#9c4921] tabular-nums">GH₵ {cashewVal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between gap-6">
-            <span className="text-[#f59e0b]">Honey :</span>
-            <span className="text-[#f59e0b] tabular-nums">GH₵ {honeyVal.toLocaleString()}</span>
+            <span className="text-[#eea000]">Honey :</span>
+            <span className="text-[#eea000] tabular-nums">GH₵ {honeyVal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between gap-6">
             <span className="text-[#ea580c]">Shea :</span>
@@ -97,7 +97,7 @@ export function RevenueChart({ data }: {
             <span className="text-[#64748b] dark:text-zinc-400">Billboards</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#eea000]" />
             <span className="text-[#64748b] dark:text-zinc-400">Honey</span>
           </span>
           <span className="flex items-center gap-1.5">
@@ -105,7 +105,7 @@ export function RevenueChart({ data }: {
             <span className="text-[#64748b] dark:text-zinc-400">Shea Butter</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#9c4921]" />
             <span className="text-[#64748b] dark:text-zinc-400">Cashew</span>
           </span>
         </div>
@@ -119,16 +119,16 @@ export function RevenueChart({ data }: {
                 <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
               </linearGradient>
               <linearGradient id="colorHoney" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#eea000" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#eea000" stopOpacity={0.02} />
               </linearGradient>
               <linearGradient id="colorShea" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#ea580c" stopOpacity={0.25} />
                 <stop offset="100%" stopColor="#ea580c" stopOpacity={0.02} />
               </linearGradient>
               <linearGradient id="colorCashew" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#9c4921" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#9c4921" stopOpacity={0.02} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#888888" strokeOpacity={0.25} vertical={false} />
@@ -142,15 +142,22 @@ export function RevenueChart({ data }: {
             />
             <Tooltip content={<CustomTooltip />} />
             <Area type="monotone" dataKey="Billboards" stroke="#3b82f6" strokeWidth={2.5} fill="url(#colorBillboards)" />
-            <Area type="monotone" dataKey="Honey" stroke="#f59e0b" strokeWidth={2.5} fill="url(#colorHoney)" />
+            <Area type="monotone" dataKey="Honey" stroke="#eea000" strokeWidth={2.5} fill="url(#colorHoney)" />
             <Area type="monotone" dataKey="Shea" stroke="#ea580c" strokeWidth={2.5} fill="url(#colorShea)" />
-            <Area type="monotone" dataKey="Cashew" stroke="#10b981" strokeWidth={2.5} fill="url(#colorCashew)" />
+            <Area type="monotone" dataKey="Cashew" stroke="#9c4921" strokeWidth={2.5} fill="url(#colorCashew)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 }
+
+const productColor = (name: string, fallback: string) => {
+  const n = name.toLowerCase();
+  if (n.includes("honey"))  return "#eea000";
+  if (n.includes("cashew")) return "#9c4921";
+  return fallback;
+};
 
 export function ProductPerformanceChart({
   commodityData = [],
@@ -162,7 +169,7 @@ export function ProductPerformanceChart({
   const [mode, setMode] = useState<"commodities" | "advertising">("commodities");
 
   const currentData = mode === "commodities" ? commodityData : adData;
-  const barColor = mode === "commodities" ? "#f59e0b" : "#3b82f6"; // Gold vs. Blue
+  const barColor = "#3b82f6";
 
   return (
     <div className="bg-card rounded-xl border border-border p-6 shadow-card flex flex-col justify-between">
@@ -220,7 +227,11 @@ export function ProductPerformanceChart({
               formatter={(v: any) => [`GH₵ ${v.toLocaleString()}`, "Revenue"]} 
               cursor={{ fill: "var(--color-secondary)" }} 
             />
-            <Bar dataKey="revenue" fill={barColor} radius={[0, 6, 6, 0]} barSize={28} />
+            <Bar dataKey="revenue" radius={[0, 6, 6, 0]} barSize={28}>
+              {currentData.map((entry, i) => (
+                <Cell key={i} fill={mode === "commodities" ? productColor(entry.product, "#ea580c") : barColor} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -330,10 +341,12 @@ export function CountryDistributionChart({
 
 export function PipelineFunnelChart({ 
   slotStats,
-  inventoryStats 
+  inventoryStats,
+  cashewInventoryStats
 }: { 
   slotStats?: { availableSlots: number, reservedSlots: number, activeSlots: number, expiredSlots: number, maintenanceSlots: number },
-  inventoryStats?: { totalStock: number, available: number, reserved: number, processing: number, shipped: number }
+  inventoryStats?: { totalStock: number, available: number, reserved: number, processing: number, shipped: number },
+  cashewInventoryStats?: { totalStock: number, available: number, reserved: number, processing: number, shipped: number }
 }) {
   const [mode, setMode] = useState<"advertising" | "honey" | "cashew" | "shea">("advertising");
 
@@ -346,11 +359,11 @@ export function PipelineFunnelChart({
   ];
 
   const cashewPipeline = [
-    { stage: "Total Capacity (Bags)", value: 5000 },
-    { stage: "Available In-Stock", value: 4200 },
-    { stage: "Ordered (Pending)", value: 300 },
-    { stage: "Processing Orders", value: 500 },
-    { stage: "Shipped & Delivered", value: 0 },
+    { stage: "Total Capacity (KG)", value: cashewInventoryStats?.totalStock || 0 },
+    { stage: "Available In-Stock", value: cashewInventoryStats?.available || 0 },
+    { stage: "Ordered (Pending)", value: cashewInventoryStats?.reserved || 0 },
+    { stage: "Processing Orders", value: cashewInventoryStats?.processing || 0 },
+    { stage: "Shipped & Delivered", value: cashewInventoryStats?.shipped || 0 },
   ];
 
   const sheaPipeline = [
@@ -466,8 +479,9 @@ export function PipelineFunnelChart({
                   <div className="flex items-center gap-2 font-semibold">
                     {mode !== "advertising" && i > 0 && <span className="text-muted-foreground font-medium">({pct.toFixed(0)}%)</span>}
                     <span className="tabular-nums">
-                      {stage.value.toLocaleString()} {mode === "cashew" ? "Bags" : mode === "advertising" ? "Slots" : "KG"}
+                      {stage.value.toLocaleString()} {mode === "advertising" ? "Slots" : "KG"}
                       {mode === "honey" && stage.value > 0 ? ` (~${Math.round(stage.value / 20).toLocaleString()} Drums)` : ""}
+                      {mode === "cashew" && stage.value > 0 ? ` (~${Math.round(stage.value / 100).toLocaleString()} Bags)` : ""}
                     </span>
                   </div>
                 </div>

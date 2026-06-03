@@ -8,8 +8,11 @@ import { TopBar } from "@/components/website/top-bar";
 import { WebsiteHeader } from "@/components/website/header";
 import { WebsiteFooter } from "@/components/website/footer";
 import { ProductsHero } from "@/components/website/products-hero";
-import { getHoneyCategories, getHoneyPackagingTypes, getHoneyPackagingSizes, getHoneyProducts } from "@/lib/actions/product-actions";
+import { getHoneyCategories, getHoneyPackagingTypes, getHoneyPackagingSizes, getHoneyProducts, getCashewProducts, getCashewCategories } from "@/lib/actions/product-actions";
 import { ProductCard } from "@/components/website/product-card";
+
+import { CashewPromoSection } from "@/components/website/cashew-promo-section";
+import { CashewCard } from "@/components/website/cashew-card";
 
 const CATEGORY_LABELS: Record<string, string> = {
   raw: "Raw Honey",
@@ -39,80 +42,7 @@ const STOCK_LABELS: Record<string, string> = {
 };
 
 
-const cashewProducts = [
-  {
-    id: 7,
-    name: "Premium Raw Cashew Nuts | Grade W320 Export Quality",
-    price: "GH₵ 20",
-    oldPrice: "GH₵ 24",
-    discount: "-16%",
-    rating: 5,
-    image: "/product_cashew_card.png",
-    category: "Raw Cashews",
-    onSale: true,
-    countdown: "299d : 13h : 55m : 52s"
-  },
-  {
-    id: 8,
-    name: "Roasted Jumbo Cashews | Sea Salted & Crunchy",
-    price: "GH₵ 25",
-    oldPrice: "GH₵ 30",
-    discount: "-15%",
-    rating: 4,
-    image: "/product_cashew_card.png",
-    category: "Roasted Cashews",
-    onSale: true,
-    countdown: "238d : 13h : 55m : 52s"
-  },
-  {
-    id: 9,
-    name: "Organic Cashew Butter | 100% Pure & Unprocessed",
-    price: "GH₵ 32",
-    oldPrice: "GH₵ 34",
-    discount: "-6%",
-    rating: 5,
-    image: "/product_cashew_card.png",
-    category: "Cashew Butter",
-    onSale: true,
-    countdown: "225d : 13h : 55m : 52s"
-  },
-  {
-    id: 10,
-    name: "Salted Caramel Cashews | Sweet & Salty Premium Snack",
-    price: "GH₵ 22",
-    oldPrice: "GH₵ 26",
-    discount: "-15%",
-    rating: 5,
-    image: "/product_cashew_card.png",
-    category: "Roasted Cashews",
-    onSale: true,
-    countdown: "185d : 10h : 20m : 15s"
-  },
-  {
-    id: 11,
-    name: "Broken Cashew Kernels | Perfect for Baking & Cooking",
-    price: "GH₵ 15",
-    oldPrice: "GH₵ 18",
-    discount: "-16%",
-    rating: 4,
-    image: "/product_cashew_card.png",
-    category: "Raw Cashews",
-    onSale: true,
-    countdown: "120d : 08h : 45m : 30s"
-  },
-  {
-    id: 12,
-    name: "Honey Glazed Cashews | Premium Crunchy & Sweet Treat",
-    price: "GH₵ 24",
-    oldPrice: "GH₵ 28",
-    discount: "-14%",
-    rating: 5,
-    image: "/product_cashew_card.png",
-    category: "Roasted Cashews",
-    onSale: true,
-    countdown: "310d : 15h : 10m : 05s"
-  }
-];
+// Hardcoded cashew products removed, data is now fetched from database
 
 export default function ShopPage() {
   const [honeyProducts, setHoneyProducts] = useState<any[]>([]);
@@ -120,6 +50,10 @@ export default function ShopPage() {
   const [honeyCategories, setHoneyCategories] = useState<string[]>([]);
   const [honeyPackaging, setHoneyPackaging] = useState<string[]>([]);
   const [honeySizes, setHoneySizes] = useState<string[]>([]);
+
+  const [cashewProductsList, setCashewProductsList] = useState<any[]>([]);
+  const [cashewLoading, setCashewLoading] = useState(true);
+  const [cashewCategories, setCashewCategories] = useState<string[]>([]);
 
   useEffect(() => {
     getHoneyProducts().then((res) => {
@@ -195,6 +129,61 @@ export default function ShopPage() {
         setHoneySizes(res.data);
       }
     });
+
+    getCashewProducts().then((res) => {
+      if (res.success && res.data) {
+        setCashewProductsList(
+          (res.data as any[]).map((db) => {
+            const galleryPaths: string[] = (db.galleryImages || []).map((g: any) => g.imagePath || g);
+            const allImages = [
+              ...(db.featureImage ? [db.featureImage] : []),
+              ...galleryPaths,
+            ].filter(Boolean);
+            return {
+              id: db.id,
+              image: db.featureImage || "/cashew.png",
+              images: allImages.length > 0 ? allImages : [db.featureImage || "/cashew.png"],
+              name: db.name,
+              category: db.category,
+              description: db.description || "",
+              warehouse: WAREHOUSE_LABELS[db.warehouse] || db.warehouse || "—",
+              packagingType: PACKAGING_LABELS[db.packagingType] || db.packagingType || "—",
+              moq: `${db.moqValue} ${db.moqUnit || ""}`,
+              stockStatus: STOCK_LABELS[db.stockStatus] || db.stockStatus || "—",
+              price: (function() {
+                const p = Number(db.pricePerUnit) || 0;
+                let multiplier = 1;
+                if (db.packagingSize) {
+                  const match = String(db.packagingSize).match(/(\d+(?:\.\d+)?)/);
+                  if (match) multiplier = Number(match[1]);
+                }
+                const finalPrice = p * multiplier;
+                return finalPrice > 0 ? `GH₵ ${finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Ask for Price";
+              })()
+            };
+          })
+        );
+      }
+      setCashewLoading(false);
+    });
+
+    getCashewCategories().then((res) => {
+      if (res.success && res.data) {
+        const { counts, total } = res.data;
+        const formatted = [
+          `Our Store (${total})`,
+          ...Object.entries(counts).map(([cat, count]) => {
+            const formattedCat = cat
+              .split(" ")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ");
+            return `${formattedCat} (${count})`;
+          }),
+        ];
+        setCashewCategories(formatted);
+      }
+    });
+
   }, []);
 
   return (
@@ -216,16 +205,20 @@ export default function ShopPage() {
           sizes={honeySizes}
         />
 
-        <div className="container mx-auto px-4 max-w-[1400px]">
+        <div className="container mx-auto px-4 max-w-[1500px]">
           <div className="border-t border-gray-100 my-8" />
         </div>
+
+        <CashewPromoSection />
 
         {/* Section 2: Cashews */}
         <ShopSection
           title="Cashew"
           subtitle="Premium Export Quality"
-          products={cashewProducts}
-          categories={["Our Store (20)", "Raw Cashews (16)", "Roasted Cashews (14)", "Cashew Butter (15)"]}
+          products={cashewProductsList}
+          loading={cashewLoading}
+          categories={cashewCategories.length > 0 ? cashewCategories : ["Our Store (0)"]}
+          cardType="cashew"
         />
       </main>
 
@@ -234,7 +227,7 @@ export default function ShopPage() {
   );
 }
 
-function ShopSection({ title, subtitle, products, loading = false, categories, highlights = [], sizes = [] }: { title: string, subtitle: string, products: any[], loading?: boolean, categories: string[], highlights?: string[], sizes?: string[] }) {
+function ShopSection({ title, subtitle, products, loading = false, categories, highlights = [], sizes = [], cardType = "default" }: { title: string, subtitle: string, products: any[], loading?: boolean, categories: string[], highlights?: string[], sizes?: string[], cardType?: "default" | "cashew" }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
   
@@ -245,8 +238,8 @@ function ShopSection({ title, subtitle, products, loading = false, categories, h
   );
 
   return (
-    <div className="container mx-auto px-4 max-w-[1400px] mt-20">
-      <div className="flex flex-col lg:flex-row gap-8">
+    <div className={`container mx-auto px-4 mt-20 ${cardType === "cashew" ? "max-w-[1750px]" : "max-w-[1500px]"}`}>
+      <div className={`flex flex-col lg:flex-row ${cardType === "cashew" ? "gap-12 lg:gap-16" : "gap-8"}`}>
         
         {/* Sidebar */}
         <aside className="w-full lg:w-72 shrink-0 space-y-4">
@@ -304,11 +297,15 @@ function ShopSection({ title, subtitle, products, loading = false, categories, h
         {/* Main Content */}
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-gray-100">
-            <h2 className="text-[24px] font-black text-[#1a1a1a] uppercase tracking-tight">{title} <span className="text-[#ffcc00]">Catalog</span></h2>
+            <h2 className="text-[24px] font-black text-[#1a1a1a] uppercase tracking-tight">
+              {title} <span className={cardType === "cashew" ? "text-[#9c4921]" : "text-[#ffcc00]"}>Catalog</span>
+            </h2>
             <div className="flex items-center gap-6">
               <p className="text-[13px] text-gray-400 font-bold uppercase tracking-widest">{subtitle}</p>
               <div className="flex items-center gap-1">
-                <div className="p-2 text-[#ffcc00]"><LayoutGrid className="w-5 h-5" /></div>
+                <div className={`p-2 ${cardType === "cashew" ? "text-[#9c4921]" : "text-[#ffcc00]"}`}>
+                  <LayoutGrid className="w-5 h-5" />
+                </div>
               </div>
             </div>
           </div>
@@ -332,7 +329,11 @@ function ShopSection({ title, subtitle, products, loading = false, categories, h
               </div>
             ) : (
               currentProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                cardType === "cashew" ? (
+                  <CashewCard key={product.id} product={product} />
+                ) : (
+                  <ProductCard key={product.id} product={product} />
+                )
               ))
             )}
           </div>

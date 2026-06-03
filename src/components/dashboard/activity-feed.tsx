@@ -78,11 +78,26 @@ export function ActivityFeed() {
             {activities.map((a) => {
               const cfg = iconMap[a.icon as keyof typeof iconMap] || iconMap.order;
               const Icon = cfg.icon;
+              const isExportOrder = a.text.toLowerCase().includes("export order") || a.icon === "export";
+              const isCashew = a.text.toLowerCase().includes("cashew");
+              const isBillboard = a.text.toLowerCase().includes("billboard") || a.icon === "billboard";
+
+              const hasCustomImage = isExportOrder || isBillboard;
+              let customImageSrc = "/export.PNG";
+              if (isBillboard) customImageSrc = "/bill_board_notification.PNG";
+              else if (isExportOrder && isCashew) customImageSrc = "/cashew_notification.PNG";
+
               return (
                 <li key={a.id} className="flex items-start gap-3 py-2.5 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", cfg.color)}>
-                    <Icon className="w-4 h-4" />
-                  </div>
+                  {hasCustomImage ? (
+                    <div className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 overflow-hidden bg-gray-100">
+                      <img src={customImageSrc} alt="Activity" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", cfg.color)}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs leading-relaxed">{a.text}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{formatRelativeTime(a.createdAt)}</p>

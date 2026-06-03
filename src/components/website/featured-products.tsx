@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getHoneyProducts } from "@/lib/actions/product-actions";
 
 const fallbackProducts = [
   {
@@ -30,10 +31,8 @@ const fallbackProducts = [
 ];
 
 export async function FeaturedProducts() {
-  const dbProducts = await prisma.product.findMany({
-    take: 3,
-    orderBy: { createdAt: 'desc' }
-  });
+  const res = await getHoneyProducts();
+  const dbProducts = res.success && res.data ? (res.data as any[]).slice(0, 3) : [];
 
   const now = new Date();
   
@@ -43,7 +42,7 @@ export async function FeaturedProducts() {
     
     return {
       id: p.id,
-      name: p.name.toUpperCase(),
+      name: p.name.split(/[-–]/)[0].trim().toUpperCase(),
       price: (function() {
         const pricePerUnit = Number(p.pricePerUnit) || 0;
         let multiplier = 1;

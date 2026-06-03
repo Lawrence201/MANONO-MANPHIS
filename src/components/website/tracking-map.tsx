@@ -198,14 +198,16 @@ const nameToCode: Record<string, string> = {
   "Colombia": "CO", "Chile": "CL", "Peru": "PE",
 };
 
-export function TrackingMap({ 
-  destinationCountry, 
-  city, 
-  currentStep 
-}: { 
+export function TrackingMap({
+  destinationCountry,
+  city,
+  currentStep,
+  productName,
+}: {
   destinationCountry: string;
   city?: string | null;
   currentStep: number;
+  productName?: string;
 }) {
   const [svgHtml, setSvgHtml] = useState("");
   const [tooltip, setTooltip] = useState<{ x: number; y: number; name: string } | null>(null);
@@ -250,10 +252,14 @@ export function TrackingMap({
     let linesHtml = "";
     let markersHtml = "";
 
-    // Ghana origin marker (gold)
+    // Determine destination colour from product
+    const pName = (productName || "").toLowerCase();
+    const destColor = pName.includes("honey") ? "#eea000" : pName.includes("cashew") ? "#9c4921" : "#0ea5e9";
+
+    // Ghana origin marker (blue)
     const gh = svgCountryCenters["GH"];
     if (gh) {
-      markersHtml += `<circle cx="${gh.x}" cy="${gh.y}" r="4" fill="#eea000" fill-opacity="1" stroke="#eea000" stroke-width="8" stroke-opacity="0.22" cursor="pointer" class="animate-pulse"></circle>`;
+      markersHtml += `<circle cx="${gh.x}" cy="${gh.y}" r="4" fill="#0ea5e9" fill-opacity="1" stroke="#0ea5e9" stroke-width="8" stroke-opacity="0.22" pointer-events="none"></circle>`;
     }
 
     // Destination country logic
@@ -292,11 +298,11 @@ export function TrackingMap({
         // Layer 1 — static faint trail so the full arc is always visible
         linesHtml += `<path d="${pathD}" fill="none" stroke="#969ba4" stroke-width="1.2" stroke-dasharray="5,5" stroke-opacity="0.25" stroke-linecap="round"/>`;
 
-        // Layer 2 — animated flowing dashes (Always show for premium UX)
-        linesHtml += `<path d="${pathD}" fill="none" stroke="#0ea5e9" stroke-width="1.8" stroke-dasharray="8,6" stroke-opacity="0.85" stroke-linecap="round"><animate attributeName="stroke-dashoffset" from="14" to="0" dur="0.8s" repeatCount="indefinite"/></path>`;
+        // Layer 2 — animated flowing dashes
+        linesHtml += `<path d="${pathD}" fill="none" stroke="#969ba4" stroke-width="1.8" stroke-dasharray="8,6" stroke-opacity="0.85" stroke-linecap="round"><animate attributeName="stroke-dashoffset" from="14" to="0" dur="0.8s" repeatCount="indefinite"/></path>`;
 
-        // Blue destination marker
-        markersHtml += `<circle cx="${dest.x}" cy="${dest.y}" r="4" fill="#0ea5e9" fill-opacity="1" stroke="#0ea5e9" stroke-width="8" stroke-opacity="0.22" cursor="pointer" class="animate-pulse"></circle>`;
+        // Destination marker (product colour, no animation)
+        markersHtml += `<circle cx="${dest.x}" cy="${dest.y}" r="4" fill="${destColor}" fill-opacity="1" stroke="${destColor}" stroke-width="8" stroke-opacity="0.22" pointer-events="none"></circle>`;
       }
     }
 

@@ -50,11 +50,16 @@ export async function GET() {
             }
         });
 
-        // 4. Count Total Clients (unique emails from bookings)
-        const uniqueClients = await prisma.billboardBooking.groupBy({
-            by: ['email']
-        });
-        const totalClientsCount = uniqueClients.length;
+        // 4. Count Total Clients (unique emails across billboard bookings + export orders)
+        const [billboardEmails, exportEmails] = await Promise.all([
+            prisma.billboardBooking.findMany({ select: { email: true } }),
+            prisma.exportOrder.findMany({ select: { email: true } }),
+        ]);
+        const uniqueClientEmails = new Set([
+            ...billboardEmails.map(b => b.email.toLowerCase()),
+            ...exportEmails.map(e => e.email.toLowerCase()),
+        ]);
+        const totalClientsCount = uniqueClientEmails.size;
 
         // 5. Total export orders count (Approved/Processing)
         const totalBookingsCount = await prisma.exportOrder.count({
@@ -104,7 +109,9 @@ export async function GET() {
             },
             take: 5,
             include: {
-                billboard: true
+                billboard: {
+                    include: { galleryImages: true }
+                }
             }
         });
 
@@ -143,6 +150,7 @@ export async function GET() {
                 company: b.companyName || "Personal Booking",
                 country: b.billboard.city || "Ghana",
                 product: b.billboard.name,
+                image: b.billboard.featureImage || (b.billboard.galleryImages?.length > 0 ? b.billboard.galleryImages[0].imagePath : null),
                 quantity: `${b.slotsRequested} Slot${b.slotsRequested > 1 ? 's' : ''}`,
                 amount: Number(b.totalPrice),
                 currency: "GH₵",
@@ -158,7 +166,11 @@ export async function GET() {
         const recentExportOrders = await prisma.exportOrder.findMany({
             orderBy: { createdAt: 'desc' },
             take: 5,
-            include: { product: true }
+            include: { 
+                product: {
+                    include: { galleryImages: true }
+                } 
+            }
         });
 
         const formattedExportOrders = recentExportOrders.map(o => {
@@ -170,6 +182,7 @@ export async function GET() {
                 company: o.companyName,
                 country: o.destinationCountry,
                 product: o.product.name,
+                image: o.product.featureImage || (o.product.galleryImages?.length > 0 ? o.product.galleryImages[0].imagePath : null),
                 quantity: `${Number(o.quantityRequested)} ${o.product.moqUnit}`,
                 amount: calculatedAmount,
                 currency: "GH₵",
@@ -241,28 +254,92 @@ export async function GET() {
                 quantityRequested: true,
                 customsValue: true,
                 totalEstimatedCost: true,
-                product: { select: { pricePerUnit: true, moqUnit: true } }
-            }
+                companyName: true,
+                buyerType: true,
+                createdAt: true,
+                product: { select: { name: true, pricePerUnit: true, moqUnit: true, featureImage: true, galleryImages: true } }
+            },
+            orderBy: { createdAt: 'desc' }
         });
 
         // Normalize "Country Name (ISO)" → "ISO" (e.g. "Russia (RU)" → "RU")
+        // Also handles plain country names (e.g. "United Arab Emirates" → "AE")
+        const nameToIso: Record<string, string> = {
+            "United States": "US", "USA": "US", "United Kingdom": "GB", "UK": "GB",
+            "Germany": "DE", "France": "FR", "Italy": "IT", "Spain": "ES", "Portugal": "PT",
+            "Netherlands": "NL", "Belgium": "BE", "Switzerland": "CH", "Sweden": "SE",
+            "Norway": "NO", "Denmark": "DK", "Finland": "FI", "Poland": "PL",
+            "Austria": "AT", "Russia": "RU", "Ukraine": "UA", "Turkey": "TR", "Greece": "GR",
+            "Saudi Arabia": "SA", "UAE": "AE", "United Arab Emirates": "AE", "Qatar": "QA",
+            "Kuwait": "KW", "Israel": "IL", "Jordan": "JO", "Iraq": "IQ", "Iran": "IR",
+            "Yemen": "YE", "Oman": "OM", "Nigeria": "NG", "South Africa": "ZA",
+            "Kenya": "KE", "Ethiopia": "ET", "Egypt": "EG", "Morocco": "MA",
+            "Algeria": "DZ", "Tanzania": "TZ", "Senegal": "SN", "Ivory Coast": "CI",
+            "Cameroon": "CM", "Ghana": "GH", "China": "CN", "Japan": "JP", "India": "IN",
+            "South Korea": "KR", "Singapore": "SG", "Malaysia": "MY", "Indonesia": "ID",
+            "Thailand": "TH", "Vietnam": "VN", "Philippines": "PH", "Pakistan": "PK",
+            "Bangladesh": "BD", "Sri Lanka": "LK", "Australia": "AU", "New Zealand": "NZ",
+            "Canada": "CA", "Mexico": "MX", "Brazil": "BR", "Argentina": "AR",
+            "Colombia": "CO", "Chile": "CL", "Peru": "PE", "Venezuela": "VE",
+            "Afghanistan": "AF", "Albania": "AL", "Armenia": "AM", "Angola": "AO",
+            "Bosnia and Herzegovina": "BA", "Bulgaria": "BG", "Belarus": "BY",
+            "Czech Republic": "CZ", "Hungary": "HU", "Romania": "RO", "Serbia": "RS",
+            "Slovakia": "SK", "Slovenia": "SI", "Croatia": "HR", "Lithuania": "LT",
+            "Latvia": "LV", "Estonia": "EE", "Moldova": "MD", "Kazakhstan": "KZ",
+            "Uzbekistan": "UZ", "Turkmenistan": "TM", "Tajikistan": "TJ", "Kyrgyzstan": "KG",
+            "Azerbaijan": "AZ", "Georgia": "GE", "Mongolia": "MN", "Nepal": "NP",
+            "Bhutan": "BT", "Myanmar": "MM", "Cambodia": "KH", "Laos": "LA",
+            "Taiwan": "TW", "North Korea": "KP", "East Timor": "TL",
+            "Papua New Guinea": "PG", "Fiji": "FJ", "Vanuatu": "VU", "Solomon Islands": "SB",
+            "Libya": "LY", "Tunisia": "TN", "Sudan": "SD", "South Sudan": "SS",
+            "Somalia": "SO", "Djibouti": "DJ", "Eritrea": "ER", "Uganda": "UG",
+            "Rwanda": "RW", "Burundi": "BI", "Zambia": "ZM", "Zimbabwe": "ZW",
+            "Mozambique": "MZ", "Malawi": "MW", "Madagascar": "MG", "Botswana": "BW",
+            "Namibia": "NA", "Lesotho": "LS", "Swaziland": "SZ", "Gabon": "GA",
+            "Republic of the Congo": "CG", "Democratic Republic of the Congo": "CD",
+            "Central African Republic": "CF", "Chad": "TD", "Niger": "NE", "Mali": "ML",
+            "Burkina Faso": "BF", "Guinea": "GN", "Sierra Leone": "SL", "Liberia": "LR",
+            "Togo": "TG", "Benin": "BJ", "Equatorial Guinea": "GQ", "Guinea-Bissau": "GW",
+            "Gambia": "GM", "Mauritania": "MR", "Western Sahara": "EH",
+            "Dominican Republic": "DO", "Haiti": "HT", "Cuba": "CU", "Jamaica": "JM",
+            "Puerto Rico": "PR", "Bahamas": "BS", "Trinidad and Tobago": "TT",
+            "Costa Rica": "CR", "Panama": "PA", "Nicaragua": "NI", "Honduras": "HN",
+            "El Salvador": "SV", "Guatemala": "GT", "Belize": "BZ",
+            "Bolivia": "BO", "Paraguay": "PY", "Uruguay": "UY", "Ecuador": "EC",
+            "Guyana": "GY", "Suriname": "SR", "Greenland": "GL",
+            "Iceland": "IS", "Ireland": "IE", "Luxembourg": "LU",
+            "Cyprus": "CY", "Malta": "MT", "Macedonia": "MK", "Montenegro": "ME",
+            "Kosovo": "XK", "Syria": "SY", "Lebanon": "LB", "Palestine": "PS",
+            "Brunei": "BN", "Maldives": "MV", "Seychelles": "SC",
+        };
         const toIso = (raw: string): string => {
             const m = raw.match(/\(([A-Z]{2})\)\s*$/);
-            return m ? m[1] : raw;
+            if (m) return m[1];
+            return nameToIso[raw] || raw;
         };
 
         // Unique destination ISO codes (for map markers)
         const exportLocations = [...new Set(activeExportOrders.map(d => toIso(d.destinationCountry)))];
 
         // Per-country summary: total units, revenue, and unit label
-        const countryMap: Record<string, { units: number; revenue: number; unit: string }> = {};
+        const countryMap: Record<string, { units: number; revenue: number; unit: string; recentOrder?: any }> = {};
         activeExportOrders.forEach(o => {
             const iso   = toIso(o.destinationCountry);
             const qty   = Number(o.quantityRequested) || 0;
             const rev   = Number(o.totalEstimatedCost) || Number(o.customsValue) || (qty * Number(o.product.pricePerUnit || 0));
             const unit  = o.product.moqUnit || 'units';
             if (!countryMap[iso]) {
-                countryMap[iso] = { units: 0, revenue: 0, unit };
+                countryMap[iso] = { 
+                    units: 0, 
+                    revenue: 0, 
+                    unit,
+                    recentOrder: {
+                        customer: o.companyName || o.buyerType,
+                        quantity: qty,
+                        productName: o.product.name,
+                        image: o.product.featureImage || (o.product.galleryImages?.length > 0 ? o.product.galleryImages[0].imagePath : null)
+                    }
+                };
             }
             countryMap[iso].units   += qty;
             countryMap[iso].revenue += rev;
@@ -281,6 +358,7 @@ export async function GET() {
                 revenue:    Math.round(v.revenue),
                 percentage: Math.round((v.units / maxUnits) * 100),
                 share:      Math.round((v.revenue / totalRevenue) * 100),
+                recentOrder: v.recentOrder,
             }));
 
         // 10. Fetch recent reviews
@@ -345,6 +423,62 @@ export async function GET() {
             shipped: honeyShipped
         };
 
+        // 12. Calculate Inventory Pipeline (Cashew Focus)
+        const cashewProducts = await prisma.product.findMany({
+            where: { 
+                OR: [
+                    { name: { contains: 'Cashew', mode: 'insensitive' } },
+                    { category: { contains: 'Cashew', mode: 'insensitive' } },
+                    { category: { in: ['kernels', 'nuts'] } }
+                ]
+            }
+        });
+        
+        const cashewTotal = cashewProducts.reduce((sum, p) => sum + (Number(p.stockQuantity) || 0), 0);
+
+        const cashewOrders = await prisma.exportOrder.findMany({
+            where: { product: { name: { contains: 'Cashew', mode: 'insensitive' } } },
+            select: { 
+              status: true, 
+              quantityRequested: true, 
+              unitMeasurement: true, 
+              product: { select: { packagingSize: true, stockUnit: true } } 
+            }
+        });
+
+        let cashewReserved = 0;
+        let cashewProcessing = 0;
+        let cashewShipped = 0;
+
+        cashewOrders.forEach(o => {
+            let qty = Number(o.quantityRequested) || 0;
+            
+            if (o.product) {
+              const orderUnit = (o.unitMeasurement || '').toLowerCase();
+              const stockUnit = (o.product.stockUnit || '').toLowerCase();
+              if (orderUnit && stockUnit && orderUnit !== stockUnit && !orderUnit.includes(stockUnit) && !stockUnit.includes(orderUnit)) {
+                 if (o.product.packagingSize) {
+                   const match = o.product.packagingSize.match(/(\d+(?:\.\d+)?)/);
+                   if (match) {
+                      qty = qty * Number(match[1]);
+                   }
+                 }
+              }
+            }
+
+            if (o.status === 'pending') cashewReserved += qty;
+            else if (['processing', 'approved', 'paid'].includes(o.status)) cashewProcessing += qty;
+            else if (['shipped', 'delivered', 'in_transit'].includes(o.status)) cashewShipped += qty;
+        });
+
+        const cashewInventoryStats = {
+            totalStock: cashewTotal,
+            available: Math.max(0, cashewTotal - cashewProcessing - cashewShipped),
+            reserved: cashewReserved,
+            processing: cashewProcessing,
+            shipped: cashewShipped
+        };
+
         // --- PRODUCT PERFORMANCE COMPUTATION ---
         const commodityMap: Record<string, number> = {};
         allExportForChart.forEach(o => {
@@ -406,6 +540,7 @@ export async function GET() {
                 recentBookings: allRecentActivity,
                 slotStats,
                 inventoryStats,
+                cashewInventoryStats,
                 exportLocations,
                 exportCountrySummary,
                 recentReviews,

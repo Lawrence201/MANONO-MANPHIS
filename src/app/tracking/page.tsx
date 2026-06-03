@@ -8,6 +8,7 @@ import { TopBar } from "@/components/website/top-bar";
 import { Package, Truck, Calendar, ChevronRight, FileText } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ClientOrderActions } from "@/components/dashboard/client-order-actions";
 
 export default async function TrackingDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -68,9 +69,11 @@ export default async function TrackingDashboardPage() {
                   const isDelivered = order.status === "delivered";
                   const isPending = order.status === "pending";
                   const statusColor = isDelivered ? "text-green-600 bg-green-50" : isPending ? "text-orange-600 bg-orange-50" : "text-[#0066cc] bg-blue-50";
+                  const pName = order.product.name.toLowerCase();
+                  const productAccent = pName.includes("honey") ? "#eea000" : pName.includes("cashew") ? "#9c4921" : "#6b7280";
 
                   return (
-                    <div key={order.id} className="border border-gray-100 rounded-xl overflow-hidden hover:border-[#ff4444]/30 hover:shadow-xl hover:shadow-red-500/5 transition-all group bg-white flex flex-col">
+                    <div key={order.id} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md hover:border-gray-200 transition-all group bg-white flex flex-col">
                       <div className="p-6 flex-1">
                         <div className="flex justify-between items-start mb-4">
                           <div className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest", statusColor)}>
@@ -91,8 +94,8 @@ export default async function TrackingDashboardPage() {
 
                         <div className="space-y-3">
                           <div className="flex items-center gap-3 text-sm text-gray-600">
-                            <Truck className="w-4 h-4 text-gray-400" />
-                            <span className="font-medium line-clamp-1 text-xs uppercase tracking-wider">{order.destinationCountry}</span>
+                            <Truck className="w-4 h-4 flex-shrink-0" style={{ color: productAccent }} />
+                            <span className="font-medium line-clamp-1 text-xs uppercase tracking-wider" style={{ color: productAccent }}>{order.destinationCountry}</span>
                           </div>
                           <div className="flex items-center gap-3 text-sm text-gray-600">
                             <FileText className="w-4 h-4 text-gray-400" />
@@ -108,6 +111,8 @@ export default async function TrackingDashboardPage() {
                         >
                           Track Shipment <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
+                        
+                        <ClientOrderActions orderId={order.id} status={order.status} />
                       </div>
                     </div>
                   );

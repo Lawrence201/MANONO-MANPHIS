@@ -101,11 +101,20 @@ export async function getHoneyPackagingSizes() {
   try {
     const products = await prisma.product.findMany({
       where: {
-        OR: [
-          { category: { in: ["raw", "processed", "wild"] } },
-          { category: "organic", cashewGrade: null, sheaGrade: null },
-          { name: { contains: "honey", mode: "insensitive" } },
-          { category: { contains: "honey", mode: "insensitive" } },
+        AND: [
+          {
+            OR: [
+              { category: { in: ["raw", "processed", "wild", "organic"] } },
+              { name: { contains: "honey", mode: "insensitive" } },
+              { category: { contains: "honey", mode: "insensitive" } },
+            ]
+          },
+          { OR: [{ cashewGrade: null }, { cashewGrade: "" }] },
+          { OR: [{ sheaGrade: null }, { sheaGrade: "" }] },
+          { NOT: { name: { contains: 'cashew', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'rcn', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'shea', mode: 'insensitive' } } },
+          { category: { notIn: ['rcn', 'kernels', 'roasted', 'shea', 'unrefined', 'refined'] } }
         ],
         status: "published",
       },
@@ -131,11 +140,20 @@ export async function getHoneyPackagingTypes() {
   try {
     const products = await prisma.product.findMany({
       where: {
-        OR: [
-          { category: { in: ["raw", "processed", "wild"] } },
-          { category: "organic", cashewGrade: null, sheaGrade: null },
-          { name: { contains: "honey", mode: "insensitive" } },
-          { category: { contains: "honey", mode: "insensitive" } },
+        AND: [
+          {
+            OR: [
+              { category: { in: ["raw", "processed", "wild", "organic"] } },
+              { name: { contains: "honey", mode: "insensitive" } },
+              { category: { contains: "honey", mode: "insensitive" } },
+            ]
+          },
+          { OR: [{ cashewGrade: null }, { cashewGrade: "" }] },
+          { OR: [{ sheaGrade: null }, { sheaGrade: "" }] },
+          { NOT: { name: { contains: 'cashew', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'rcn', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'shea', mode: 'insensitive' } } },
+          { category: { notIn: ['rcn', 'kernels', 'roasted', 'shea', 'unrefined', 'refined'] } }
         ],
         status: "published",
       },
@@ -161,11 +179,20 @@ export async function getHoneyCategories() {
   try {
     const products = await prisma.product.findMany({
       where: {
-        OR: [
-          { category: { in: ["raw", "processed", "wild"] } },
-          { category: "organic", cashewGrade: null, sheaGrade: null },
-          { name: { contains: "honey", mode: "insensitive" } },
-          { category: { contains: "honey", mode: "insensitive" } },
+        AND: [
+          {
+            OR: [
+              { category: { in: ["raw", "processed", "wild", "organic"] } },
+              { name: { contains: "honey", mode: "insensitive" } },
+              { category: { contains: "honey", mode: "insensitive" } },
+            ]
+          },
+          { OR: [{ cashewGrade: null }, { cashewGrade: "" }] },
+          { OR: [{ sheaGrade: null }, { sheaGrade: "" }] },
+          { NOT: { name: { contains: 'cashew', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'rcn', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'shea', mode: 'insensitive' } } },
+          { category: { notIn: ['rcn', 'kernels', 'roasted', 'shea', 'unrefined', 'refined'] } }
         ],
         status: "published",
       },
@@ -187,15 +214,20 @@ export async function getHoneyProducts() {
   try {
     const products = await prisma.product.findMany({
       where: {
-        OR: [
-          { category: { in: ['raw', 'processed', 'wild'] } },
+        AND: [
           {
-            category: 'organic',
-            cashewGrade: null,
-            sheaGrade: null,
+            OR: [
+              { category: { in: ['raw', 'processed', 'wild', 'organic'] } },
+              { name: { contains: 'honey', mode: 'insensitive' } },
+              { category: { contains: 'honey', mode: 'insensitive' } }
+            ]
           },
-          { name: { contains: 'honey', mode: 'insensitive' } },
-          { category: { contains: 'honey', mode: 'insensitive' } }
+          { OR: [{ cashewGrade: null }, { cashewGrade: "" }] },
+          { OR: [{ sheaGrade: null }, { sheaGrade: "" }] },
+          { NOT: { name: { contains: 'cashew', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'rcn', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'shea', mode: 'insensitive' } } },
+          { category: { notIn: ['rcn', 'kernels', 'roasted', 'shea', 'unrefined', 'refined'] } }
         ]
       },
       include: {
@@ -493,6 +525,7 @@ export async function getGlobalInventory() {
   try {
     const products = await prisma.product.findMany({
       orderBy: { createdAt: "desc" },
+      include: { galleryImages: true },
     });
 
     const activeOrders = await prisma.exportOrder.findMany({
@@ -567,7 +600,8 @@ export async function getGlobalInventory() {
         packageType: p.packagingType || 'Units',
         packagesAvailable: Math.floor(availableStock / packageMultiplier),
         packagesTotal: Math.floor(totalStock / packageMultiplier),
-        packagesReserved: Math.floor(reserved / packageMultiplier)
+        packagesReserved: Math.floor(reserved / packageMultiplier),
+        image: p.featureImage || (p.galleryImages?.length > 0 ? p.galleryImages[0].imagePath : null)
       };
     });
 
@@ -575,5 +609,120 @@ export async function getGlobalInventory() {
   } catch (error: any) {
     console.error("Failed to fetch global inventory:", error);
     return { success: false, error: "Failed to load global inventory" };
+  }
+}
+
+export async function getCashewProducts() {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        OR: [
+          { category: { in: ['rcn', 'kernels', 'roasted'] } },
+          { cashewGrade: { not: null } },
+          { name: { contains: 'cashew', mode: 'insensitive' } },
+          { category: { contains: 'cashew', mode: 'insensitive' } }
+        ]
+      },
+      include: {
+        galleryImages: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    const activeOrders = await prisma.exportOrder.findMany({
+      select: { productId: true, quantityRequested: true, unitMeasurement: true },
+      where: {
+        status: { in: ['pending', 'processing', 'approved', 'paid', 'shipped', 'delivered', 'in_transit'] }
+      }
+    });
+
+    const orderSumMap: Record<number, number> = {};
+    activeOrders.forEach(o => {
+      let qty = Number(o.quantityRequested || 0);
+      const product = products.find(p => p.id === o.productId);
+      if (product) {
+        const orderUnit = (o.unitMeasurement || '').toLowerCase();
+        const stockUnit = (product.stockUnit || '').toLowerCase();
+        
+        if (orderUnit && stockUnit && orderUnit !== stockUnit && !orderUnit.includes(stockUnit) && !stockUnit.includes(orderUnit)) {
+           if (product.packagingSize) {
+             const match = product.packagingSize.match(/(\d+(?:\.\d+)?)/);
+             if (match) {
+                qty = qty * Number(match[1]);
+             }
+           }
+        }
+      }
+      orderSumMap[o.productId] = (orderSumMap[o.productId] || 0) + qty;
+    });
+
+    const serialized = products.map((p) => {
+      const totalStock = Number(p.stockQuantity);
+      const reserved = orderSumMap[p.id] || 0;
+      const availableStock = Math.max(0, totalStock - reserved);
+
+      return {
+      ...p,
+      moqValue: Number(p.moqValue),
+      stockQuantity: Number(p.stockQuantity),
+      pricePerUnit: Number(p.pricePerUnit),
+      moistureContent: p.moistureContent ? Number(p.moistureContent) : null,
+      defectRate: p.defectRate ? Number(p.defectRate) : null,
+      sheaFatContent: p.sheaFatContent ? Number(p.sheaFatContent) : null,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+      availableStock: availableStock,
+    };
+    });
+
+    return { success: true, data: serialized };
+  } catch (error: any) {
+    console.error("Failed to fetch cashew products:", error);
+    return { success: false, error: "Failed to fetch cashew inventory" };
+  }
+}
+
+export async function getCashewCategories() {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        OR: [
+          { category: { in: ['rcn', 'kernels', 'roasted'] } },
+          { cashewGrade: { not: null } },
+          { name: { contains: 'cashew', mode: 'insensitive' } },
+          { category: { contains: 'cashew', mode: 'insensitive' } }
+        ],
+        status: "published",
+      },
+      select: { category: true },
+    });
+
+    const counts: Record<string, number> = {};
+    products.forEach((p) => {
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    });
+
+    return { success: true, data: { counts, total: products.length } };
+  } catch (error: any) {
+    return { success: false, error: "Failed to fetch cashew categories" };
+  }
+}
+
+export async function getCashewClientsCount() {
+  try {
+    const orders = await prisma.exportOrder.findMany({
+      where: { product: { name: { contains: 'Cashew', mode: 'insensitive' } } },
+      select: { email: true }
+    });
+    const uniqueEmails = new Set();
+    orders.forEach(o => {
+      if (o.email) uniqueEmails.add(o.email.toLowerCase());
+    });
+    return { success: true, count: uniqueEmails.size };
+  } catch (error) {
+    console.error("Failed to fetch cashew clients count:", error);
+    return { success: false, count: 0 };
   }
 }

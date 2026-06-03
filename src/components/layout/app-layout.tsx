@@ -53,10 +53,18 @@ export function AppLayout({ children, title, subtitle, actions }: {
   const [dark, setDark] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    const isDark = saved === "dark";
+    setDark(isDark);
+    document.documentElement.classList.toggle("dark", isDark);
+  }, []);
+
   const toggleTheme = () => {
     const next = !dark;
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("theme", next ? "dark" : "light");
   };
 
   return (
@@ -213,7 +221,7 @@ function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => v
                 {[
                   { label: 'Digital Billboards', icon: Monitor, url: '/inventory/billboards' },
                   { label: 'Honey', icon: Droplets, url: '/inventory/honey' },
-                  { label: 'Cashew', icon: Nut, url: '/inventory' },
+                  { label: 'Cashew', icon: Nut, url: '/inventory/cashew' },
                   { label: 'Sheabutter', icon: Leaf, url: '/inventory' },
                 ].map((item, idx) => (
                   <Link 

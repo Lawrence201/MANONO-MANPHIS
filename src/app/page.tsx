@@ -14,6 +14,8 @@ import { NewsletterBanner } from "@/components/website/newsletter-banner";
 import { WebsiteFooter } from "@/components/website/footer";
 import { OutdoorSolution } from "@/components/website/outdoor-solution";
 
+export const dynamic = "force-dynamic";
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#f7f3f0] selection:bg-[#eea000] selection:text-white">

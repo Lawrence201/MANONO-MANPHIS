@@ -8,7 +8,26 @@ export async function submitExportOrder(data: any) {
     // Generate a unique reference number
     const timestamp = Date.now().toString().slice(-6);
     const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const referenceNumber = `EXP-${new Date().getFullYear()}-${timestamp}${randomStr}`;
+    
+    let prefix = "EXP";
+    const product = await prisma.product.findUnique({
+      where: { id: Number(data.productId) },
+      select: { category: true, name: true }
+    });
+    
+    if (product) {
+      const nameLower = product.name.toLowerCase();
+      const catLower = product.category.toLowerCase();
+      if (nameLower.includes("cashew") || catLower === "kernels") {
+        prefix = "CSH";
+      } else if (nameLower.includes("honey") || catLower === "honey") {
+        prefix = "HNY";
+      } else if (nameLower.includes("shea") || catLower.includes("shea")) {
+        prefix = "SHE";
+      }
+    }
+
+    const referenceNumber = `${prefix}-${new Date().getFullYear()}-${timestamp}${randomStr}`;
 
     const order = await prisma.exportOrder.create({
       data: {

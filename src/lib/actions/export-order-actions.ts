@@ -199,6 +199,10 @@ export async function getActiveShipments(params?: {
         pricePerUnit: Number(o.product.pricePerUnit),
         moqValue: Number(o.product.moqValue),
         stockQuantity: Number(o.product.stockQuantity),
+        moistureContent: o.product.moistureContent != null ? Number(o.product.moistureContent) : null,
+        defectRate: o.product.defectRate != null ? Number(o.product.defectRate) : null,
+        sheaFatContent: o.product.sheaFatContent != null ? Number(o.product.sheaFatContent) : null,
+        purityLevel: o.product.purityLevel != null ? Number(o.product.purityLevel) : null,
         createdAt: o.product.createdAt.toISOString(),
         updatedAt: o.product.updatedAt.toISOString(),
       }
@@ -241,6 +245,7 @@ export async function updateExportOrderStatus(id: number, status: string, timest
     revalidatePath("/orders");
     revalidatePath("/dashboard");
     revalidatePath("/logistics");
+    revalidatePath("/tracking");
     return { success: true, data: {
       ...order,
       quantityRequested: Number(order.quantityRequested),
@@ -272,6 +277,7 @@ export async function updateExportOrderDetails(id: number, data: { quantityReque
 
     revalidatePath("/orders");
     revalidatePath("/dashboard");
+    revalidatePath("/tracking");
     return { success: true, data: {
       ...order,
       quantityRequested: Number(order.quantityRequested),
@@ -304,6 +310,7 @@ export async function saveInvoicePdf(id: number, formData: FormData) {
     revalidatePath("/quotations");
     revalidatePath("/invoices");
     revalidatePath("/orders");
+    revalidatePath("/tracking");
     
     return { success: true, url };
   } catch (error: any) {
@@ -321,6 +328,7 @@ export async function deleteExportOrder(id: number) {
     revalidatePath("/orders");
     revalidatePath("/dashboard");
     revalidatePath("/logistics");
+    revalidatePath("/tracking");
     return { success: true };
   } catch (error: any) {
     console.error("Failed to delete order:", error);

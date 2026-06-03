@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,21 +14,24 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Droplets, Package, Activity, ImagePlus, Save, Eye, Settings2, ShieldCheck, Layout, Plus, X, FileText, Truck, Percent, Calendar, Layers } from "lucide-react";
-import { CediSign as DollarSign } from "@/components/CediSign";;
+import { CediSign as DollarSign } from "@/components/CediSign";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { createProduct } from "@/lib/actions/product-actions";
-import { useRouter } from "next/navigation";
+import { getProduct, updateProduct } from "@/lib/actions/product-actions";
+import { useRouter, useParams } from "next/navigation";
 
-export default function AddCashewPage() {
+export default function EditCashewPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
   const featureInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const certInputRef = useRef<HTMLInputElement>(null);
   
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [newCountry, setNewCountry] = useState("");
@@ -66,6 +69,50 @@ export default function AddCashewPage() {
     seasonality: "Seasonal (March - June)"
   });
 
+  useEffect(() => {
+    async function loadData() {
+      const res = await getProduct(Number(params.id));
+      if (res.success && res.data) {
+        const p = res.data;
+        setFormData({
+          name: p.name || "",
+          category: p.category || "rcn",
+          description: p.description || "",
+          packagingType: p.packagingType || "jute_bag",
+          packagingSize: p.packagingSize || "",
+          moqValue: p.moqValue ? p.moqValue.toString() : "",
+          moqUnit: p.moqUnit || "tons",
+          stockQuantity: p.originalStock ? p.originalStock.toString() : p.stockQuantity.toString(),
+          stockUnit: p.stockUnit || "tons",
+          stockStatus: p.stockStatus || "in_stock",
+          pricePerUnit: p.pricePerUnit ? p.pricePerUnit.toString() : "",
+          priceUnitType: p.priceUnitType || "per_ton",
+          isExportReady: p.isExportReady ?? true,
+          exportCountries: p.exportCountries || [],
+          shippingMethods: p.shippingMethods || [],
+          isOrganic: p.isOrganic ?? false,
+          certificates: p.certificates || [],
+          featureImage: p.featureImage || "",
+          videoShowcase: p.videoShowcase || "",
+          galleryImages: p.galleryImages || [],
+          processingTime: p.processingTime || "1-2 weeks",
+          warehouse: p.warehouse || "tema_cold",
+          status: p.status || "published",
+          
+          cashewGrade: p.cashewGrade || "W320",
+          moistureContent: p.moistureContent ? p.moistureContent.toString() : "8.5",
+          kernelCount: p.kernelCount ? p.kernelCount.toString() : "190",
+          defectRate: p.defectRate ? p.defectRate.toString() : "3.5",
+          seasonality: p.seasonality || "Seasonal (March - June)"
+        });
+      } else {
+        toast.error(res.error || "Failed to load product details.");
+      }
+      setIsPageLoading(false);
+    }
+    loadData();
+  }, [params.id]);
+
   const handleSubmit = async () => {
     if (!formData.name || !formData.packagingSize || !formData.moqValue || !formData.stockQuantity || !formData.pricePerUnit) {
       toast.error("Please fill in all required fields.");
@@ -74,7 +121,7 @@ export default function AddCashewPage() {
 
     setIsSubmitting(true);
     try {
-      const result = await createProduct({
+      const result = await updateProduct(Number(params.id), {
         ...formData,
         moqValue: Number(formData.moqValue) || 0,
         stockQuantity: Number(formData.stockQuantity) || 0,
@@ -85,10 +132,10 @@ export default function AddCashewPage() {
       });
 
       if (result.success) {
-        toast.success("Cashew product registered successfully!");
-        router.push("/inventory");
+        toast.success("Cashew product updated successfully!");
+        router.push("/inventory/cashew");
       } else {
-        toast.error(result.error || "Failed to publish product.");
+        toast.error(result.error || "Failed to update product.");
       }
     } catch (error) {
       toast.error("An error occurred during submission.");
@@ -210,10 +257,23 @@ export default function AddCashewPage() {
     });
   };
 
+  if (isPageLoading) {
+    return (
+      <AppLayout title="Edit Cashew Product" subtitle="Modify existing cashew batch details.">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Activity className="w-8 h-8 text-[#6aabfc] animate-spin" />
+            <p className="text-sm font-medium text-muted-foreground animate-pulse">Loading product details...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout
-      title="Add Cashew Product"
-      subtitle="Register a new cashew export batch into the commodity database."
+      title="Edit Cashew Product"
+      subtitle="Modify existing cashew batch details in the commodity database."
       actions={
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2 h-10 px-5 border-border hover:bg-secondary/50 transition-all font-semibold">
@@ -224,7 +284,7 @@ export default function AddCashewPage() {
             disabled={isSubmitting}
             className="gap-2 h-10 px-6 bg-[#6aabfc] hover:bg-[#6aabfc]/90 text-white border-0 font-semibold shadow-lg shadow-blue-500/20 transition-all"
           >
-            {isSubmitting ? "Publishing..." : <><Save className="w-4 h-4" /> Publish Product</>}
+            {isSubmitting ? "Saving..." : <><Save className="w-4 h-4" /> Save Changes</>}
           </Button>
         </div>
       }

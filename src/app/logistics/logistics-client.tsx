@@ -91,11 +91,14 @@ export function LogisticsClient({ initialShipments, pagination }: { initialShipm
 
             <div className="relative z-10 flex items-start justify-between gap-4 mb-5 flex-wrap">
               <div className="flex items-center gap-4">
-                <div className={cn(
-                  "w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-md",
-                  (s.shippingType || "").toLowerCase().includes("air") ? "bg-gradient-warm" : "bg-gradient-primary"
-                )}>
-                  <ShipI className="w-6 h-6" />
+                <div className="w-14 h-14 rounded-xl shadow-md overflow-hidden flex items-center justify-center">
+                  {(s.product.name || "").toLowerCase().includes("cashew") ? (
+                    <img src="/cashew_shipping.PNG" alt="Cashew Shipping" className="w-full h-full object-cover" />
+                  ) : (s.product.name || "").toLowerCase().includes("honey") ? (
+                    <img src="/ship.PNG" alt="Honey Shipping" className="w-full h-full object-cover" />
+                  ) : (
+                    <ShipI className="w-6 h-6" />
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -158,11 +161,8 @@ export function LogisticsClient({ initialShipments, pagination }: { initialShipm
               
               {/* Progress Bar Fill */}
               <div 
-                className={cn(
-                  "absolute left-0 top-3 h-1.5 rounded-full transition-all duration-1000 ease-out",
-                  (s.shippingType || "").toLowerCase().includes("air") ? "bg-gradient-warm" : "bg-gradient-primary"
-                )} 
-                style={{ width: `${progress}%` }} 
+                className="absolute left-0 top-3 h-1.5 rounded-full transition-all duration-1000 ease-out" 
+                style={{ width: `${progress}%`, backgroundColor: '#6aabfc' }} 
               />
               
               {/* Floating Vehicle Icon */}

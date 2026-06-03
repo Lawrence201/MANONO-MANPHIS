@@ -326,10 +326,11 @@ export default async function ShipmentProcessPage({ searchParams }: { searchPara
 
         {/* RIGHT PANE: Map Area */}
         <div className="flex-1 bg-[#fdfaf7] relative hidden lg:block overflow-hidden border-l border-gray-100 shadow-[inset_10px_0_20px_rgba(0,0,0,0.01)]">
-          <TrackingMap 
-            destinationCountry={order.destinationCountry} 
-            city={order.city} 
-            currentStep={currentStep} 
+          <TrackingMap
+            destinationCountry={order.destinationCountry}
+            city={order.city}
+            currentStep={currentStep}
+            productName={order.product.name}
           />
         </div>
 

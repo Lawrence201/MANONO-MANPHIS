@@ -129,6 +129,11 @@ export default function DashboardPage() {
     name: string;
     x: number;
     y: number;
+    customer?: string;
+    productName?: string;
+    quantity?: number;
+    unit?: string;
+    image?: string | null;
   } | null>(null);
 
   const [mapTab, setMapTab] = useState<"world" | "ghana">("world");
@@ -146,10 +151,18 @@ export default function DashboardPage() {
       if (code) {
         const name = countryNames[code] || code;
         const rect = e.currentTarget.getBoundingClientRect();
+        const countryStats = stats.exportCountrySummary?.find((c: any) => c.code === code);
+        const order = countryStats?.recentOrder;
+
         setTooltip({
           name,
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
+          customer: order?.customer,
+          productName: order?.productName,
+          quantity: order?.quantity,
+          unit: countryStats?.unit,
+          image: order?.image,
         });
       } else {
         setTooltip(null);
@@ -185,8 +198,15 @@ export default function DashboardPage() {
       processing: number;
       shipped: number;
     };
+    cashewInventoryStats?: {
+      totalStock: number;
+      available: number;
+      reserved: number;
+      processing: number;
+      shipped: number;
+    };
     exportLocations?: string[];
-    exportCountrySummary?: { code: string; units: number; unit: string; revenue: number; percentage: number; share: number }[];
+    exportCountrySummary?: { code: string; units: number; unit: string; revenue: number; percentage: number; share: number; recentOrder?: { customer?: string; quantity?: number; productName?: string; image?: string | null } }[];
     recentReviews?: any[];
     commodityPerformance?: { product: string; revenue: number }[];
     adPerformance?: { product: string; revenue: number }[];
@@ -230,6 +250,7 @@ export default function DashboardPage() {
             monthlyData: json.data.monthlyData,
             slotStats: json.data.slotStats,
             inventoryStats: json.data.inventoryStats,
+            cashewInventoryStats: json.data.cashewInventoryStats,
             exportLocations: json.data.exportLocations || [],
             exportCountrySummary: json.data.exportCountrySummary || [],
             recentReviews: json.data.recentReviews || [],
@@ -516,7 +537,7 @@ export default function DashboardPage() {
       // Ghana origin marker (gold) — always the single source
       const gh = svgCountryCenters["GH"];
       if (gh) {
-        markersHtml += `<circle cx="${gh.x}" cy="${gh.y}" r="4" fill="#eea000" fill-opacity="1" stroke="#eea000" stroke-width="8" stroke-opacity="0.22" cursor="pointer" class="animate-pulse"></circle>`;
+        markersHtml += `<circle cx="${gh.x}" cy="${gh.y}" r="4" fill="#0ea5e9" fill-opacity="1" stroke="#0ea5e9" stroke-width="8" stroke-opacity="0.22" pointer-events="none"></circle>`;
       }
 
       // Name → ISO code lookup
@@ -543,6 +564,11 @@ export default function DashboardPage() {
         const code = nameToCode[country] || country;
         if (!code || !svgCountryCenters[code]) return;
         const dest = svgCountryCenters[code];
+
+        // Determine marker colour from the product going to this destination
+        const summary = (stats.exportCountrySummary || []).find(s => s.code === code);
+        const pName = (summary?.recentOrder?.productName || '').toLowerCase();
+        const markerColor = pName.includes('honey') ? '#eea000' : pName.includes('cashew') ? '#9c4921' : '#0ea5e9';
 
         // ── Curved dashed trade-route arc from Ghana → destination ──
         if (gh) {
@@ -574,8 +600,8 @@ export default function DashboardPage() {
           linesHtml += `<path d="${pathD}" fill="none" stroke="#969ba4" stroke-width="1.8" stroke-dasharray="8,6" stroke-opacity="0.85" stroke-linecap="round"><animate attributeName="stroke-dashoffset" from="14" to="0" dur="0.5s" repeatCount="indefinite"/></path>`;
         }
 
-        // Blue destination marker (on top of line)
-        markersHtml += `<circle cx="${dest.x}" cy="${dest.y}" r="4" fill="#0ea5e9" fill-opacity="1" stroke="#0ea5e9" stroke-width="8" stroke-opacity="0.22" cursor="pointer" class="animate-pulse"></circle>`;
+        // Destination marker coloured by product (pointer-events="none" so hover passes through to the path)
+        markersHtml += `<circle cx="${dest.x}" cy="${dest.y}" r="4" fill="${markerColor}" fill-opacity="1" stroke="${markerColor}" stroke-width="8" stroke-opacity="0.22" pointer-events="none"></circle>`;
       });
 
       // Inject: lines first (behind), then markers (on top) — both INSIDE transform group
@@ -695,7 +721,7 @@ export default function DashboardPage() {
           <RevenueChart data={stats.monthlyData} />
         </div>
         <div className="h-full">
-          <PipelineFunnelChart slotStats={stats.slotStats} inventoryStats={stats.inventoryStats} />
+          <PipelineFunnelChart slotStats={stats.slotStats} inventoryStats={stats.inventoryStats} cashewInventoryStats={stats.cashewInventoryStats} />
         </div>
       </div>
 
@@ -703,7 +729,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Most Sales Location Widget */}
         <div className="lg:col-span-2">
-          <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden flex flex-col h-full">
+          <div className="bg-card rounded-xl border border-border shadow-card overflow-visible flex flex-col h-full">
             <div className="p-5 pb-0 flex items-center justify-between">
               <h3 className="font-display font-semibold text-base text-foreground">Most Sales Location</h3>
               <div className="flex bg-secondary p-1 rounded-lg border border-border shrink-0 select-none">
@@ -730,7 +756,7 @@ export default function DashboardPage() {
             <div className="p-5 flex-1 flex flex-col lg:flex-row gap-6 justify-between items-center">
               {/* Map Container */}
               <div
-                className="relative w-full lg:w-[65%] h-[320px] flex items-center justify-center overflow-hidden"
+                className="relative w-full lg:w-[65%] h-[400px] flex items-center justify-center overflow-visible"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
               >
@@ -756,22 +782,53 @@ export default function DashboardPage() {
                 `}} />
                 {/* Dynamic inline map rendering */}
                 <div
-                  className={`w-full h-full [&>svg]:w-full [&>svg]:h-full ${mapTab === "world" ? "[&>svg]:scale-[1.15]" : "[&>svg]:scale-[1.05]"
+                  className={`w-full h-full [&>svg]:w-full [&>svg]:h-full ${mapTab === "world" ? "[&>svg]:scale-[1.15] [&>svg]:translate-x-20" : "[&>svg]:scale-[1.05]"
                     }`}
                   dangerouslySetInnerHTML={getSvgWithMarkers()}
                 />
 
                 {/* Custom Tooltip */}
                 {tooltip && (
-                  <div
-                    className="absolute pointer-events-none bg-blue-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg z-50 transform -translate-x-1/2 -translate-y-full transition-all duration-75 ease-out"
-                    style={{
-                      left: tooltip.x,
-                      top: tooltip.y - 10,
-                    }}
-                  >
-                    {tooltip.name}
-                  </div>
+                  tooltip.customer ? (
+                    <div
+                      className="absolute pointer-events-none bg-popover/95 backdrop-blur-sm border border-border text-foreground text-xs rounded-xl shadow-xl z-50 transform -translate-x-1/2 -translate-y-[calc(100%+15px)] transition-all duration-75 ease-out min-w-[200px] overflow-hidden"
+                      style={{
+                        left: tooltip.x,
+                        top: tooltip.y,
+                      }}
+                    >
+                      <div className="bg-primary/10 px-3 py-2 border-b border-border font-semibold flex items-center justify-between">
+                        <span>{tooltip.name}</span>
+                      </div>
+                      <div className="p-3">
+                        <div className="flex items-center gap-3">
+                          {tooltip.image ? (
+                            <img src={tooltip.image} alt={tooltip.productName} className="w-10 h-10 rounded-md object-cover border border-border shadow-sm shrink-0 bg-white" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-md bg-secondary border border-border flex items-center justify-center shrink-0 shadow-sm">
+                              <span className="text-[10px] font-bold text-muted-foreground">{tooltip.productName?.substring(0, 2).toUpperCase()}</span>
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-semibold text-[13px]">{tooltip.customer}</div>
+                            <div className="text-muted-foreground mt-0.5">
+                              {tooltip.quantity} {tooltip.unit} of {tooltip.productName}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="absolute pointer-events-none bg-blue-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg z-50 transform -translate-x-1/2 -translate-y-full transition-all duration-75 ease-out"
+                      style={{
+                        left: tooltip.x,
+                        top: tooltip.y - 10,
+                      }}
+                    >
+                      {tooltip.name}
+                    </div>
+                  )
                 )}
               </div>
 
@@ -828,7 +885,7 @@ export default function DashboardPage() {
               </button>
             </div>
             <div className="relative flex-1 min-h-0">
-              <div className="p-5 pt-3 max-h-[325px] overflow-y-auto custom-scrollbar flex flex-col">
+              <div className="p-5 pt-3 max-h-[405px] overflow-y-auto custom-scrollbar flex flex-col">
                 {(stats.recentReviews || []).length > 0 ? (stats.recentReviews || []).map((review, idx) => {
                   const isLong = review.comment.length > 100;
                   const isExpanded = expandedReviews[review.id];
@@ -919,8 +976,26 @@ export default function DashboardPage() {
                     <div className="text-[10px] text-muted-foreground">{o.company} · {o.country}</div>
                   </td>
                   <td className="px-5 py-3.5 text-xs">
-                    <div>{o.product}</div>
-                    <div className="text-[10px] text-muted-foreground">{o.quantity}</div>
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={o.image || (o.type === "billboard" ? "/billboards/bill_boards 3.webp" : 
+                                         o.product.toLowerCase().includes("cashew") ? "/cashew.png" : 
+                                         o.product.toLowerCase().includes("shea") ? "/shea_butter.png" : 
+                                         "/honey.png")} 
+                        alt={o.product} 
+                        className="w-9 h-9 rounded-md object-cover border border-border shadow-sm shrink-0 bg-white" 
+                        onError={(e) => {
+                          e.currentTarget.src = o.type === "billboard" ? "/billboards/bill_boards 3.webp" : 
+                                                o.product.toLowerCase().includes("cashew") ? "/cashew.png" : 
+                                                o.product.toLowerCase().includes("shea") ? "/shea_butter.png" : 
+                                                "/honey.png";
+                        }}
+                      />
+                      <div>
+                        <div className="font-medium text-foreground">{o.product}</div>
+                        <div className="text-[10px] text-muted-foreground">{o.quantity}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-5 py-3.5 font-semibold tabular-nums text-xs">{o.currency} {fmt.format(o.amount)}</td>
                   <td className="px-5 py-3.5">

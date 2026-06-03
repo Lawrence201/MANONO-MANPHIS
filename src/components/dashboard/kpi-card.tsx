@@ -32,7 +32,7 @@ export function KpiCard({ label, value, change, trend, icon, accent = "primary",
             <div className="text-2xl font-bold font-display tracking-tight" title={tooltip}>{value}</div>
           </div>
           {icon && (
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground bg-secondary shrink-0 border border-border">
+            <div className="hidden dark:flex w-10 h-10 rounded-lg items-center justify-center text-muted-foreground bg-secondary shrink-0 border border-border">
               {icon}
             </div>
           )}

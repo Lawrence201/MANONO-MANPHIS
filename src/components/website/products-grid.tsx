@@ -241,7 +241,7 @@ export async function HoneyCatalog() {
         id: db.id,
         image: db.featureImage || "/product_honey_card.png",
         images: allImages.length > 0 ? allImages : [db.featureImage || "/product_honey_card.png"],
-        name: db.name,
+        name: (db.name || "").split(/[-–]/)[0].trim().toUpperCase(),
         category: CATEGORY_LABELS[db.category] || db.category,
         description: db.description || "",
         warehouse: WAREHOUSE_LABELS[db.warehouse] || db.warehouse || "—",
