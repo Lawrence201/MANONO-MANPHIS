@@ -7,7 +7,7 @@ import { RevenueChart, ProductPerformanceChart, CountryDistributionChart, Pipeli
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { Button } from "@/components/ui/button";
 import { kpis, orders } from "@/lib/mock-data";
-import { ShoppingCart, Users, TrendingUp, Truck, Target, Download, Plus, ArrowRight, Monitor, MessageSquare, ClipboardCheck, Globe, Star, MoreHorizontal } from "lucide-react";
+import { ShoppingCart, Users, TrendingUp, Truck, Target, Download, Plus, ArrowRight, Monitor, MessageSquare, ClipboardCheck, Globe, Star, MoreHorizontal, MapPin, X } from "lucide-react";
 import { CediSign as DollarSign } from "@/components/CediSign";;
 import Link from "next/link";
 import { PaymentBadge, StatusBadge } from "@/components/dashboard/badges";
@@ -136,8 +136,10 @@ export default function DashboardPage() {
     image?: string | null;
   } | null>(null);
 
-  const [mapTab, setMapTab] = useState<"world" | "ghana">("world");
+  const [mapTab, setMapTab] = useState<"world" | "ghana" | "billboard">("world");
   const [expandedReviews, setExpandedReviews] = useState<Record<number, boolean>>({});
+  const [selectedBillboard, setSelectedBillboard] = useState<{ id: number; name: string; city: string; latitude: number; longitude: number; clients?: { name: string; duration: string; daysRemaining: number }[] } | null>(null);
+  const [showClientsModal, setShowClientsModal] = useState(false);
 
   const toggleReview = (id: number) => {
     setExpandedReviews(prev => ({ ...prev, [id]: !prev[id] }));
@@ -211,6 +213,7 @@ export default function DashboardPage() {
     commodityPerformance?: { product: string; revenue: number }[];
     adPerformance?: { product: string; revenue: number }[];
     topAdLocations?: { name: string; revenue: number; share: number }[];
+    activeBillboardLocations?: { id: number; name: string; city: string; latitude: number; longitude: number; clients?: { name: string; duration: string; daysRemaining: number }[] }[];
   }>({
     totalRevenue: 0,
     activeBillboardsCount: 0,
@@ -226,7 +229,8 @@ export default function DashboardPage() {
     recentReviews: [],
     commodityPerformance: [],
     adPerformance: [],
-    topAdLocations: []
+    topAdLocations: [],
+    activeBillboardLocations: []
   });
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [svgHtml, setSvgHtml] = useState<string>("");
@@ -256,7 +260,8 @@ export default function DashboardPage() {
             recentReviews: json.data.recentReviews || [],
             commodityPerformance: json.data.commodityPerformance || [],
             adPerformance: json.data.adPerformance || [],
-            topAdLocations: json.data.topAdLocations || []
+            topAdLocations: json.data.topAdLocations || [],
+            activeBillboardLocations: json.data.activeBillboardLocations || []
           });
           setRecentBookings(json.data.recentBookings || []);
         }
@@ -616,6 +621,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const filename = mapTab === "world" ? "map.svg" : "ghana_map.svg";
+    if (mapTab === "billboard") return; // Skip fetching SVGs for billboard map
+    
     fetch(`/${filename}?v=` + Date.now())
       .then((res) => res.text())
       .then((text) => {
@@ -624,6 +631,13 @@ export default function DashboardPage() {
       })
       .catch((err) => console.error("Error loading map SVG:", err));
   }, [mapTab]);
+
+
+  useEffect(() => {
+    if (mapTab === "billboard" && !selectedBillboard && stats.activeBillboardLocations && stats.activeBillboardLocations.length > 0) {
+      setSelectedBillboard(stats.activeBillboardLocations[0]);
+    }
+  }, [mapTab, stats.activeBillboardLocations, selectedBillboard]);
 
   const formatRevenue = (val: number) => {
     if (val === 0) return "GH₵ 0";
@@ -642,7 +656,7 @@ export default function DashboardPage() {
     color: COUNTRY_COLORS[idx % COUNTRY_COLORS.length],
   }));
 
-  const activeSidebarData = mapTab === "world" ? worldSidebarData : ghanaData;
+  const activeSidebarData = mapTab === "world" ? worldSidebarData : (mapTab === "ghana" ? ghanaData : []);
 
   // Build data for the Top Export Markets pie chart
   const exportPieData = (stats.exportCountrySummary || []).map((item) => ({
@@ -731,7 +745,9 @@ export default function DashboardPage() {
         <div className="lg:col-span-2">
           <div className="bg-card rounded-xl border border-border shadow-card overflow-visible flex flex-col h-full">
             <div className="p-5 pb-0 flex items-center justify-between">
-              <h3 className="font-display font-semibold text-base text-foreground">Most Sales Location</h3>
+              <h3 className="font-display font-semibold text-base text-foreground">
+                {mapTab === "billboard" ? "Active Billboard Location" : "Most Sales Location"}
+              </h3>
               <div className="flex bg-secondary p-1 rounded-lg border border-border shrink-0 select-none">
                 <button
                   onClick={() => setMapTab("world")}
@@ -751,14 +767,26 @@ export default function DashboardPage() {
                 >
                   Ghana Map
                 </button>
+                <button
+                  onClick={() => {
+                    setMapTab("billboard");
+                    setShowClientsModal(false);
+                  }}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${mapTab === "billboard"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                  Billboard Map
+                </button>
               </div>
             </div>
             <div className="p-5 flex-1 flex flex-col lg:flex-row gap-6 justify-between items-center">
               {/* Map Container */}
               <div
-                className="relative w-full lg:w-[65%] h-[400px] flex items-center justify-center overflow-visible"
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
+                className={`relative w-full h-[400px] flex items-center justify-center overflow-visible ${mapTab === "billboard" ? "lg:w-[60%]" : "lg:w-[65%]"}`}
+                onMouseMove={mapTab !== "billboard" ? handleMouseMove : undefined}
+                onMouseLeave={mapTab !== "billboard" ? handleMouseLeave : undefined}
               >
                 <style dangerouslySetInnerHTML={{
                   __html: `
@@ -780,12 +808,52 @@ export default function DashboardPage() {
                     fill: #55b2b9 !important;
                   }
                 `}} />
-                {/* Dynamic inline map rendering */}
-                <div
-                  className={`w-full h-full [&>svg]:w-full [&>svg]:h-full ${mapTab === "world" ? "[&>svg]:scale-[1.15] [&>svg]:translate-x-20" : "[&>svg]:scale-[1.05]"
-                    }`}
-                  dangerouslySetInnerHTML={getSvgWithMarkers()}
-                />
+                {mapTab === "billboard" ? (
+                  <div className="w-full h-full rounded-lg overflow-hidden border border-border shadow-sm bg-muted/20 relative">
+                    {selectedBillboard ? (
+                      <>
+                        <iframe
+                          src={`https://maps.google.com/maps?ll=${selectedBillboard.latitude},${selectedBillboard.longitude}&z=15&t=m&hl=en&output=embed`}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen={true}
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          className="pointer-events-none"
+                        ></iframe>
+                        {/* Transparent overlay */}
+                        <div className="absolute inset-0 z-10"></div>
+                        {/* Bouncing Custom Marker */}
+                        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none pb-8">
+                          <svg 
+                            onClick={() => setShowClientsModal(true)}
+                            width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                            className="drop-shadow-xl animate-bounce pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
+                          >
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#EA4335" />
+                          </svg>
+                        </div>
+                      </>
+                    ) : (
+                      <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4047271.299908127!2d-3.391295988350029!3d7.953507963248386!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2b7a773%3A0xbed14ed8650e2dd3!2sGhana!5e0!3m2!1sen!2sgh!4v1717596000000!5m2!1sen!2sgh"
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen={true}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      ></iframe>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    className={`w-full h-full [&>svg]:w-full [&>svg]:h-full ${mapTab === "world" ? "[&>svg]:scale-[1.15] [&>svg]:translate-x-20" : "[&>svg]:scale-[1.05]"
+                      }`}
+                    dangerouslySetInnerHTML={getSvgWithMarkers()}
+                  />
+                )}
 
                 {/* Custom Tooltip */}
                 {tooltip && (
@@ -833,13 +901,81 @@ export default function DashboardPage() {
               </div>
 
               {/* Country List Sidebar */}
-              <div className="w-full lg:w-[30%] flex flex-col">
+              <div className={`w-full flex flex-col ${mapTab === "billboard" ? "lg:w-[38%] h-[400px]" : "lg:w-[30%]"}`}>
                 {activeSidebarData.length === 0 && mapTab === "world" && (
                   <div className="flex flex-col items-center justify-center h-full py-8 text-center">
                     <span className="text-muted-foreground text-xs">No approved export orders yet</span>
                   </div>
                 )}
-                {activeSidebarData.map((country, idx) => (
+                {mapTab === "billboard" && (!stats.activeBillboardLocations || stats.activeBillboardLocations.length === 0) && (
+                  <div className="flex flex-col items-center justify-center h-full py-8 text-center">
+                    <span className="text-muted-foreground text-xs">No active billboards found</span>
+                  </div>
+                )}
+                {mapTab === "billboard" && selectedBillboard && (
+                  <div className="flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+                    {stats.activeBillboardLocations && stats.activeBillboardLocations.length > 1 && (
+                      <div className="p-3 border-b border-border bg-muted/20">
+                        <select
+                          className="w-full p-2.5 rounded-lg border border-border bg-card text-sm font-medium outline-none focus:border-primary"
+                          value={selectedBillboard.id}
+                          onChange={(e) => {
+                            const b = stats.activeBillboardLocations?.find((b: any) => b.id.toString() === e.target.value);
+                            if (b) setSelectedBillboard(b);
+                          }}
+                        >
+                          {stats.activeBillboardLocations.map((b: any) => (
+                            <option key={b.id} value={b.id}>{b.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div className="p-3 border-b border-border flex justify-between items-center bg-muted/30">
+                      <div>
+                        <h3 className="text-sm font-bold text-foreground leading-tight">{selectedBillboard.name}</h3>
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-3 h-3" /> {selectedBillboard.city} — Active Bookings
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-card">
+                      {selectedBillboard.clients && selectedBillboard.clients.length > 0 ? (
+                        <table className="w-full text-left">
+                          <thead className="bg-muted text-muted-foreground text-[11px] uppercase tracking-wider border-b border-border sticky top-0 z-10">
+                            <tr>
+                              <th className="px-3 py-2 font-semibold">Client Name</th>
+                              <th className="px-3 py-2 font-semibold">Duration</th>
+                              <th className="px-3 py-2 font-semibold text-right">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                            {selectedBillboard.clients.map((client: any, idx: number) => (
+                              <tr key={idx} className="hover:bg-muted/30 transition-colors">
+                                <td className="px-3 py-2.5 font-medium text-foreground text-xs leading-tight">{client.name}</td>
+                                <td className="px-3 py-2.5 text-muted-foreground text-[10px] whitespace-normal leading-tight min-w-[70px] max-w-[80px] break-words">{client.duration}</td>
+                                <td className="px-3 py-2.5 text-right">
+                                  <div className="flex flex-col items-end gap-1">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary/15 text-primary uppercase tracking-wider">
+                                      Active
+                                    </span>
+                                    <span className="text-[10px] font-bold text-[#fe9a00] whitespace-nowrap">{client.daysRemaining} day{client.daysRemaining !== 1 ? 's' : ''} left</span>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div className="text-center py-12 flex flex-col items-center justify-center bg-muted/10 h-full">
+                          <Users className="w-10 h-10 text-muted-foreground mb-3 opacity-20" />
+                          <p className="text-muted-foreground text-sm">No active clients found for this billboard.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {mapTab !== "billboard" && activeSidebarData.map((country, idx) => (
                   <div key={idx} className="flex items-center justify-between p-[10px] mb-[10px] last:mb-0 bg-card border border-border/80 dark:border-[#3a3a3a] rounded-lg transition-all duration-300 hover:bg-primary/5 hover:border-primary/5">
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold text-foreground">{country.name}</span>
@@ -1026,6 +1162,7 @@ export default function DashboardPage() {
           </table>
         </div>
       </div>
+
     </AppLayout>
   );
 }

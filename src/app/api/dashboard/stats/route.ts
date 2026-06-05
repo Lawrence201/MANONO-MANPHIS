@@ -69,8 +69,46 @@ export async function GET() {
         // 6. Monthly revenue — Billboards (GH₵) + Export streams (GH₵)
         const allBookings = await prisma.billboardBooking.findMany({
             where: { status: { in: ['approved', 'active'] } },
-            select: { totalPrice: true, createdAt: true, billboard: { select: { name: true, city: true } } }
+            select: { 
+                totalPrice: true, 
+                createdAt: true, 
+                fullName: true,
+                startDate: true,
+                endDate: true,
+                status: true,
+                billboard: { select: { id: true, name: true, city: true, latitude: true, longitude: true } } 
+            }
         });
+
+        const uniqueActiveBillboards = new Map();
+        allBookings.forEach(b => {
+            if (b.billboard && b.billboard.latitude && b.billboard.longitude) {
+                const bId = b.billboard.id;
+                if (!uniqueActiveBillboards.has(bId)) {
+                    uniqueActiveBillboards.set(bId, {
+                        id: b.billboard.id,
+                        name: b.billboard.name,
+                        city: b.billboard.city,
+                        latitude: Number(b.billboard.latitude),
+                        longitude: Number(b.billboard.longitude),
+                        clients: []
+                    });
+                }
+                
+                const billboardEntry = uniqueActiveBillboards.get(bId);
+                
+                const endDate = new Date(b.endDate).getTime();
+                const now = Date.now();
+                const daysRemaining = Math.max(0, Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)));
+                
+                billboardEntry.clients.push({
+                    name: b.fullName,
+                    duration: `${new Date(b.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} - ${new Date(b.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`,
+                    daysRemaining: daysRemaining
+                });
+            }
+        });
+        const activeBillboardLocations = Array.from(uniqueActiveBillboards.values());
 
         const allExportForChart = await prisma.exportOrder.findMany({
             where: { status: { in: ['approved', 'processing', 'in_transit', 'shipped', 'delivered', 'paid'] } },
@@ -546,7 +584,8 @@ export async function GET() {
                 recentReviews,
                 commodityPerformance,
                 adPerformance,
-                topAdLocations
+                topAdLocations,
+                activeBillboardLocations
             }
         });
     } catch (error: any) {
