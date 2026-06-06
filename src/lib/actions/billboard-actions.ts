@@ -61,6 +61,12 @@ export async function createBillboard(data: BillboardInput) {
     return { success: true, data: serializedBillboard };
   } catch (error: any) {
     console.error("Failed to create billboard:", error);
+    if (error?.code === 'P2002') {
+      return { 
+        success: false, 
+        error: "A billboard with this Asset Code already exists. Please generate a new unique code and try again." 
+      };
+    }
     return { 
       success: false, 
       error: error.message || "Failed to create billboard. Please try again." 

@@ -272,8 +272,8 @@ export function OrdersTable({
       {editingOrder && (
         <EditOrderModal 
           order={editingOrder} 
-          onClose={() => setEditingOrder(null)} 
-          onSaved={() => {
+          onCloseAction={() => setEditingOrder(null)} 
+          onSavedAction={() => {
             window.location.reload();
           }} 
         />

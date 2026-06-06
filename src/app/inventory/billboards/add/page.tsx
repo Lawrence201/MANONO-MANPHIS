@@ -147,6 +147,46 @@ export default function AddBillboardPage() {
       });
       if (result.success) {
         toast.success("Billboard registered successfully!");
+        
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let newCode = "BB-";
+        for (let i = 0; i < 4; i++) newCode += chars.charAt(Math.floor(Math.random() * chars.length));
+        newCode += "-";
+        for (let i = 0; i < 4; i++) newCode += chars.charAt(Math.floor(Math.random() * chars.length));
+        
+        setFormData({
+          name: "",
+          assetCode: newCode,
+          category: "premium",
+          description: "",
+          city: "accra",
+          address: "",
+          latitude: "",
+          longitude: "",
+          screenType: "led",
+          resolution: "p6",
+          aspectRatio: "landscape",
+          dimensions: "",
+          brightness: "",
+          trafficVolume: "",
+          weeklyRate: "",
+          taxRate: "",
+          minDuration: "1w",
+          wakeTime: "06:00",
+          sleepTime: "00:00",
+          maxSlots: "",
+          slotDuration: "",
+          hasLightSensor: true,
+          hasAudio: false,
+          hasStreaming: true,
+          hasClimate: true,
+          featureImage: "",
+          videoShowcase: "",
+          galleryImages: [] as string[],
+          audienceTags: [] as string[]
+        });
+        setLocationSearch("");
+        setZoom(14);
       } else {
         toast.error(result.error || "Failed to publish billboard.");
       }
@@ -231,10 +271,10 @@ export default function AddBillboardPage() {
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploading}
             className="gap-2 h-10 px-6 bg-[#6aabfc] hover:bg-[#6aabfc]/90 text-white border-0 font-semibold shadow-lg shadow-blue-500/20 transition-all"
           >
-            {isSubmitting ? "Publishing..." : <><Save className="w-4 h-4" /> Publish Billboard</>}
+            {isSubmitting ? "Publishing..." : isUploading ? "Uploading Media..." : <><Save className="w-4 h-4" /> Publish Billboard</>}
           </Button>
         </div>
       }

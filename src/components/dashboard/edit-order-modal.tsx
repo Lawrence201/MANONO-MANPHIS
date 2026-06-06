@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { X, Save } from "lucide-react";
 import { updateExportOrderDetails, updateExportOrderStatus } from "@/lib/actions/export-order-actions";
 
-export function EditOrderModal({ order, onClose, onSaved }: { order: any; onClose: () => void; onSaved: () => void }) {
+export function EditOrderModal({ order, onCloseAction, onSavedAction }: { order: any; onCloseAction: () => void; onSavedAction: () => void }) {
   const [loading, setLoading] = useState(false);
   const [qty, setQty] = useState(order.quantityRequested.toString());
   const [customsValue, setCustomsValue] = useState(order.customsValue ? order.customsValue.toString() : "");
@@ -25,8 +25,8 @@ export function EditOrderModal({ order, onClose, onSaved }: { order: any; onClos
     }
     
     setLoading(false);
-    onSaved();
-    onClose();
+    onSavedAction();
+    onCloseAction();
   };
 
   return (
@@ -34,7 +34,7 @@ export function EditOrderModal({ order, onClose, onSaved }: { order: any; onClos
       <div className="bg-card w-full max-w-lg rounded-2xl shadow-2xl border border-border overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <h2 className="font-display font-semibold text-lg">Edit Order: {order.referenceNumber}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-secondary rounded-full transition-colors">
+          <button onClick={onCloseAction} className="p-1 hover:bg-secondary rounded-full transition-colors">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
@@ -84,7 +84,7 @@ export function EditOrderModal({ order, onClose, onSaved }: { order: any; onClos
         </div>
         
         <div className="p-5 border-t border-border bg-secondary/20 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} disabled={loading}>Cancel</Button>
+          <Button variant="outline" onClick={onCloseAction} disabled={loading}>Cancel</Button>
           <Button onClick={handleSave} disabled={loading} className="gap-2 bg-gradient-accent border-0">
             <Save className="w-4 h-4" />
             {loading ? "Saving..." : "Save Changes"}
