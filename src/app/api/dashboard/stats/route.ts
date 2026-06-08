@@ -76,7 +76,7 @@ export async function GET() {
                 startDate: true,
                 endDate: true,
                 status: true,
-                billboard: { select: { id: true, name: true, city: true, latitude: true, longitude: true } } 
+                billboard: { select: { id: true, name: true, city: true, latitude: true, longitude: true, featureImage: true, galleryImages: true } } 
             }
         });
 
@@ -91,6 +91,7 @@ export async function GET() {
                         city: b.billboard.city,
                         latitude: Number(b.billboard.latitude),
                         longitude: Number(b.billboard.longitude),
+                        image: b.billboard.featureImage || (b.billboard.galleryImages?.length > 0 ? b.billboard.galleryImages[0].imagePath : null),
                         clients: []
                     });
                 }

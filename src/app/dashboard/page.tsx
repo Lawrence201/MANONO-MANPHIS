@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { AppLayout } from "@/components/layout/app-layout";
+
+const BillboardMap = dynamic(() => import("@/components/dashboard/billboard-map"), { ssr: false });
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { RevenueChart, ProductPerformanceChart, CountryDistributionChart, PipelineFunnelChart } from "@/components/dashboard/charts";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
@@ -12,6 +15,7 @@ import { CediSign as DollarSign } from "@/components/CediSign";;
 import Link from "next/link";
 import { PaymentBadge, StatusBadge } from "@/components/dashboard/badges";
 import "./dashboard.css";
+
 
 const fmt = new Intl.NumberFormat("en-US");
 
@@ -138,8 +142,10 @@ export default function DashboardPage() {
 
   const [mapTab, setMapTab] = useState<"world" | "ghana" | "billboard">("world");
   const [expandedReviews, setExpandedReviews] = useState<Record<number, boolean>>({});
-  const [selectedBillboard, setSelectedBillboard] = useState<{ id: number; name: string; city: string; latitude: number; longitude: number; clients?: { name: string; duration: string; daysRemaining: number }[] } | null>(null);
+  const [selectedBillboard, setSelectedBillboard] = useState<{ id: number; name: string; city: string; latitude: number; longitude: number; image?: string | null; clients?: { name: string; duration: string; daysRemaining: number }[] } | null>(null);
   const [showClientsModal, setShowClientsModal] = useState(false);
+  const [showBillboardPanel, setShowBillboardPanel] = useState(false);
+
 
   const toggleReview = (id: number) => {
     setExpandedReviews(prev => ({ ...prev, [id]: !prev[id] }));
@@ -213,7 +219,7 @@ export default function DashboardPage() {
     commodityPerformance?: { product: string; revenue: number }[];
     adPerformance?: { product: string; revenue: number }[];
     topAdLocations?: { name: string; revenue: number; share: number }[];
-    activeBillboardLocations?: { id: number; name: string; city: string; latitude: number; longitude: number; clients?: { name: string; duration: string; daysRemaining: number }[] }[];
+    activeBillboardLocations?: { id: number; name: string; city: string; latitude: number; longitude: number; image?: string | null; clients?: { name: string; duration: string; daysRemaining: number }[] }[];
   }>({
     totalRevenue: 0,
     activeBillboardsCount: 0,
@@ -771,6 +777,7 @@ export default function DashboardPage() {
                   onClick={() => {
                     setMapTab("billboard");
                     setShowClientsModal(false);
+                    setShowBillboardPanel(false);
                   }}
                   className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${mapTab === "billboard"
                       ? "bg-card text-foreground shadow-sm"
@@ -784,7 +791,7 @@ export default function DashboardPage() {
             <div className="p-5 flex-1 flex flex-col lg:flex-row gap-6 justify-between items-center">
               {/* Map Container */}
               <div
-                className={`relative w-full h-[400px] flex items-center justify-center overflow-visible ${mapTab === "billboard" ? "lg:w-[60%]" : "lg:w-[65%]"}`}
+                className={`relative w-full h-[400px] flex items-center justify-center overflow-visible transition-all duration-300 ${mapTab === "billboard" ? (showBillboardPanel ? "lg:w-[60%]" : "lg:w-full") : "lg:w-[65%]"}`}
                 onMouseMove={mapTab !== "billboard" ? handleMouseMove : undefined}
                 onMouseLeave={mapTab !== "billboard" ? handleMouseLeave : undefined}
               >
@@ -810,31 +817,15 @@ export default function DashboardPage() {
                 `}} />
                 {mapTab === "billboard" ? (
                   <div className="w-full h-full rounded-lg overflow-hidden border border-border shadow-sm bg-muted/20 relative">
-                    {selectedBillboard ? (
-                      <>
-                        <iframe
-                          src={`https://maps.google.com/maps?ll=${selectedBillboard.latitude},${selectedBillboard.longitude}&z=15&t=m&hl=en&output=embed`}
-                          width="100%"
-                          height="100%"
-                          style={{ border: 0 }}
-                          allowFullScreen={true}
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                          className="pointer-events-none"
-                        ></iframe>
-                        {/* Transparent overlay */}
-                        <div className="absolute inset-0 z-10"></div>
-                        {/* Bouncing Custom Marker */}
-                        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none pb-8">
-                          <svg 
-                            onClick={() => setShowClientsModal(true)}
-                            width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-                            className="drop-shadow-xl animate-bounce pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
-                          >
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#EA4335" />
-                          </svg>
-                        </div>
-                      </>
+                    {true ? (
+                      <BillboardMap
+                        locations={stats.activeBillboardLocations || []}
+                        selectedId={selectedBillboard?.id ?? null}
+                        onMarkerClick={(b) => {
+                          setSelectedBillboard(b);
+                          setShowBillboardPanel(true);
+                        }}
+                      />
                     ) : (
                       <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4047271.299908127!2d-3.391295988350029!3d7.953507963248386!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2b7a773%3A0xbed14ed8650e2dd3!2sGhana!5e0!3m2!1sen!2sgh!4v1717596000000!5m2!1sen!2sgh"
@@ -844,7 +835,7 @@ export default function DashboardPage() {
                         allowFullScreen={true}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                      ></iframe>
+                      />
                     )}
                   </div>
                 ) : (
@@ -898,10 +889,11 @@ export default function DashboardPage() {
                     </div>
                   )
                 )}
+
               </div>
 
               {/* Country List Sidebar */}
-              <div className={`w-full flex flex-col ${mapTab === "billboard" ? "lg:w-[38%] h-[400px]" : "lg:w-[30%]"}`}>
+              <div className={`w-full flex flex-col transition-all duration-300 ${mapTab === "billboard" ? (showBillboardPanel ? "lg:w-[38%] h-[400px]" : "hidden") : "lg:w-[30%]"}`}>
                 {activeSidebarData.length === 0 && mapTab === "world" && (
                   <div className="flex flex-col items-center justify-center h-full py-8 text-center">
                     <span className="text-muted-foreground text-xs">No approved export orders yet</span>
@@ -912,7 +904,12 @@ export default function DashboardPage() {
                     <span className="text-muted-foreground text-xs">No active billboards found</span>
                   </div>
                 )}
-                {mapTab === "billboard" && selectedBillboard && (
+                {mapTab === "billboard" && (!stats.activeBillboardLocations || stats.activeBillboardLocations.length === 0) && (
+                  <div className="flex flex-col items-center justify-center h-full py-8 text-center">
+                    <span className="text-muted-foreground text-xs">No active billboards found</span>
+                  </div>
+                )}
+                {mapTab === "billboard" && selectedBillboard && showBillboardPanel && (
                   <div className="flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden shadow-sm">
                     {stats.activeBillboardLocations && stats.activeBillboardLocations.length > 1 && (
                       <div className="p-3 border-b border-border bg-muted/20">
@@ -930,14 +927,26 @@ export default function DashboardPage() {
                         </select>
                       </div>
                     )}
-
                     <div className="p-3 border-b border-border flex justify-between items-center bg-muted/30">
-                      <div>
-                        <h3 className="text-sm font-bold text-foreground leading-tight">{selectedBillboard.name}</h3>
-                        <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3" /> {selectedBillboard.city} — Active Bookings
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={selectedBillboard.image || "/billboards/bill_boards 3.webp"} 
+                          alt={selectedBillboard.name} 
+                          className="w-12 h-12 rounded-md object-cover border border-border bg-white" 
+                          onError={(e) => {
+                            e.currentTarget.src = "/billboards/bill_boards 3.webp";
+                          }}
+                        />
+                        <div>
+                          <h3 className="text-sm font-bold text-foreground leading-tight">{selectedBillboard.name}</h3>
+                          <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3" /> {selectedBillboard.city} — Active Bookings
+                          </p>
+                        </div>
                       </div>
+                      <button onClick={() => setShowBillboardPanel(false)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground shrink-0">
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
                     <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-card">
                       {selectedBillboard.clients && selectedBillboard.clients.length > 0 ? (
@@ -956,9 +965,7 @@ export default function DashboardPage() {
                                 <td className="px-3 py-2.5 text-muted-foreground text-[10px] whitespace-normal leading-tight min-w-[70px] max-w-[80px] break-words">{client.duration}</td>
                                 <td className="px-3 py-2.5 text-right">
                                   <div className="flex flex-col items-end gap-1">
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary/15 text-primary uppercase tracking-wider">
-                                      Active
-                                    </span>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary/15 text-primary uppercase tracking-wider">Active</span>
                                     <span className="text-[10px] font-bold text-[#fe9a00] whitespace-nowrap">{client.daysRemaining} day{client.daysRemaining !== 1 ? 's' : ''} left</span>
                                   </div>
                                 </td>
