@@ -36,7 +36,7 @@ export default async function TrackingDashboardPage() {
           {/* Header Section */}
           <div className="text-center mb-16 space-y-4">
             <h1 
-              className="text-[80px] md:text-[110px] font-bold text-[#1a1a1a] tracking-[-0.04em] uppercase leading-[1.0] md:scale-x-[0.85] transform origin-center"
+              className="text-[48px] max-[450px]:text-[36px] min-[1029px]:text-[110px] font-bold text-[#1a1a1a] tracking-[-0.04em] uppercase leading-[1.0] min-[1029px]:scale-x-[0.85] transform origin-center max-[1028px]:px-4"
               style={{ fontFamily: "var(--font-antonio)" }}
             >
               Your Shipments

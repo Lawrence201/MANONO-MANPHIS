@@ -46,9 +46,23 @@ function LoginForm() {
     }
   };
 
+  useEffect(() => {
+    document.body.style.backgroundColor = '#000000';
+    return () => {
+      document.body.style.backgroundColor = '';
+    };
+  }, []);
+
   return (
-    <div className="h-screen bg-black flex font-sans text-white overflow-hidden">
+    <div className="fixed inset-0 bg-black flex font-sans text-white overflow-hidden z-50">
       <style dangerouslySetInnerHTML={{ __html: `
+        body::-webkit-scrollbar, html::-webkit-scrollbar {
+          display: none !important;
+        }
+        body, html {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
         .hide-scrollbar::-webkit-scrollbar {
           display: none !important;
         }
@@ -56,9 +70,20 @@ function LoginForm() {
           -ms-overflow-style: none !important;
           scrollbar-width: none !important;
         }
+        /* Autofill — light blue background */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px #dbeafe inset !important;
+            box-shadow: 0 0 0 1000px #dbeafe inset !important;
+            -webkit-text-fill-color: #1e3a8a !important;
+            transition: background-color 9999999s ease-in-out 0s !important;
+            caret-color: #1e3a8a !important;
+        }
       `}} />
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-[45%] relative border-r border-white/5 overflow-hidden flex-col items-center justify-center bg-[#0a0a0a]">
+      <div className="hidden min-[1029px]:flex min-[1029px]:w-[45%] relative border-r border-white/5 overflow-hidden flex-col items-center justify-center bg-[#0a0a0a]">
         {/* Background Image */}
         <Image
           src="/billboards/login.png"
@@ -95,8 +120,20 @@ function LoginForm() {
           </Link>
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 w-full mt-16 sm:mt-0">
-          <div className="w-full max-w-[360px] space-y-5">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 max-[480px]:mt-0 mt-16 sm:mt-0 w-full">
+          <div className="w-full max-w-[360px] space-y-4 max-[480px]:space-y-3.5">
+            {/* Mobile/Tablet Logo */}
+            <div className="hidden max-[1028px]:flex justify-center mb-4">
+              <Image 
+                src="/logo.PNG" 
+                alt="Manono Manphis Logo" 
+                width={90} 
+                height={25} 
+                className="object-contain"
+                priority
+              />
+            </div>
+
             {/* Header */}
             <div className="text-center space-y-1.5">
               <h2 className="text-[26px] font-semibold tracking-tight text-white">Login to Manono</h2>
@@ -146,7 +183,7 @@ function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full bg-[#111111] border border-white/10 rounded-md px-3.5 py-2.5 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-white/30 focus:bg-[#1a1a1a] transition-all [&:-webkit-autofill]:[box-shadow:0_0_0_30px_#111111_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+                  className="w-full bg-[#111111] border border-white/10 rounded-md px-3.5 py-2.5 text-[16px] sm:text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-white/30 focus:bg-[#1a1a1a] transition-all [&:-webkit-autofill]:[box-shadow:0_0_0_30px_#111111_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                 />
               </div>
 
@@ -164,7 +201,7 @@ function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full bg-[#111111] border border-white/10 rounded-md px-3.5 py-2.5 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-white/30 focus:bg-[#1a1a1a] transition-all pr-10 [&:-webkit-autofill]:[box-shadow:0_0_0_30px_#111111_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+                    className="w-full bg-[#111111] border border-white/10 rounded-md px-3.5 py-2.5 text-[16px] sm:text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-white/30 focus:bg-[#1a1a1a] transition-all pr-10 [&:-webkit-autofill]:[box-shadow:0_0_0_30px_#111111_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                   />
                   <button
                     type="button"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Clock, MapPin } from "lucide-react";
 
 const svgCountryCenters: Record<string, { x: number; y: number }> = {
@@ -212,6 +212,13 @@ export function TrackingMap({
   const [svgHtml, setSvgHtml] = useState("");
   const [tooltip, setTooltip] = useState<{ x: number; y: number; name: string } | null>(null);
 
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const innerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const svgDivRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     fetch("/map.svg?v=" + Date.now())
       .then((res) => res.text())
@@ -219,30 +226,124 @@ export function TrackingMap({
       .catch((err) => console.error("Error loading map SVG:", err));
   }, []);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    const isPath = target.tagName.toLowerCase() === "path";
-    const dataCode = target.getAttribute("data-code");
-    
-    if (isPath && dataCode) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      const countryName = Object.keys(nameToCode).find((key) => nameToCode[key] === dataCode) || dataCode;
+  // Auto-center the route's bounding box in the visible container after SVG loads.
+  // Uses getScreenCTM() on the group element so coordinate math is correct regardless
+  // of the SVG's internal preserveAspectRatio letterboxing or CSS scale transforms.
+  useEffect(() => {
+    if (!svgHtml) return;
+    const timer = setTimeout(() => {
+      const svgEl = svgDivRef.current?.querySelector("svg") as SVGSVGElement | null;
+      const groupEl = svgDivRef.current?.querySelector("g") as SVGGraphicsElement | null;
+      const containerEl = containerRef.current;
+      if (!svgEl || !groupEl || !containerEl) return;
 
-      setTooltip({
-        x,
-        y,
-        name: countryName,
+      const ctm = groupEl.getScreenCTM();
+      if (!ctm) return;
+
+      const containerRect = containerEl.getBoundingClientRect();
+
+      const gh = svgCountryCenters["GH"];
+      if (!gh) return;
+
+      const toIso = (raw: string) => {
+        const m = raw.match(/\(([A-Z]{2})\)\s*$/);
+        return m ? m[1] : raw;
+      };
+      const code = nameToCode[toIso(destinationCountry)] || toIso(destinationCountry);
+      const dest = svgCountryCenters[code];
+
+      // Converts path-space coordinates to screen coordinates using the group's CTM.
+      // This correctly accounts for the group transform, SVG preserveAspectRatio, and CSS scale.
+      const toScreen = (x: number, y: number) => {
+        const pt = svgEl.createSVGPoint();
+        pt.x = x; pt.y = y;
+        const sp = pt.matrixTransform(ctm);
+        return { x: sp.x, y: sp.y };
+      };
+
+      let centerSvgX = gh.x;
+      let centerSvgY = gh.y;
+
+      if (dest) {
+        // Replicate the arc control point calculation from getSvgWithMarkers
+        const dx = dest.x - gh.x;
+        const dy = dest.y - gh.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const midX = (gh.x + dest.x) / 2;
+        const midY = (gh.y + dest.y) / 2;
+        const perpX = -dy / dist;
+        const perpY = dx / dist;
+        const curveAmount = dist * 0.30;
+        let cpX = midX + perpX * curveAmount;
+        let cpY = midY + perpY * curveAmount;
+        if (cpY > midY) { cpX = midX - perpX * curveAmount; cpY = midY - perpY * curveAmount; }
+
+        // Use the bounding box of all route points (including the arc peak) as center
+        const minX = Math.min(gh.x, dest.x, cpX);
+        const maxX = Math.max(gh.x, dest.x, cpX);
+        const minY = Math.min(gh.y, dest.y, cpY);
+        const maxY = Math.max(gh.y, dest.y, cpY);
+        centerSvgX = (minX + maxX) / 2;
+        centerSvgY = (minY + maxY) / 2;
+      }
+
+      const centerScreen = toScreen(centerSvgX, centerSvgY);
+      const containerCenterX = containerRect.left + containerRect.width / 2;
+      const containerCenterY = containerRect.top + containerRect.height / 2;
+
+      setPan({
+        x: containerCenterX - centerScreen.x,
+        y: containerCenterY - centerScreen.y,
       });
-    } else {
-      setTooltip(null);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [svgHtml, destinationCountry]);
+
+  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    setDragStart({ x: clientX - pan.x, y: clientY - pan.y });
+  };
+
+  const handleMouseMoveMap = (e: React.MouseEvent | React.TouchEvent) => {
+    if (isDragging) {
+      const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+      setPan({
+        x: clientX - dragStart.x,
+        y: clientY - dragStart.y
+      });
     }
+
+    // Tooltip logic for mouse only
+    if (!('touches' in e) && !isDragging) {
+      const target = e.target as HTMLElement;
+      const isPath = target.tagName.toLowerCase() === "path";
+      const dataCode = target.getAttribute("data-code");
+      
+      if (isPath && dataCode && innerRef.current) {
+        const rect = innerRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const countryName = Object.keys(nameToCode).find((key) => nameToCode[key] === dataCode) || dataCode;
+
+        setTooltip({ x, y, name: countryName });
+      } else {
+        setTooltip(null);
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   const handleMouseLeave = () => {
     setTooltip(null);
+    handleMouseUp();
   };
 
   const getSvgWithMarkers = () => {
@@ -316,13 +417,23 @@ export function TrackingMap({
   };
 
   return (
-    <div className="w-full h-full relative flex items-center justify-center bg-[#fdfaf7] overflow-hidden group">
+    <div
+      ref={containerRef}
+      className={`w-full h-full relative flex items-center justify-center bg-[#fdfaf7] overflow-hidden group select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMoveMap}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleMouseDown}
+      onTouchMove={handleMouseMoveMap}
+      onTouchEnd={handleMouseUp}
+    >
       <style dangerouslySetInnerHTML={{
         __html: `
         path[data-code] {
           fill: #e1e7e7 !important;
           transition: fill 0.2s ease;
-          cursor: pointer;
+          cursor: inherit;
           stroke: #FFFFFF !important;
           stroke-width: 0.5px !important;
         }
@@ -335,29 +446,34 @@ export function TrackingMap({
         }
       `}} />
       
-      {/* Dynamic inline map rendering */}
-      <div
-        className="absolute inset-0 flex items-center justify-center pt-48 pl-20 [&>svg]:w-full [&>svg]:h-full [&>svg]:scale-[1.15] transition-transform duration-700 ease-in-out"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        dangerouslySetInnerHTML={getSvgWithMarkers()}
-      />
-
-      {/* Custom Tooltip */}
-      {tooltip && (
+      {/* Moving wrapper for Map + Hover Tooltip */}
+      <div 
+        ref={innerRef}
+        style={{ transform: `translate(${pan.x}px, ${pan.y}px)`, transition: isDragging ? 'none' : 'transform 0.1s ease-out' }} 
+        className="w-[300%] h-[300%] absolute left-[-100%] top-[-100%] transition-transform flex items-center justify-center"
+      >
         <div
-          className="absolute pointer-events-none bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-md shadow-lg z-50 transform -translate-x-1/2 -translate-y-full transition-all duration-75 ease-out"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y - 10,
-          }}
-        >
-          {tooltip.name}
-        </div>
-      )}
+          ref={svgDivRef}
+          className="w-[33.33%] h-[33.33%] flex items-center justify-center pt-48 pl-20 max-md:pt-0 max-md:pl-0 [&>svg]:h-full [&>svg]:w-full [&>svg]:scale-[1.15] max-md:[&>svg]:!w-auto max-md:[&>svg]:scale-100 transition-transform duration-700 ease-in-out"
+          dangerouslySetInnerHTML={getSvgWithMarkers()}
+        />
+
+        {/* Custom Tooltip */}
+        {tooltip && (
+          <div
+            className="absolute pointer-events-none bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-md shadow-lg z-50 transform -translate-x-1/2 -translate-y-full transition-all duration-75 ease-out"
+            style={{
+              left: tooltip.x,
+              top: tooltip.y - 10,
+            }}
+          >
+            {tooltip.name}
+          </div>
+        )}
+      </div>
 
       {/* Map Tooltip for actual Destination */}
-      <div className="absolute top-1/2 right-12 transform -translate-y-1/2 mt-10 pointer-events-none">
+      <div className="absolute top-1/2 right-12 transform -translate-y-1/2 mt-10 pointer-events-none max-md:hidden">
           <div className="bg-[#1a1a1a] text-white p-4 rounded-xl shadow-2xl relative min-w-[250px]">
             {/* Tooltip triangle */}
             <div className="absolute top-1/2 -left-2 transform -translate-y-1/2 w-4 h-4 bg-[#1a1a1a] rotate-45"></div>

@@ -464,3 +464,158 @@
     max-width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .comparison-table .cell-label {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    padding: 12px;
+    font-size: 12px;
+  }
+  
+  .comparison-table .cell-value {
+    padding: 12px;
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
+  }
+
+  .comparison-table .row-images .cell-value img {
+    max-height: 100px;
+  }
+
+  .comparison-table .row-names .cell-value {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    font-size: 12px;
+  }
+
+  .comparison-table .row-prices .cell-value {
+    font-size: 14px;
+  }
+
+  .comparison-btn {
+    padding: 10px 16px;
+    font-size: 10px;
+  }
+}
+
+/* Custom Social Icon Button Styles */
+.btn.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.btn.btn-icon:last-child {
+  margin-right: 0;
+}
+
+.btn-outline-facebook {
+  color: #1877F2;
+  border: 1px solid #1877F2;
+  background-color: transparent;
+}
+.btn-outline-facebook:hover {
+  background-color: #1877F2;
+  color: white;
+}
+
+.btn-outline-twitter {
+  color: #1a1a1a;
+  border: 1px solid #1a1a1a;
+  background-color: transparent;
+}
+.btn-outline-twitter:hover {
+  background-color: #1a1a1a;
+  color: white;
+}
+
+/* Footer override for Twitter/X */
+.btn-outline-twitter-footer {
+  color: #000000;
+  border: 1px solid #000000;
+  background-color: transparent;
+}
+.btn-outline-twitter-footer:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.btn-outline-linkedin {
+  color: #0A66C2;
+  border: 1px solid #0A66C2;
+  background-color: transparent;
+}
+.btn-outline-linkedin:hover {
+  background-color: #0A66C2;
+  color: white;
+}
+
+.btn-outline-whatsapp {
+  color: #25D366;
+  border: 1px solid #25D366;
+  background-color: transparent;
+}
+.btn-outline-whatsapp:hover {
+  background-color: #25D366;
+  color: white;
+}
+
+/* Footer Social Icon Responsive Sizing */
+.footer-social-btn {
+  width: 40px !important;
+  height: 40px !important;
+  font-size: 16px !important;
+  margin-right: 0 !important;
+}
+
+@media (max-width: 1028px) {
+  .footer-social-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-social-btn {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 15px !important;
+  }
+}
+
+.waves-effect {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Autofill — light blue background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1e3a8a !important;
+  -webkit-box-shadow: 0 0 0 1000px #dbeafe inset !important;
+  box-shadow: 0 0 0 1000px #dbeafe inset !important;
+  transition: background-color 9999999s ease-in-out 0s !important;
+  caret-color: #1e3a8a !important;
+}

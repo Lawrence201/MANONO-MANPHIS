@@ -19,6 +19,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const shipIcon = (s: string) => {
   const t = (s || "").toLowerCase();
@@ -38,6 +40,10 @@ export function LogisticsClient({ initialShipments, pagination }: { initialShipm
   const [shipments, setShipments] = useState(initialShipments);
   const [selectedUpdate, setSelectedUpdate] = useState<{ id: number; status: string; label: string } | null>(null);
   const [updateDate, setUpdateDate] = useState<string>("");
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   const handleUpdateStatus = async (id: number, newStatus: string, timestamp?: string) => {
     // Optimistic update
@@ -70,9 +76,77 @@ export function LogisticsClient({ initialShipments, pagination }: { initialShipm
     window.location.href = url.toString();
   };
 
+  const filteredShipments = shipments.filter(s => {
+    // Search Match
+    const term = searchTerm.toLowerCase();
+    const searchMatch = !term || 
+      (s.companyName || s.buyerType || "").toLowerCase().includes(term) || 
+      (s.destinationCountry || "").toLowerCase().includes(term) ||
+      (s.referenceNumber || "").toLowerCase().includes(term) ||
+      `exp-${s.id}`.includes(term);
+
+    // Type Match
+    let typeMatch = true;
+    if (filterType !== 'all') {
+      const productName = (s.product?.name || "").toLowerCase();
+      if (filterType === 'shea') {
+        typeMatch = productName.includes('shea');
+      } else if (filterType === 'honey') {
+        typeMatch = productName.includes('honey') || productName.includes('honney');
+      } else {
+        typeMatch = productName.includes(filterType);
+      }
+    }
+
+    // Status Match
+    let statusMatch = true;
+    if (filterStatus !== 'all') {
+      if (filterStatus === 'shipped') {
+        statusMatch = s.status === 'shipped' || s.status === 'in_transit';
+      } else if (filterStatus === 'approved') {
+        statusMatch = s.status === 'approved' || s.status === 'paid';
+      } else {
+        statusMatch = s.status === filterStatus;
+      }
+    }
+
+    return searchMatch && typeMatch && statusMatch;
+  });
+
   return (
     <div className="space-y-4">
-      {shipments.map((s) => {
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <Input 
+          placeholder="Search shipments by ID, company, or country..." 
+          className="max-w-xs h-9 bg-card"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+        <Button onClick={() => setFilterType('all')} variant={filterType === 'all' ? 'default' : 'outline'} size="sm" className={cn("h-9", filterType === 'all' && "bg-[#6aabfc] text-white")}>All Orders</Button>
+        <Button onClick={() => setFilterType('honey')} variant={filterType === 'honey' ? 'default' : 'outline'} size="sm" className={cn("h-9", filterType === 'honey' && "bg-[#eea000] text-white")}>Honey</Button>
+        <Button onClick={() => setFilterType('cashew')} variant={filterType === 'cashew' ? 'default' : 'outline'} size="sm" className={cn("h-9", filterType === 'cashew' && "bg-[#e5d5b5] text-amber-900")}>Cashew nut</Button>
+        <Button onClick={() => setFilterType('shea')} variant={filterType === 'shea' ? 'default' : 'outline'} size="sm" className={cn("h-9", filterType === 'shea' && "bg-[#e1ceb6] text-amber-900")}>Sheabutter</Button>
+        
+        <div className="ml-auto flex items-center">
+          <Select 
+            value={filterStatus} 
+            onValueChange={setFilterStatus}
+          >
+            <SelectTrigger className="w-[140px] h-9 bg-card text-xs">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="approved">Order Confirmed</SelectItem>
+              <SelectItem value="processing">Production</SelectItem>
+              <SelectItem value="shipped">In Transit</SelectItem>
+              <SelectItem value="delivered">Delivered</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {filteredShipments.map((s) => {
         const ShipI = shipIcon(s.shippingType);
         const progress = getProgress(s.status);
 
@@ -94,7 +168,7 @@ export function LogisticsClient({ initialShipments, pagination }: { initialShipm
                 <div className="w-14 h-14 rounded-xl shadow-md overflow-hidden flex items-center justify-center">
                   {(s.product.name || "").toLowerCase().includes("cashew") ? (
                     <img src="/cashew_shipping.PNG" alt="Cashew Shipping" className="w-full h-full object-cover" />
-                  ) : (s.product.name || "").toLowerCase().includes("honey") ? (
+                  ) : ((s.product.name || "").toLowerCase().includes("honey") || (s.product.name || "").toLowerCase().includes("honney")) ? (
                     <img src="/ship.PNG" alt="Honey Shipping" className="w-full h-full object-cover" />
                   ) : (
                     <ShipI className="w-6 h-6" />
@@ -171,8 +245,12 @@ export function LogisticsClient({ initialShipments, pagination }: { initialShipm
                   className="absolute top-1 -mt-2 transition-all duration-1000 ease-out z-20"
                   style={{ left: `calc(${progress}% - 14px)` }}
                 >
-                  <div className="bg-white dark:bg-black p-1 rounded-full shadow-lg border border-border">
-                    <ShipI className={cn("w-4 h-4", (s.shippingType || "").toLowerCase().includes("air") ? "text-orange-500" : "text-blue-500")} />
+                  <div className="bg-white dark:bg-black p-1 rounded-full shadow-lg border border-border flex items-center justify-center overflow-hidden">
+                    {((s.product.name || "").toLowerCase().includes("honey") || (s.product.name || "").toLowerCase().includes("honney")) ? (
+                      <img src="/ship.PNG" alt="Ship Tracker" className="w-4 h-4 object-cover" />
+                    ) : (
+                      <ShipI className={cn("w-4 h-4", (s.shippingType || "").toLowerCase().includes("air") ? "text-orange-500" : "text-blue-500")} />
+                    )}
                   </div>
                 </div>
               )}
@@ -230,7 +308,7 @@ export function LogisticsClient({ initialShipments, pagination }: { initialShipm
         );
       })}
       
-      {shipments.length === 0 && (
+      {filteredShipments.length === 0 && (
         <div className="text-center py-12 bg-card rounded-xl border border-border">
           <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-semibold">No Active Shipments</h3>

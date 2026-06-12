@@ -106,11 +106,27 @@ export default async function ShipmentProcessPage({ searchParams }: { searchPara
         <WebsiteHeader />
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row relative min-h-[800px]">
+      <div className="flex-1 flex flex-col xl:flex-row relative">
         
-        {/* LEFT PANE: Information Panel */}
-        <div className="w-full lg:w-[680px] bg-white border-r border-gray-100 flex flex-col">
-          <div className="p-8 md:p-10 flex-1">
+        {/* MAP PANE (Top on mobile/tablet, Right on desktop) */}
+        <div className="w-full h-[45vh] xl:h-auto xl:min-h-[800px] xl:flex-1 bg-[#e5e3df] relative xl:order-last overflow-hidden xl:border-l xl:border-gray-100 xl:shadow-[inset_10px_0_20px_rgba(0,0,0,0.01)] sticky top-0 xl:static z-0">
+          <TrackingMap
+            destinationCountry={order.destinationCountry}
+            city={order.city}
+            currentStep={currentStep}
+            productName={order.product.name}
+          />
+        </div>
+
+        {/* LEFT PANE: Information Panel (Bottom card on mobile/tablet) */}
+        <div className="w-full xl:w-[680px] bg-white xl:border-r xl:border-gray-100 flex flex-col relative z-10 -mt-6 xl:mt-0 rounded-t-[32px] xl:rounded-none shadow-[0_-8px_30px_rgba(0,0,0,0.06)] xl:shadow-none pb-12 xl:pb-0 min-h-[60vh] xl:min-h-[800px]">
+          
+          {/* Mobile Drag Handle Indicator */}
+          <div className="w-full flex justify-center pt-5 pb-1 xl:hidden">
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+          </div>
+
+          <div className="p-6 md:p-10 pt-2 xl:pt-10 flex-1">
             
             {/* Header Section */}
             <div className="flex items-center justify-between mb-2">
@@ -316,24 +332,13 @@ export default async function ShipmentProcessPage({ searchParams }: { searchPara
                       )}
                     </div>
                     <p className="text-sm text-gray-500">Package has arrived at destination</p>
-                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
           </div>
         </div>
-
-        {/* RIGHT PANE: Map Area */}
-        <div className="flex-1 bg-[#fdfaf7] relative hidden lg:block overflow-hidden border-l border-gray-100 shadow-[inset_10px_0_20px_rgba(0,0,0,0.01)]">
-          <TrackingMap
-            destinationCountry={order.destinationCountry}
-            city={order.city}
-            currentStep={currentStep}
-            productName={order.product.name}
-          />
-        </div>
-
       </div>
       <WebsiteFooter />
     </div>

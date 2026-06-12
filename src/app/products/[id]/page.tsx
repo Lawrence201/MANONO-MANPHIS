@@ -430,24 +430,50 @@ export default function ProductDetailsPage() {
           <div className="flex flex-col lg:flex-row gap-8 mb-24">
             
             {/* Left: Gallery (Thumbnails + Main) */}
-            <div className="w-full lg:w-[55%] flex gap-6">
-              {/* Vertical Thumbnails */}
-              <div className="hidden sm:flex flex-col gap-4 w-24">
-                {displayImages.map((img: string, i: number) => (
-                  <button 
-                    key={i} 
-                    onClick={() => setActiveImage(img)}
-                    className={`w-full aspect-square bg-[#f6f6f6] border ${activeImage === img ? "border-[#ffcc00]" : "border-gray-100"} hover:border-[#ffcc00] transition-all p-2 flex items-center justify-center ${activeImage === img ? "opacity-100" : "opacity-60 hover:opacity-100"}`}
-                  >
-                    <Image src={img} alt={`thumb-${i}`} width={80} height={80} className="object-contain" />
-                  </button>
-                ))}
+            <div className="w-full lg:w-[55%] flex flex-col-reverse sm:flex-row gap-4 sm:gap-6">
+              {/* Thumbnails Wrapper (With mobile dots) */}
+              <div className="flex flex-col w-full sm:w-24 shrink-0">
+                {/* Thumbnails (Horizontal on mobile, Vertical on larger screens) */}
+                <div className="flex flex-row sm:flex-col overflow-x-auto sm:overflow-visible gap-3 sm:gap-4 w-full shrink-0 pb-2 sm:pb-0 no-scrollbar snap-x">
+                  {displayImages.map((img: string, i: number) => (
+                    <button 
+                      key={i} 
+                      id={`thumb-btn-${i}`}
+                      onClick={() => {
+                        setActiveImage(img);
+                        const btn = document.getElementById(`thumb-btn-${i}`);
+                        if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                      }}
+                      className={`shrink-0 snap-center w-[72px] sm:w-full aspect-square bg-[#f6f6f6] border ${activeImage === img ? "border-[#ffcc00]" : "border-gray-100"} hover:border-[#ffcc00] transition-all p-2 flex items-center justify-center ${activeImage === img ? "opacity-100" : "opacity-60 hover:opacity-100"}`}
+                    >
+                      <Image src={img} alt={`thumb-${i}`} width={80} height={80} className="object-contain w-full h-full" />
+                    </button>
+                  ))}
+                </div>
+
+                {/* Mobile Navigation Dots */}
+                {displayImages.length > 1 && (
+                  <div className="flex sm:hidden items-center justify-center gap-1.5 pt-2 pb-1">
+                    {displayImages.map((img: string, i: number) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setActiveImage(img);
+                          const btn = document.getElementById(`thumb-btn-${i}`);
+                          if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }}
+                        className={`h-1.5 rounded-full transition-all ${activeImage === img ? "bg-[#ffcc00] w-4" : "bg-gray-300 w-1.5"}`}
+                        aria-label={`View image ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Main Image & Trust Bar */}
               <div className="flex-1">
                 <div 
-                  className="relative aspect-square bg-[#f6f6f6] flex items-center justify-center cursor-crosshair group/zoom"
+                  className="relative aspect-square bg-[#f6f6f6] flex items-center justify-center cursor-crosshair group/zoom touch-none"
                   onMouseMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -473,7 +499,39 @@ export default function ProductDetailsPage() {
                       zoom.style.display = "block";
                     }
                   }}
+                  onTouchMove={(e) => {
+                    const touch = e.touches[0];
+                    if (!touch) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = ((touch.clientX - rect.left) / rect.width) * 100;
+                    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+                    const lens = e.currentTarget.querySelector(".zoom-lens") as HTMLElement;
+                    const zoom = document.getElementById("zoom-preview") as HTMLElement;
+                    
+                    if (lens && zoom) {
+                      const lensSize = 120;
+                      let left = touch.clientX - rect.left - lensSize / 2;
+                      let top = touch.clientY - rect.top - lensSize / 2;
+                      
+                      left = Math.max(0, Math.min(left, rect.width - lensSize));
+                      top = Math.max(0, Math.min(top, rect.height - lensSize));
+                      
+                      lens.style.left = `${left}px`;
+                      lens.style.top = `${top}px`;
+                      lens.style.display = "block";
+                      
+                      zoom.style.backgroundImage = `url("${(activeImage || product.image).replace(/ /g, '%20')}")`;
+                      zoom.style.backgroundPosition = `${x}% ${y}%`;
+                      zoom.style.display = "block";
+                    }
+                  }}
                   onMouseLeave={(e) => {
+                    const lens = e.currentTarget.querySelector(".zoom-lens") as HTMLElement;
+                    const zoom = document.getElementById("zoom-preview") as HTMLElement;
+                    if (lens) lens.style.display = "none";
+                    if (zoom) zoom.style.display = "none";
+                  }}
+                  onTouchEnd={(e) => {
                     const lens = e.currentTarget.querySelector(".zoom-lens") as HTMLElement;
                     const zoom = document.getElementById("zoom-preview") as HTMLElement;
                     if (lens) lens.style.display = "none";
@@ -489,16 +547,16 @@ export default function ProductDetailsPage() {
                   {/* Zoom Lens */}
                   <div className="zoom-lens absolute border border-gray-300 bg-white/20 pointer-events-none hidden z-10" style={{ width: '120px', height: '120px' }}></div>
                   
-                  {/* Floating Zoom Preview Box */}
+                  {/* Floating Zoom Preview Box (Picture-in-Picture on tablet/mobile, Outer right on Desktop) */}
                   <div 
                     id="zoom-preview"
-                    className="absolute top-0 left-full ml-4 w-[320px] h-[320px] bg-white border border-gray-200 shadow-2xl z-[100] hidden bg-no-repeat rounded-sm overflow-hidden"
+                    className="absolute top-2 lg:top-0 right-2 lg:right-auto lg:left-full ml-0 lg:ml-4 w-[160px] h-[160px] sm:w-[200px] sm:h-[200px] lg:w-[420px] lg:h-[420px] bg-white border-2 border-gray-300 lg:border-gray-200 shadow-2xl z-[100] hidden bg-no-repeat rounded-sm overflow-hidden pointer-events-none"
                     style={{ backgroundSize: '280%' }}
                   ></div>
                 </div>
 
-                {/* Trust Bar */}
-                <div className="grid grid-cols-3 gap-1 mt-8">
+                {/* Trust Bar (Desktop) */}
+                <div className="hidden sm:grid grid-cols-3 gap-1 mt-8">
                   {(product.isService ? [
                     { icon: ShieldCheck, text: "view", onClick: () => setShowGalleryModal(true) },
                     { icon: Play, text: "Watch Video", onClick: () => setShowVideoModal(true) },
@@ -510,10 +568,10 @@ export default function ProductDetailsPage() {
                   ]).map((item: any, i) => (
                     <div 
                       key={i} 
-                      className={`bg-[#f0f3f9] py-4 flex flex-col sm:flex-row items-center justify-center gap-2 text-[#4a5f8e] font-bold text-[11px] uppercase tracking-wider ${item.onClick ? 'cursor-pointer hover:bg-[#e1e7f0] transition-colors' : ''}`}
+                      className={`bg-[#f0f3f9] py-4 flex flex-col lg:flex-row items-center justify-center gap-2 text-[#4a5f8e] font-bold text-[11px] uppercase tracking-wider text-center px-2 ${item.onClick ? 'cursor-pointer hover:bg-[#e1e7f0] transition-colors' : ''}`}
                       onClick={item.onClick}
                     >
-                      <item.icon className="w-4 h-4" />
+                      <item.icon className="w-4 h-4 shrink-0" />
                       {item.text}
                     </div>
                   ))}
@@ -521,33 +579,55 @@ export default function ProductDetailsPage() {
               </div>
             </div>
 
+            {/* Trust Bar (Mobile) - Placed below thumbnails */}
+            <div className="grid sm:hidden grid-cols-3 gap-1 w-full mt-[-8px] mb-8">
+                  {(product.isService ? [
+                    { icon: ShieldCheck, text: "view", onClick: () => setShowGalleryModal(true) },
+                    { icon: Play, text: "Watch Video", onClick: () => setShowVideoModal(true) },
+                    { icon: Truck, text: "Global Export" }
+                  ] : [
+                    { icon: ShieldCheck, text: "101% Original" },
+                    { icon: Repeat, text: "Lowest Price" },
+                    { icon: Truck, text: "Free Shipping" }
+                  ]).map((item: any, i) => (
+                    <div 
+                      key={i} 
+                      className={`bg-[#f0f3f9] py-3 flex flex-col items-center justify-center gap-1.5 text-[#4a5f8e] font-bold text-[10px] uppercase tracking-wider text-center px-1 ${item.onClick ? 'cursor-pointer hover:bg-[#e1e7f0] transition-colors' : ''}`}
+                      onClick={item.onClick}
+                    >
+                      <item.icon className="w-4 h-4 shrink-0" />
+                      {item.text}
+                    </div>
+                  ))}
+            </div>
+
             {/* Right: Product Info */}
             <div className="w-full lg:w-[45%] lg:pl-4">
               <div className="mb-6 pb-6 border-b border-gray-100">
                 {/* Repositioned Supplier Info (Minimalist) */}
-                <div className="flex items-center gap-6 mb-8">
-                  <div className="w-20 h-20 flex items-center justify-center shrink-0">
-                    <Image src="/logo.PNG" alt="Supplier" width={80} height={80} className="object-contain" />
+                <div className="flex items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center shrink-0">
+                    <Image src="/logo.PNG" alt="Supplier" width={80} height={80} className="object-contain w-full h-full" />
                   </div>
                   <div>
-                    <h4 className="text-[18px] font-black text-gray-900 leading-tight">Manono Export Materials Co., Ltd.</h4>
-                    <p className="text-[12px] text-gray-400 font-bold uppercase tracking-wider mt-1">Manufacturer/Factory & Trading Company</p>
+                    <h4 className="text-[16px] sm:text-[18px] font-black text-gray-900 leading-tight">Manono Export Materials Co., Ltd.</h4>
+                    <p className="text-[10px] sm:text-[12px] text-gray-400 font-bold uppercase tracking-wider mt-1">Manufacturer/Factory & Trading Company</p>
                   </div>
                 </div>
 
-                <h1 className="text-[32px] font-black text-[#1a1a1a] leading-tight mb-4 tracking-tight">
+                <h1 className="text-[24px] sm:text-[32px] font-black text-[#1a1a1a] leading-tight mb-4 sm:mb-4 tracking-tight">
                   {product.name}
                 </h1>
                 
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="text-[22px] font-bold text-[#1a1a1a]">{product.price}</span>
-                  <div className="flex items-center gap-1 ml-4 border-l border-gray-200 pl-4">
+                <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 mb-6 sm:mb-4">
+                  <span className="text-[24px] sm:text-[22px] font-bold text-[#1a1a1a] leading-none">{product.price}</span>
+                  <div className="flex items-center gap-2 sm:gap-1 sm:ml-0 border-l-0 sm:border-l border-gray-200 sm:pl-4">
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3.5 h-3.5 ${i < (reviewsData.totalReviews > 0 ? Math.round(reviewsData.averageRating) : 5) ? "text-[#ffcc00] fill-[#ffcc00]" : "text-gray-200"}`} />
+                        <Star key={i} className={`w-4 h-4 sm:w-3.5 sm:h-3.5 ${i < (reviewsData.totalReviews > 0 ? Math.round(reviewsData.averageRating) : 5) ? "text-[#ffcc00] fill-[#ffcc00]" : "text-gray-200"}`} />
                       ))}
                     </div>
-                    <span className="text-[13px] text-gray-400 font-medium">({reviewsData.totalReviews} reviews)</span>
+                    <span className="text-[14px] sm:text-[13px] text-gray-400 font-medium ml-1">({reviewsData.totalReviews} reviews)</span>
                   </div>
                 </div>
 
@@ -555,14 +635,14 @@ export default function ProductDetailsPage() {
 
                 {/* Specs Table — works for both honey and billboard */}
                 {product.specs && product.specs.length > 0 && (
-                  <div className="rounded-[12px] overflow-hidden border border-gray-100 mb-8 shadow-sm">
+                  <div className="rounded-[12px] overflow-hidden border border-gray-100 mb-8 shadow-sm w-[106%] -ml-[3%] sm:w-full sm:ml-0">
                     {product.specs.map((spec: any, i: number) => (
                       <div
                         key={i}
-                        className={`flex justify-between items-center px-6 py-3.5 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                        className={`flex justify-between items-center px-3 sm:px-6 py-3.5 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="w-5 flex justify-center">
+                        <div className="flex items-center gap-2 sm:gap-4">
+                          <div className="w-5 flex justify-center shrink-0">
                             {spec.label === "BILLBOARD CODE"   ? <Hash className="w-4 h-4 text-[#eea000]" /> :
                              (spec.label === "Location" || spec.label === "Origin") ? <MapPin className="w-4 h-4 text-[#eea000]" /> :
                              spec.label === "Duration"         ? <Calendar className="w-4 h-4 text-[#eea000]" /> :
@@ -585,44 +665,43 @@ export default function ProductDetailsPage() {
                           </div>
                           <span className="text-gray-400 font-bold text-[12px] uppercase tracking-wide">{spec.label}</span>
                         </div>
-                        <span className="text-[#1a1a1a] font-bold text-[14px]">{spec.value}</span>
+                        <span className="text-[#1a1a1a] font-bold text-[14px] text-right ml-2">{spec.value}</span>
                       </div>
                     ))}
                   </div>
                 )}
 
                 {product.isService ? (
-                  <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                  <div className="flex flex-row gap-2 sm:gap-4 mb-8">
                     <Link 
                       href={session ? `/billboard-booking?hallId=${product.id}` : `/login?callbackUrl=${encodeURIComponent(`/billboard-booking?hallId=${product.id}`)}`} 
                       className="flex-1"
                     >
-                      <button className="w-full h-14 bg-[#b8b3b4] text-white px-8 font-bold text-[15px] rounded-full transition-all hover:opacity-90 flex items-center justify-center whitespace-nowrap">
+                      <button className="w-full h-12 sm:h-14 bg-[#b8b3b4] text-white px-2 sm:px-8 font-bold text-[13px] sm:text-[15px] rounded-full transition-all hover:opacity-90 flex items-center justify-center whitespace-nowrap">
                         BOOK NOW
                       </button>
                     </Link>
-                    <button className="flex-1 h-14 bg-white border border-[#666] text-black px-8 font-bold text-[15px] rounded-full transition-all hover:bg-gray-50 flex items-center justify-center gap-2 whitespace-nowrap">
-                      <div className="w-5 h-5 bg-[#007aff] rounded-full flex items-center justify-center p-1 shrink-0">
-                        <MessageCircle className="w-full h-full text-white" />
-                      </div>
+                    <button className="flex-1 sm:flex-none sm:w-auto h-12 sm:h-14 bg-white border border-[#1a1a1a] text-[#1a1a1a] px-2 sm:px-8 font-bold text-[13px] sm:text-[15px] rounded-full transition-all hover:bg-gray-50 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap">
+                      <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                       Chat Now
                     </button>
                   </div>
                 ) : (
                   <div className="mb-8">
                     {/* Action buttons */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <button className="flex-1 h-14 bg-[#ffcc00] hover:bg-[#f0be00] text-black font-black text-[13px] uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center gap-2">
-                        <ShoppingCart className="w-4 h-4" />
-                        Add to Cart
+                    <div className="flex flex-row gap-2 sm:gap-3">
+                      <button className="flex-1 h-12 sm:h-14 bg-[#ffcc00] hover:bg-[#f0be00] text-black font-black text-[12px] sm:text-[13px] uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2">
+                        <ShoppingCart className="w-4 h-4 shrink-0" />
+                        <span className="hidden sm:inline">Add to Cart</span>
+                        <span className="sm:hidden">Cart</span>
                       </button>
                       <Link 
                         href={session ? `/shipping?productName=${encodeURIComponent(product.name)}&productImage=${encodeURIComponent(product.image)}&productLocation=${encodeURIComponent(product.specs?.find((s: any) => s.label === "Warehouse")?.value || "Kumasi")}&productId=${product.id}` : `/login?callbackUrl=${encodeURIComponent(`/shipping?productName=${encodeURIComponent(product.name)}&productImage=${encodeURIComponent(product.image)}&productLocation=${encodeURIComponent(product.specs?.find((s: any) => s.label === "Warehouse")?.value || "Kumasi")}&productId=${product.id}`)}`} 
                         className="flex-1 flex"
                       >
-                        <button className="w-full h-14 bg-black hover:bg-[#1a1a1a] text-white font-black text-[13px] uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center gap-2">
-                          <MessageCircle className="w-4 h-4" />
-                          Request Quote
+                        <button className="w-full h-12 sm:h-14 bg-black hover:bg-[#1a1a1a] text-white font-black text-[12px] sm:text-[13px] uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2">
+                          <MessageCircle className="w-4 h-4 shrink-0" />
+                          Quote
                         </button>
                       </Link>
                     </div>
@@ -642,49 +721,33 @@ export default function ProductDetailsPage() {
                       href={`https://www.facebook.com/sharer/sharer.php?u=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border border-[#cbd5e1] bg-white hover:bg-gray-50 text-[#1a1a1a] text-[12px] font-bold px-4 py-2.5 rounded-[6px] transition-all shrink-0"
-                      style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+                      className="btn btn-icon btn-outline-facebook waves-effect waves-light"
                     >
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4 text-[#475569]">
-                        <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
-                      </svg>
-                      Facebook
+                      <i className="fa-brands fa-facebook-f"></i>
                     </a>
                     <a
                       href={`https://twitter.com/intent/tweet?url=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border border-[#cbd5e1] bg-white hover:bg-gray-50 text-[#1a1a1a] text-[12px] font-bold px-4 py-2.5 rounded-[6px] transition-all shrink-0"
-                      style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+                      className="btn btn-icon btn-outline-twitter waves-effect waves-light"
                     >
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4 text-[#475569]">
-                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                      </svg>
-                      Twitter
+                      <i className="fa-brands fa-x-twitter"></i>
                     </a>
                     <a
                       href={`https://www.linkedin.com/sharing/share-offsite/?url=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border border-[#cbd5e1] bg-white hover:bg-gray-50 text-[#1a1a1a] text-[12px] font-bold px-4 py-2.5 rounded-[6px] transition-all shrink-0"
-                      style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+                      className="btn btn-icon btn-outline-linkedin waves-effect waves-light"
                     >
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4 text-[#475569]">
-                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                      </svg>
-                      LinkedIn
+                      <i className="fa-brands fa-linkedin-in"></i>
                     </a>
                     <a
                       href={`https://api.whatsapp.com/send?text=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border border-[#cbd5e1] bg-white hover:bg-gray-50 text-[#1a1a1a] text-[12px] font-bold px-4 py-2.5 rounded-[6px] transition-all shrink-0"
-                      style={{ fontFamily: "var(--font-jetbrains-mono)" }}
+                      className="btn btn-icon btn-outline-whatsapp waves-effect waves-light"
                     >
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4 text-[#475569]">
-                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864.003-2.637-1.019-5.114-2.88-6.978C16.592 1.897 14.12 .876 11.48.876c-5.437 0-9.863 4.421-9.867 9.867-.001 1.73.473 3.42 1.37 4.91L2.006 21.9l6.39-1.674c1.472.804 3.09 1.228 4.743 1.228h-.006z"/>
-                      </svg>
-                      WhatsApp
+                      <i className="fa-brands fa-whatsapp"></i>
                     </a>
                   </div>
                 </div>
@@ -696,11 +759,16 @@ export default function ProductDetailsPage() {
           </div>
 
           {/* Unified Documentation Box */}
+          <div className="max-w-[1500px] mx-auto mb-6 px-4 xl:px-0 text-center">
+            <h2 className="text-[28px] sm:text-[32px] font-bold text-gray-900 tracking-tight">
+              Quick Comparison
+            </h2>
+          </div>
           <div className="max-w-[1500px] mx-auto mb-24 border border-gray-200 rounded-sm overflow-hidden">
             {/* Tab Navigation (Inside Box) */}
             <div className="border-b border-gray-200">
               <div className="w-full">
-                <div className="flex w-full overflow-x-auto no-scrollbar">
+                <div className="flex w-full overflow-x-auto no-scrollbar snap-x snap-mandatory">
                   {[
                     { id: "description", label: "Description" },
                     { id: "specs", label: "Additional information" },
@@ -709,8 +777,13 @@ export default function ProductDetailsPage() {
                   ].map((tab) => (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex-1 py-8 text-[16px] uppercase tracking-wider transition-all relative whitespace-nowrap text-center ${
+                      id={`tab-${tab.id}`}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        const el = document.getElementById(`tab-${tab.id}`);
+                        el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                      }}
+                      className={`shrink-0 md:flex-1 px-8 md:px-4 lg:px-0 py-5 md:py-6 lg:py-8 text-[13px] md:text-[14px] lg:text-[16px] uppercase tracking-wider transition-all relative whitespace-nowrap text-center snap-start ${
                         activeTab === tab.id ? "text-black font-black bg-gray-50/50" : "text-gray-500 font-bold hover:text-black hover:bg-gray-50/30"
                       }`}
                     >
@@ -760,13 +833,13 @@ export default function ProductDetailsPage() {
               )}
               
               {activeTab === "specs" && (
-                <div className="animate-in fade-in duration-500 overflow-hidden rounded-sm border border-gray-200 max-w-[1100px] mx-auto">
-                  <table className="w-full text-left">
+                <div className="animate-in fade-in duration-500 overflow-hidden rounded-sm border border-gray-200 w-full">
+                  <table className="w-full text-left table-fixed sm:table-auto">
                     <tbody>
                       {product.specs.map((spec: any, i: number) => (
-                        <tr key={i} className="border-b border-gray-200">
-                          <th className="px-8 py-5 font-bold text-gray-900 text-sm text-left">{spec.label}</th>
-                          <td className="px-8 py-5 text-[#ffcc00] font-bold text-sm text-right">{spec.value}</td>
+                        <tr key={i} className="border-b border-gray-200 last:border-b-0">
+                          <th className="px-3 sm:px-8 py-3.5 sm:py-5 font-bold text-gray-900 text-[11px] sm:text-sm text-left uppercase tracking-wide w-[45%] sm:w-auto break-words align-middle">{spec.label}</th>
+                          <td className="px-3 sm:px-8 py-3.5 sm:py-5 text-[#eea000] font-bold text-[13px] sm:text-sm text-right w-[55%] sm:w-auto break-words align-middle">{spec.value}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -778,8 +851,8 @@ export default function ProductDetailsPage() {
                 <div className="animate-in fade-in duration-500 space-y-12 text-left">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
                     {/* Reviews Stats */}
-                    <div className="p-8 rounded-sm border border-gray-200">
-                      <h2 className="text-[20px] font-bold mb-6">{reviewsData.totalReviews} reviews for <span>{product.name}</span></h2>
+                    <div className="p-5 sm:p-8 rounded-sm border border-gray-200">
+                      <h2 className="text-[18px] sm:text-[20px] font-bold mb-6">{reviewsData.totalReviews} reviews for <span>{product.name}</span></h2>
                       <div className="flex items-center gap-6 mb-8">
                         <div className="text-[48px] font-black text-[#eea000]">
                           {reviewsData.averageRating.toFixed(2)}
@@ -812,8 +885,8 @@ export default function ProductDetailsPage() {
                     </div>
 
                     {/* Review Form */}
-                    <div className="border border-gray-200 p-8 rounded-sm">
-                      <h3 className="text-xl font-bold mb-6">Add a review</h3>
+                    <div className="border border-gray-200 p-5 sm:p-8 rounded-sm">
+                      <h3 className="text-[18px] sm:text-xl font-bold mb-6">Add a review</h3>
                       
                       {/* Interactive Star Selection */}
                       <div className="flex items-center gap-2 mb-4">
@@ -988,12 +1061,36 @@ export default function ProductDetailsPage() {
                 </div>
               )}
             </div>
+
+          </div>
+
+          {/* Mobile Navigation Dots for Tabs (Outside of Card) */}
+          <div className="flex sm:hidden justify-center gap-2 pb-8 pt-4 -mt-16 relative z-10">
+            {[
+              { id: "description" },
+              { id: "specs" },
+              { id: "reviews" },
+              { id: "shipping" }
+            ].map((tab, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  const el = document.getElementById(`tab-${tab.id}`);
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }}
+                className={`w-2 h-2 rounded-full transition-all duration-300 shadow-sm ${
+                  activeTab === tab.id ? "bg-[#eea000] w-6" : "bg-gray-300"
+                }`}
+                aria-label={`Switch to tab ${idx + 1}`}
+              />
+            ))}
           </div>
 
           {/* Quick Comparison / Related Products Section */}
-          <div className="pt-20 border-t border-gray-100 mt-20">
+          <div className="pt-20 border-t border-gray-100 mt-10">
             <h2 className="text-[28px] font-bold text-gray-900 text-center mb-8 tracking-tight">
-              Quick Comparison
+              More Products
             </h2>
 
             {!product.isService && relatedHoneyProducts.length > 0 ? (
@@ -1293,9 +1390,9 @@ export default function ProductDetailsPage() {
               })()
             ) : product.isService ? (
               /* Billboard: keep original grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                 {relatedBillboards.map((b) => (
-                <div key={b.id} className="group border border-gray-100 rounded-sm bg-white p-4 hover:shadow-xl transition-all duration-300">
+                <div key={b.id} className="group border border-gray-100 rounded-sm bg-white p-3 md:p-5 hover:shadow-xl transition-all duration-300">
                   {/* Image Area */}
                   <div className="relative bg-[#f6f6f6] aspect-square rounded-sm mb-6 flex items-center justify-center p-8 overflow-hidden">
                     <Link href={`/products/${b.id}`} className="absolute inset-0 block w-full h-full">
@@ -1325,8 +1422,7 @@ export default function ProductDetailsPage() {
                       <span className="text-[16px] text-gray-900 font-black">GH₵{Number(b.weeklyRate).toLocaleString()}</span>
                     </div>
                     <Link href={`/products/${b.id}`}>
-                      <button className="w-full bg-[#ffcc00] hover:bg-black hover:text-white text-black py-4 rounded-full text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 group/btn">
-                        <Eye className="w-3.5 h-3.5" />
+                      <button className="w-full bg-[#ffcc00] hover:bg-black hover:text-white text-black py-4 rounded-full text-[11px] font-black uppercase tracking-widest flex items-center justify-center transition-all duration-300 group/btn">
                         VIEW DETAILS
                       </button>
                     </Link>

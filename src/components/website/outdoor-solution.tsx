@@ -7,9 +7,9 @@ export function OutdoorSolution() {
       <div className="container mx-auto px-4 max-w-7xl">
         
         {/* Top Section: Image + Title */}
-        <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 mb-12 md:mb-24">
+        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-12 md:mb-24">
           {/* Left: Billboard Image */}
-          <div className="w-full lg:w-1/2">
+          <div className="w-full md:w-1/2">
             <div className="relative aspect-[4/3] rounded-sm overflow-hidden shadow-2xl">
               <Image 
                 src="/work9.webp" 
@@ -21,9 +21,9 @@ export function OutdoorSolution() {
           </div>
 
           {/* Right: Text Content */}
-          <div className="w-full lg:w-1/2 flex flex-col items-start">
+          <div className="w-full md:w-1/2 flex flex-col items-start">
             <h2 
-              className="text-[64px] md:text-[88px] font-bold text-[#1a1a1a] leading-[1.05] tracking-[-0.04em] uppercase mb-8 md:scale-x-[0.85] transform origin-left"
+              className="text-[56px] md:text-[60px] lg:text-[88px] font-bold text-[#1a1a1a] leading-[1.05] tracking-[-0.04em] uppercase mb-8 md:scale-x-[0.85] transform origin-left"
               style={{ fontFamily: "var(--font-antonio)" }}
             >
               OUTDOOR<br />

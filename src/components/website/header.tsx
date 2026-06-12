@@ -1,11 +1,12 @@
 "use client";
 
-import { Search, Ship, ChevronDown, Menu, X, LayoutGrid, Home, Settings, MapPin, FileText, Layers, PhoneCall, User, ShoppingCart } from "lucide-react";
+import { Search, Ship, ChevronDown, Menu, X, LayoutGrid, Home, Settings, MapPin, FileText, Layers, PhoneCall, User, ShoppingCart, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getCart } from "@/lib/actions/cart-actions";
+import { useSession, signOut } from "next-auth/react";
 
 export function WebsiteHeader() {
   const pathname = usePathname();
@@ -13,6 +14,8 @@ export function WebsiteHeader() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const { data: session } = useSession();
+  const firstName = session?.user?.name ? session.user.name.split(" ")[0] : "";
 
   useEffect(() => {
     setIsMounted(true);
@@ -105,7 +108,7 @@ export function WebsiteHeader() {
             className="object-contain h-10 md:h-12 max-[380px]:h-8 w-auto"
             priority
           />
-          <span className="hidden sm:inline text-base md:text-lg font-black text-[#1a1a1a] tracking-tight uppercase lg:-ml-3">
+          <span className="hidden min-[1029px]:inline text-base md:text-lg font-black text-[#1a1a1a] tracking-tight uppercase lg:-ml-3">
             MANONO <span className="text-[#eea000]">MANPHIS</span>
           </span>
         </Link>
@@ -156,7 +159,7 @@ export function WebsiteHeader() {
         </nav>
 
         {/* Mobile Middle Search Bar */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] max-[768px]:w-[40%] max-[480px]:w-[48%] max-[1028px]:flex hidden items-center z-40">
+        <div className="absolute left-1/2 max-[1028px]:left-[58%] max-[768px]:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] max-[768px]:w-[40%] max-[480px]:w-[48%] max-[1028px]:flex hidden items-center z-40">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
           <input 
             type="text" 
@@ -283,13 +286,35 @@ export function WebsiteHeader() {
             }`}
             style={{ transitionDelay: isMenuOpen ? `${(navLinks.length + 1) * 100}ms` : "0ms" }}
           >
-            <div className="flex items-center gap-4 text-[26px] max-[768px]:text-[22px] max-[480px]:text-[18px] max-[380px]:text-[15px] font-semibold text-[#1a1a1a]">
-              <div className="flex items-center gap-2">
-                <User className="w-7 h-7 text-[#eea001]" />
-                <Link href="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
-              </div>
-              <div className="w-[1px] h-6 bg-gray-400" />
-              <Link href="/register" onClick={() => setIsMenuOpen(false)}>Register</Link>
+            <div className="flex flex-nowrap items-center gap-4 max-[768px]:gap-3 max-[480px]:gap-2 text-[26px] max-[768px]:text-[20px] max-[480px]:text-[16px] max-[380px]:text-[14px] font-semibold text-[#1a1a1a] whitespace-nowrap">
+              {session ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <User className="w-7 h-7 max-[768px]:w-6 max-[768px]:h-6 max-[480px]:w-5 max-[480px]:h-5 text-[#eea001]" />
+                    <span>Welcome, {firstName}</span>
+                  </div>
+                  <div className="w-[1px] h-6 max-[480px]:h-4 bg-gray-400" />
+                  <button 
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      signOut();
+                    }}
+                    className="flex items-center gap-2 hover:text-[#ff8080] transition-colors"
+                  >
+                    <LogOut className="w-7 h-7 max-[768px]:w-6 max-[768px]:h-6 max-[480px]:w-5 max-[480px]:h-5" />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <User className="w-7 h-7 text-[#eea001]" />
+                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
+                  </div>
+                  <div className="w-[1px] h-6 bg-gray-400" />
+                  <Link href="/register" onClick={() => setIsMenuOpen(false)}>Register</Link>
+                </>
+              )}
             </div>
           </div>
         </div>

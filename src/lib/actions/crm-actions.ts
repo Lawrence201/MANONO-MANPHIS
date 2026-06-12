@@ -6,20 +6,41 @@ export async function getAggregatedCustomers() {
   try {
     const exportOrders = await prisma.exportOrder.findMany({
       where: {
-        status: { in: ['processing', 'approved', 'paid', 'shipped', 'delivered', 'in_transit'] }
+        // Fetch all statuses so we can determine if they are pending or approved
       },
       select: { 
+        id: true,
+        referenceNumber: true,
+        buyerType: true,
         email: true, 
         companyName: true, 
         phone: true, 
+        taxId: true,
         destinationCountry: true, 
+        city: true,
+        deliveryAddress: true,
+        stateRegion: true,
+        postalCode: true,
         customsValue: true, 
         totalEstimatedCost: true, 
         quantityRequested: true, 
-        product: { select: { pricePerUnit: true } }, 
+        unitMeasurement: true,
+        shippingType: true,
+        deliveryType: true,
+        pickupOption: true,
+        preferredDate: true,
+        requiresFda: true,
+        requiresPhyto: true,
+        requiresOrganic: true,
+        requiresOrigin: true,
+        importRequirements: true,
+        paymentMethod: true,
+        depositRequired: true,
+        product: { select: { name: true, pricePerUnit: true, priceUnitType: true, featureImage: true, moqUnit: true } }, 
         status: true,
         createdAt: true 
-      }
+      },
+      orderBy: { createdAt: 'desc' }
     });
 
     const billboardBookings = await prisma.billboardBooking.findMany({
@@ -27,14 +48,17 @@ export async function getAggregatedCustomers() {
         status: { in: ['approved', 'active', 'paused', 'completed'] }
       },
       select: { 
+        id: true,
         email: true, 
         companyName: true, 
         fullName: true, 
         phone: true, 
         totalPrice: true, 
-        billboard: { select: { city: true } }, 
+        slotsRequested: true,
+        billboard: { select: { city: true, featureImage: true } }, 
         createdAt: true 
-      }
+      },
+      orderBy: { createdAt: 'desc' }
     });
 
     const customerMap = new Map<string, any>();
@@ -76,6 +100,10 @@ export async function getAggregatedCustomers() {
       if (!customerMap.has(key)) {
         customerMap.set(key, {
           id: `C-${key}`,
+          latestOrderId: o.referenceNumber ? `#${o.referenceNumber}` : `#CUST-${key.substring(0, 5).toUpperCase()}`,
+          latestProductImage: o.product?.featureImage || "/map_thumbnail.png",
+          latestQuantity: `${Number(o.quantityRequested)} ${o.unitMeasurement || o.product?.moqUnit || 'Units'}`.trim(),
+          latestOrder: o,
           name: o.companyName || "Unknown Company",
           contact: o.email,
           phone: o.phone,
@@ -107,6 +135,9 @@ export async function getAggregatedCustomers() {
       if (!customerMap.has(key)) {
         customerMap.set(key, {
           id: `C-${key}`,
+          latestOrderId: `#BB-${b.id}`,
+          latestProductImage: b.billboard?.featureImage || "/map_thumbnail.png",
+          latestQuantity: `${b.slotsRequested || 1} Slot(s)`,
           name: b.companyName || b.fullName || "Unknown Company",
           contact: b.email,
           phone: b.phone,
@@ -127,13 +158,17 @@ export async function getAggregatedCustomers() {
 
     // Determine tiers
     const customers = Array.from(customerMap.values()).map(c => {
-      if (c.revenue > 500000) c.type = "VIP";
-      else if (c.revenue > 100000) c.type = "Trusted";
-      else c.type = "New";
+      const s = c.latestOrder?.status;
+      if (!s || s === 'pending' || s === 'rejected') {
+        c.type = "Pending";
+      } else {
+        c.type = "Approved";
+      }
       return c;
     });
 
-    return { success: true, data: customers.sort((a, b) => b.revenue - a.revenue) };
+    const safeData = JSON.parse(JSON.stringify(customers.sort((a, b) => b.revenue - a.revenue)));
+    return { success: true, data: safeData };
   } catch (error: any) {
     console.error("Failed to fetch CRM customers:", error);
     return { success: false, error: "Failed to load customers" };

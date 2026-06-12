@@ -169,6 +169,7 @@ export default function CreateShippingPage() {
       return;
     }
     setCurrentStep(currentStep + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -200,7 +201,7 @@ export default function CreateShippingPage() {
           />
         ) : null}
 
-        <div className={`container mx-auto px-4 max-w-6xl ${productName && productImage ? "mt-16" : ""}`}>
+        <div className={`container mx-auto sm:px-4 px-0 max-w-6xl ${productName && productImage ? "mt-16" : ""}`}>
           {!productName || !productImage ? (
             <div className="text-center mb-20">
               <h1 
@@ -219,41 +220,43 @@ export default function CreateShippingPage() {
           ) : null}
 
           {/* Stepper */}
-          <div className="mb-16 relative px-4">
-            {/* The Background Line */}
-            <div className="absolute top-[20px] left-8 right-8 h-[2px] bg-gray-200 z-0" />
-            {/* The Active/Progress Line */}
-            <div 
-              className="absolute top-[20px] left-8 h-[2px] bg-[#535353] z-0 transition-all duration-500" 
-              style={{ width: `${Math.max(0, (currentStep - 1) / (steps.length - 1) * 100)}%` }}
-            />
-            
-            <div className="flex justify-between relative z-10">
-              {steps.map((step) => (
-                <div key={step.id} className="flex flex-col items-center bg-transparent">
-                  <div 
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 z-10 ${
-                      currentStep >= step.id 
-                        ? "bg-[#535353] text-white shadow-lg shadow-gray-200" 
-                        : "bg-white border-2 border-gray-200 text-gray-400"
-                    }`}
-                  >
-                    {currentStep > step.id || (currentStep === 7 && step.id === 7) ? <CheckCircle2 className="w-5 h-5" /> : step.id}
+          <div className="mb-16 relative px-4 overflow-x-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="relative min-w-[600px] sm:min-w-0 pb-4 sm:pb-0">
+              {/* The Background Line */}
+              <div className="absolute top-[20px] left-8 right-8 h-[2px] bg-gray-200 z-0" />
+              {/* The Active/Progress Line */}
+              <div 
+                className="absolute top-[20px] left-8 h-[2px] bg-[#535353] z-0 transition-all duration-500" 
+                style={{ width: `${Math.max(0, (currentStep - 1) / (steps.length - 1) * 100)}%` }}
+              />
+              
+              <div className="flex justify-between relative z-10">
+                {steps.map((step) => (
+                  <div key={step.id} className="flex flex-col items-center bg-transparent">
+                    <div 
+                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 z-10 ${
+                        currentStep >= step.id 
+                          ? "bg-[#535353] text-white shadow-lg shadow-gray-200" 
+                          : "bg-white border-2 border-gray-200 text-gray-400"
+                      }`}
+                    >
+                      {currentStep > step.id || (currentStep === 7 && step.id === 7) ? <CheckCircle2 className="w-5 h-5" /> : step.id}
+                    </div>
+                    <span className={`mt-3 text-[10px] font-black tracking-widest uppercase text-center max-w-[80px] hidden sm:block ${
+                      currentStep === step.id ? "text-gray-900" : "text-gray-400"
+                    }`}>
+                      {step.label}
+                    </span>
                   </div>
-                  <span className={`mt-3 text-[10px] font-black tracking-widest uppercase text-center max-w-[80px] ${
-                    currentStep === step.id ? "text-gray-900" : "text-gray-400"
-                  }`}>
-                    {step.label}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Form Container */}
-          <div className="bg-white border border-gray-100 shadow-xl shadow-gray-200/50 rounded-sm overflow-hidden min-h-[500px] flex flex-col">
+          <div className="bg-white sm:border border-x-0 sm:border-y border-y-gray-100 border-gray-100 shadow-xl shadow-gray-200/50 sm:rounded-sm rounded-none overflow-hidden min-h-[500px] flex flex-col">
             {currentStep < 7 && (
-              <div className="p-8 border-b border-gray-100 flex justify-between items-center">
+              <div className="p-5 sm:p-8 border-b border-gray-100 flex justify-between items-center">
                 <div>
                   <h2 className="text-2xl font-black text-gray-900 mb-1 uppercase tracking-tight">
                     {currentStep === 1 ? "Exporting Company Information" : 
@@ -272,7 +275,7 @@ export default function CreateShippingPage() {
               </div>
             )}
 
-            <div className="p-8 flex-1 flex flex-col">
+            <div className="p-5 sm:p-8 flex-1 flex flex-col">
               {/* Step 1 Rendering */}
               {currentStep === 1 && (
                 <div className="space-y-8">
@@ -779,11 +782,14 @@ export default function CreateShippingPage() {
               )}
 
               {/* Action Buttons */}
-              <div className="mt-12 flex flex-wrap gap-4 pt-8 border-t border-gray-100 items-center">
+              <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-100">
                 {currentStep > 1 && (
                   <button 
-                    onClick={() => setCurrentStep(currentStep - 1)}
-                    className="bg-[#535353] text-white px-10 py-4 font-black text-sm uppercase tracking-widest rounded-sm hover:opacity-90 transition-all shadow-lg shadow-gray-200"
+                    onClick={() => {
+                      setCurrentStep(currentStep - 1);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="px-10 py-4 font-black text-sm uppercase tracking-widest rounded-sm hover:opacity-90 transition-all shadow-lg shadow-gray-200 bg-[#535353] text-white"
                   >
                     Previous
                   </button>
@@ -806,7 +812,12 @@ export default function CreateShippingPage() {
                       (productName && formData.agreedToTerms1 && formData.agreedToTerms2 && formData.agreedToTerms3 && !isSubmitting) ? "bg-[#1a1a1a] text-white hover:opacity-90 shadow-gray-200" : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
                     }`}
                   >
-                    {isSubmitting ? "Submitting..." : "Confirm & Submit Order"}
+                    {isSubmitting ? "Submitting..." : (
+                      <>
+                        <span className="sm:hidden">Submit</span>
+                        <span className="hidden sm:inline">Confirm & Submit Order</span>
+                      </>
+                    )}
                   </button>
                 )}
               </div>

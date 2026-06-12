@@ -21,8 +21,8 @@ export function HowWeWork() {
               />
               
               {/* Play Button Overlay - Positioned on the image edge */}
-              <div className="absolute right-[28%] top-[50%] -translate-y-1/2 hidden lg:block z-30">
-                <div className="relative group cursor-pointer">
+              <div className="absolute right-[55%] sm:right-[45%] md:right-[45%] lg:right-[32%] top-[50%] -translate-y-1/2 block z-30">
+                <div className="relative group cursor-pointer scale-[0.6] sm:scale-75 md:scale-100">
                   {/* Gold ripple animation */}
                   <div className="absolute inset-[-2px] rounded-full border-[1.5px] border-[#f0a000] animate-ping opacity-75" />
                   <div className="absolute inset-[-2px] rounded-full border-[1.5px] border-[#f0a000]" />
@@ -35,10 +35,10 @@ export function HowWeWork() {
               </div>
 
               {/* Overlapping Content Card - Now positioned INSIDE the image container flow on large screens */}
-              <div className="hidden lg:block absolute right-0 top-[60%] w-[30%] bg-[#050505] border border-white/20 p-12 shadow-2xl z-20">
-                <div className="flex flex-col gap-8 h-full justify-center items-end text-right">
+              <div className="block absolute right-0 top-[35%] sm:top-[40%] md:top-[50%] lg:top-[60%] w-[60%] sm:w-[50%] md:w-[45%] lg:w-[30%] bg-[#050505] border border-white/20 p-4 sm:p-6 md:p-8 lg:p-12 shadow-2xl z-20">
+                <div className="flex flex-col gap-3 sm:gap-6 lg:gap-8 h-full justify-center items-end text-right">
                   <h2 
-                    className="text-white text-[46px] md:text-[62px] font-bold leading-[1.05] tracking-[-0.04em] uppercase text-right md:scale-x-[0.85] transform origin-right"
+                    className="text-white text-[24px] sm:text-[36px] md:text-[42px] lg:text-[62px] font-bold leading-[1.05] tracking-[-0.04em] uppercase text-right scale-x-[0.9] sm:scale-x-[0.85] transform origin-right"
                     style={{ fontFamily: "var(--font-antonio)" }}
                   >
                     DIGITAL<br />
@@ -64,27 +64,10 @@ export function HowWeWork() {
               </div>
             </div>
 
-            {/* Mobile Content Card */}
-            <div className="lg:hidden w-full bg-[#050505] border border-white/20 p-10 mt-8 shadow-2xl flex flex-col items-end text-right">
-              <h2 
-                className="text-white text-[42px] font-bold leading-[1.05] tracking-[-0.04em] uppercase mb-8 scale-x-95 transform origin-right"
-                style={{ fontFamily: "var(--font-antonio)" }}
-              >
-                DIGITAL<br />
-                BILLBOARD<br />
-                ADVERTISING
-              </h2>
-              <Link 
-                href="/about" 
-                className="inline-flex items-center gap-4 text-white border border-white/40 px-8 py-3.5"
-              >
-                <ArrowRight className="w-5 h-5 rotate-180" />
-                <span className="text-[14px] font-medium tracking-widest uppercase" style={{ fontFamily: "var(--font-bebas-neue)" }}>About Us</span>
-              </Link>
-            </div>
+            {/* Mobile Content Card Removed */}
 
             {/* Description Text Below Image */}
-            <div className="mt-12 max-w-2xl">
+            <div className="mt-28 sm:mt-24 md:mt-20 lg:mt-12 max-w-2xl w-full sm:w-[45%] md:w-[50%] lg:w-auto relative z-10">
               <p 
                 className="text-gray-400 text-[13px] md:text-[14px] leading-[1.6] tracking-tight opacity-80"
                 style={{ fontFamily: "var(--font-jetbrains-mono)" }}

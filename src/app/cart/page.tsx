@@ -212,7 +212,7 @@ function CartPageContent() {
 
       toast.success("Payment Received & Order Placed Successfully!", {
         id: toastId,
-        description: `Your receipt for GHS ${totalGHS.toFixed(2)} has been sent to your email.`,
+        description: `Your receipt for GH₵${totalGHS.toFixed(2)} has been sent to your email.`,
       });
 
       // Remove the specific item from the database cart
@@ -239,7 +239,7 @@ function CartPageContent() {
         {/* Title */}
         <div className="text-center mb-20">
           <h1
-            className="text-[80px] md:text-[110px] font-bold text-[#1a1a1a] tracking-[-0.04em] uppercase leading-[1.0] md:scale-x-[0.85] transform origin-center"
+            className="text-[42px] sm:text-[60px] md:text-[80px] lg:text-[110px] font-bold text-[#1a1a1a] tracking-[-0.02em] md:tracking-[-0.04em] uppercase leading-[1.0] sm:scale-x-[0.9] md:scale-x-[0.85] transform origin-center whitespace-nowrap"
             style={{ fontFamily: "var(--font-antonio)" }}
           >
             Orders & Bookings
@@ -277,8 +277,8 @@ function CartPageContent() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Left Column: Cart items table and actions */}
             <div className={selectedCartItem ? "lg:col-span-2" : "lg:col-span-3"}>
-              {/* Responsive Table Container */}
-              <div className="overflow-x-auto bg-white rounded-lg border border-gray-100 shadow-sm mb-6">
+              {/* Desktop Table Container */}
+              <div className="hidden lg:block overflow-x-auto bg-white rounded-lg border border-gray-100 shadow-sm mb-6">
                 <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
                     <tr className="bg-[#fcfbf9] border-b border-gray-100 text-gray-500 text-[13px] font-semibold tracking-wider">
@@ -350,7 +350,7 @@ function CartPageContent() {
 
                         {/* Price */}
                         <td className="py-6 px-6 text-center font-semibold text-gray-800 text-[14px]">
-                          GHS {item.price.toFixed(2)}
+                          GH₵{item.price.toFixed(2)}
                         </td>
 
                         {/* Quantity / Duration */}
@@ -381,7 +381,7 @@ function CartPageContent() {
 
                         {/* Total */}
                         <td className="py-6 px-6 text-center font-bold text-gray-800 text-[14px]">
-                          GHS {(item.price * item.quantity).toFixed(2)}
+                          GH₵{(item.price * item.quantity).toFixed(2)}
                         </td>
 
                         {/* Checkout button */}
@@ -403,6 +403,90 @@ function CartPageContent() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card Layout (Hidden on Desktop) */}
+              <div className="lg:hidden space-y-4 mb-6">
+                {cartItems.map((item) => (
+                  <div key={item.id} className={`bg-white rounded-xl border ${selectedCartItem?.id === item.id ? "border-[#373737]" : "border-gray-200"} shadow-sm p-5 relative transition-all`}>
+                    
+                    {/* Remove Button */}
+                    <button
+                      onClick={() => {
+                        if (selectedCartItem?.id === item.id) setSelectedCartItem(null);
+                        removeItem(item.id);
+                      }}
+                      className="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-full p-2 transition-colors z-10"
+                      title="Remove item"
+                    >
+                      <X className="w-4 h-4 stroke-[2.5px]" />
+                    </button>
+
+                    <div className="flex gap-4">
+                      {/* Product Image */}
+                      <div className="relative w-24 h-24 border border-gray-100 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center flex-shrink-0">
+                        {item.image.toLowerCase().includes('.mp4') || item.image.toLowerCase().includes('video') ? (
+                          <video src={item.image} className="object-cover w-full h-full" muted playsInline />
+                        ) : item.image.toLowerCase().endsWith('.pdf') ? (
+                          <div className="flex flex-col items-center justify-center w-full h-full bg-gray-100 text-gray-400">
+                            <span className="text-xs font-medium">PDF</span>
+                          </div>
+                        ) : (
+                          <Image src={item.image} alt={item.title} fill className="object-cover" priority />
+                        )}
+                      </div>
+
+                      {/* Product Details */}
+                      <div className="flex-1 pr-8">
+                        <h3 className="font-semibold text-gray-800 text-[15px] leading-snug mb-1">{item.title}</h3>
+                        <div className="text-gray-500 font-medium text-[13px] mb-2">Unit: GH₵{item.price.toFixed(2)}</div>
+                        
+                        {/* Quantity / Duration */}
+                        {item.itemType === "billboard" ? (
+                          <div className="inline-flex items-center bg-gray-50 border border-gray-100 px-2.5 py-1 rounded text-[13px] font-semibold text-gray-700">
+                            {item.details?.campaignDuration || 1} {item.details?.durationUnit || (Number(item.details?.campaignDuration || 1) !== 1 ? 'Months' : 'Month')}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500 text-[13px] font-medium">Qty:</span>
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantity}
+                              onChange={(e) => {
+                                updateQuantity(item.id, e.target.value);
+                                if (selectedCartItem?.id === item.id) {
+                                  setSelectedCartItem(prev => prev ? { ...prev, quantity: parseInt(e.target.value, 10) || 1 } : null);
+                                }
+                              }}
+                              className="w-16 h-8 border border-gray-200 rounded-md text-center font-medium text-gray-800 text-sm focus:border-[#eea000] focus:ring-1 focus:outline-none"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Total & Checkout Row */}
+                    <div className="mt-5 pt-4 border-t border-gray-100 flex flex-col gap-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500 font-medium text-[14px]">Total Amount</span>
+                        <span className="font-bold text-gray-900 text-[16px]">GH₵{(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCartItem(selectedCartItem?.id === item.id ? null : item)}
+                        className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
+                          selectedCartItem?.id === item.id
+                            ? "bg-[#eea000] text-white scale-[0.98]"
+                            : "bg-[#1a1a1a] text-white hover:bg-black shadow-md"
+                        }`}
+                      >
+                        {selectedCartItem?.id === item.id ? "Selected for Checkout" : "Checkout Item"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {/* Return to Shop link */}
@@ -441,7 +525,7 @@ function CartPageContent() {
 
                   <div className="flex justify-between items-center text-sm mt-2">
                     <span className="text-gray-500 font-medium">Original price</span>
-                    <span className="text-gray-800 font-bold">GHS {selectedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="text-gray-800 font-bold">GH₵{selectedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
 
                   {selectedCartItem.itemType === "billboard" ? (
@@ -470,12 +554,12 @@ function CartPageContent() {
 
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500 font-medium">Tax</span>
-                    <span className="text-gray-800 font-bold">GHS {taxAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="text-gray-800 font-bold">GH₵{taxAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
 
                   <div className="border-t border-gray-200/80 pt-4 mt-2 flex justify-between items-center">
                     <span className="text-base font-bold text-gray-800">Total</span>
-                    <span className="text-xl font-extrabold text-[#eea000]">GHS {totalGHS.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="text-xl font-extrabold text-[#eea000]">GH₵{totalGHS.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 
@@ -523,7 +607,7 @@ function CartPageContent() {
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
                           placeholder="Lawrence Antwi"
-                          className="border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#eea000] focus:ring-1 focus:ring-[#eea000]"
+                          className="border border-gray-200 rounded-lg p-3 text-[16px] focus:outline-none focus:border-[#eea000] focus:ring-1 focus:ring-[#eea000]"
                         />
                       </div>
 
@@ -536,7 +620,7 @@ function CartPageContent() {
                           value={cardNumber}
                           onChange={(e) => setCardNumber(e.target.value)}
                           placeholder="xxxx-xxxx-xxxx-xxxx"
-                          className="border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#eea000] focus:ring-1 focus:ring-[#eea000]"
+                          className="border border-gray-200 rounded-lg p-3 text-[16px] focus:outline-none focus:border-[#eea000] focus:ring-1 focus:ring-[#eea000]"
                         />
                       </div>
 
@@ -550,7 +634,7 @@ function CartPageContent() {
                             value={cardExpiration}
                             onChange={(e) => setCardExpiration(e.target.value)}
                             placeholder="MM/YY"
-                            className="border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#eea000] focus:ring-1 focus:ring-[#eea000]"
+                            className="border border-gray-200 rounded-lg p-3 text-[16px] focus:outline-none focus:border-[#eea000] focus:ring-1 focus:ring-[#eea000]"
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
@@ -566,7 +650,7 @@ function CartPageContent() {
                             onChange={(e) => setCvv(e.target.value)}
                             placeholder="..."
                             maxLength={3}
-                            className="border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#eea000] focus:ring-1 focus:ring-[#eea000]"
+                            className="border border-gray-200 rounded-lg p-3 text-[16px] focus:outline-none focus:border-[#eea000] focus:ring-1 focus:ring-[#eea000]"
                           />
                         </div>
                       </div>

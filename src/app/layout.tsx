@@ -52,6 +52,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})();` }} />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
       </head>
       <body
         className={`${antonio.variable} ${anton.variable} ${bebasNeue.variable} ${jetbrainsMono.variable} ${plusJakarta.variable} antialiased`}

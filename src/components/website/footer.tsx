@@ -6,9 +6,9 @@ export function WebsiteFooter() {
   return (
     <footer className="bg-[#1a1a1a] text-white pt-16 md:pt-20 pb-10">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-16">
           {/* About */}
-          <div className="col-span-1 md:col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-0 mb-6">
               <Image 
                 src="/logo.PNG" 
@@ -17,25 +17,37 @@ export function WebsiteFooter() {
                 height={80} 
                 className="object-contain h-12 md:h-14 w-auto"
               />
-              <span className="text-base md:text-lg font-black tracking-tight uppercase -ml-2 md:-ml-3">
+              <span className="inline max-[1028px]:hidden max-[768px]:inline text-base md:text-lg font-black tracking-tight uppercase -ml-2 md:-ml-3">
                 MANONO <span className="text-[#eea000]">MANPHIS</span>
               </span>
             </Link>
             <p className="text-gray-400 text-[13px] leading-relaxed mb-6">
               Manono Manphis is a trusted export company based in Ghana, specializing in the supply of high-quality agricultural commodities including honey, cashew nuts, and shea butter.
             </p>
-            <div className="flex gap-4">
-              <Link href="#" className="w-8 h-8 bg-white/5 flex items-center justify-center rounded-full hover:bg-[#eea000] transition-colors">
-                <Facebook className="w-4 h-4" />
+            <div className="flex flex-nowrap gap-2 sm:gap-2.5">
+              <Link
+                href="#"
+                className="btn btn-icon footer-social-btn btn-outline-facebook waves-effect waves-light"
+              >
+                <i className="fa-brands fa-facebook-f"></i>
               </Link>
-              <Link href="#" className="w-8 h-8 bg-white/5 flex items-center justify-center rounded-full hover:bg-[#eea000] transition-colors">
-                <Twitter className="w-4 h-4" />
+              <Link
+                href="#"
+                className="btn btn-icon footer-social-btn btn-outline-twitter-footer waves-effect waves-light"
+              >
+                <i className="fa-brands fa-x-twitter"></i>
               </Link>
-              <Link href="#" className="w-8 h-8 bg-white/5 flex items-center justify-center rounded-full hover:bg-[#eea000] transition-colors">
-                <Linkedin className="w-4 h-4" />
+              <Link
+                href="#"
+                className="btn btn-icon footer-social-btn btn-outline-linkedin waves-effect waves-light"
+              >
+                <i className="fa-brands fa-linkedin-in"></i>
               </Link>
-              <Link href="#" className="w-8 h-8 bg-white/5 flex items-center justify-center rounded-full hover:bg-[#eea000] transition-colors">
-                <Instagram className="w-4 h-4" />
+              <Link
+                href="#"
+                className="btn btn-icon footer-social-btn btn-outline-whatsapp waves-effect waves-light"
+              >
+                <i className="fa-brands fa-whatsapp"></i>
               </Link>
             </div>
           </div>
@@ -65,7 +77,7 @@ export function WebsiteFooter() {
           </div>
 
           {/* Contact Info */}
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <h4 className="text-base font-bold mb-8 relative after:content-[''] after:absolute after:left-0 after:-bottom-2 after:w-8 after:h-1 after:bg-[#eea000]">Get In Touch</h4>
             <ul className="space-y-4 text-[13px] text-gray-400">
               <li className="flex gap-3">

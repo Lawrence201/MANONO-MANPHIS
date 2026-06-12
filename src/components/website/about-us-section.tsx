@@ -16,10 +16,10 @@ export function AboutUsSection() {
       <div className="container mx-auto px-4 relative z-10 max-w-7xl">
         
         {/* Top Section */}
-        <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-8 md:gap-24 mb-[-40px] md:mb-[-40px] relative z-20">
+        <div className="flex flex-col min-[1029px]:flex-row items-center min-[1029px]:items-start justify-center gap-8 min-[1029px]:gap-24 mb-[-40px] relative z-20">
           
           {/* Vertical Image */}
-          <div className="w-full md:w-[420px] aspect-[1/1] md:aspect-[3/4.5] relative shadow-2xl border-[8px] md:border-[12px] border-[#2d2d2d] md:ml-12">
+          <div className="w-full min-[1029px]:w-[420px] max-[1028px]:max-w-[420px] aspect-[1/1] min-[1029px]:aspect-[3/4.5] relative shadow-2xl border-[8px] md:border-[12px] border-[#2d2d2d] min-[1029px]:ml-12">
             <Image 
               src="/uploads/about_us.webp" 
               alt="Manono Manphis Business" 
@@ -29,8 +29,8 @@ export function AboutUsSection() {
           </div>
 
           {/* About Us Content */}
-          <div className="text-center md:text-left relative pt-0 pb-12 flex-1 flex flex-col justify-start md:mt-[-20px] px-2 md:px-0 max-w-3xl mx-auto md:mx-0">
-            <p className="text-[#eea000] font-bold tracking-[0.2em] text-[14px] md:text-[16px] uppercase mb-4 md:mb-6 text-center md:text-left">About Us</p>
+          <div className="text-center min-[1029px]:text-left relative pt-0 pb-12 flex-1 flex flex-col justify-start min-[1029px]:mt-[-20px] px-2 md:px-0 max-w-3xl mx-auto min-[1029px]:mx-0">
+            <p className="text-[#eea000] font-bold tracking-[0.2em] text-[14px] md:text-[16px] uppercase mb-4 md:mb-6 text-center min-[1029px]:text-left">About Us</p>
             <div className="space-y-4 md:space-y-6 text-gray-300 text-[16px] min-[480px]:text-[17px] md:text-[19px] leading-relaxed text-left">
               <p>
                 <strong className="text-white text-[19px] md:text-[22px] block mb-2">Manono Manphis is a trusted export company based in Ghana,</strong> 
