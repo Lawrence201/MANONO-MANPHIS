@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,8 +31,12 @@ function LoginForm() {
       if (res?.error) {
         setError("Invalid email or password");
       } else {
+        const session = await getSession();
         const callbackUrl = searchParams.get("callbackUrl");
-        if (callbackUrl && callbackUrl.startsWith("/")) {
+        
+        if ((session?.user as any)?.role === "admin") {
+          router.push("/dashboard");
+        } else if (callbackUrl && callbackUrl.startsWith("/")) {
           router.push(callbackUrl);
         } else {
           router.push("/");
