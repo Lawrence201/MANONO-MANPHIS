@@ -169,6 +169,11 @@ function LoginForm() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-3">
+              {searchParams?.get("registered") === "true" && (
+                <div className="text-green-500 text-xs mb-4 text-center bg-green-500/10 py-2 rounded">
+                  Account successfully created! Please log in.
+                </div>
+              )}
               {error && (
                 <div className="text-red-500 text-xs mb-4 text-center bg-red-500/10 py-2 rounded">
                   {error}

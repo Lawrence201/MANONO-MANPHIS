@@ -33,7 +33,7 @@ export default function AddCashewPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [newCountry, setNewCountry] = useState("");
 
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     name: "",
     category: "rcn",
     description: "",
@@ -64,7 +64,9 @@ export default function AddCashewPage() {
     kernelCount: "190",
     defectRate: "3.5",
     seasonality: "Seasonal (March - June)"
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.packagingSize || !formData.moqValue || !formData.stockQuantity || !formData.pricePerUnit) {
@@ -86,7 +88,7 @@ export default function AddCashewPage() {
 
       if (result.success) {
         toast.success("Cashew product registered successfully!");
-        router.push("/inventory");
+        setFormData(initialFormState);
       } else {
         toast.error(result.error || "Failed to publish product.");
       }

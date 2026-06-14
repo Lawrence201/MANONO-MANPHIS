@@ -86,6 +86,7 @@ export function WebsiteHeader() {
 
   const serviceItems = [
     { name: "Digital Billboards Rental", href: "/services/billboards" },
+    { name: "Construction Services", href: "/services/construction" },
     { name: "Honey & Cashew Nut Export", href: "/products" },
     { name: "Shea Butter", href: "#" },
   ];
