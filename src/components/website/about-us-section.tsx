@@ -21,7 +21,7 @@ export function AboutUsSection() {
           {/* Vertical Image */}
           <div className="w-full min-[1029px]:w-[420px] max-[1028px]:max-w-[420px] aspect-[1/1] min-[1029px]:aspect-[3/4.5] relative shadow-2xl border-[8px] md:border-[12px] border-[#2d2d2d] min-[1029px]:ml-12">
             <Image 
-              src="/uploads/about_us.webp" 
+              src="/images/about_us.webp" 
               alt="Manono Manphis Business" 
               fill
               className="object-cover"
