@@ -118,7 +118,7 @@ export async function generateBookingReceipt(data: BookingReceiptData): Promise<
 
     // Load images
     const [logoBase64, stampBase64] = await Promise.all([
-        loadImageAsBase64('/logo.png'),
+        loadImageAsBase64('/logo.PNG'),
         loadImageAsBase64('/stamp.png')
     ]);
 
@@ -431,7 +431,7 @@ export async function generatePendingRequestPDF(data: PendingRequestData): Promi
     const borderGray: [number, number, number] = [229, 231, 235];
 
     // Load logo
-    const logoBase64 = await loadImageAsBase64('/logo.png');
+    const logoBase64 = await loadImageAsBase64('/logo.PNG');
 
     // ============ HEADER ============
     if (logoBase64) {
@@ -703,7 +703,7 @@ export async function generateInternalInvoiceData(data: BookingReceiptData): Pro
     const borderGray: [number, number, number] = [229, 231, 235];
 
     // Load images
-    const logoBase64 = await loadImageAsBase64('/logo.png');
+    const logoBase64 = await loadImageAsBase64('/logo.PNG');
 
     // ============ HEADER ============
     if (logoBase64) {
@@ -953,7 +953,7 @@ export const generateInternalInvoicePDF = async (data: BookingReceiptData) => {
     const borderGray: [number, number, number] = [229, 231, 235];
 
     // Load images
-    const logoBase64 = await loadImageAsBase64('/logo.png');
+    const logoBase64 = await loadImageAsBase64('/logo.PNG');
 
     // ============ HEADER ============
     if (logoBase64) {

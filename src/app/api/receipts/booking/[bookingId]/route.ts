@@ -84,7 +84,7 @@ async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
     const borderGray: [number, number, number] = [229, 231, 235];
 
     // ============ HEADER ============
-    const logoBase64 = await loadImageAsBase64('/logo.png');
+    const logoBase64 = await loadImageAsBase64('/logo.PNG');
     if (logoBase64) {
         try {
             doc.addImage(logoBase64, 'PNG', margin, y, 40, 16, undefined, 'FAST');
