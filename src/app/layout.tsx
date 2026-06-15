@@ -37,9 +37,6 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Manono Manphis — Global Export & Trade Management",
   description: "Enterprise import/export trade management platform for agricultural commodities including honey, cashew nuts, and shea butter.",
-  icons: {
-    icon: "/logo.png",
-  },
 };
 
 export default async function RootLayout({
