@@ -11,6 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { signOut, useSession } from "next-auth/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function LiveClock() {
   const [time, setTime] = useState<Date | null>(null);
@@ -49,6 +58,7 @@ export function AppLayout({ children, title, subtitle, actions }: {
   subtitle?: string;
   actions?: ReactNode;
 }) {
+  const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(true);
   const [dark, setDark] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
@@ -107,16 +117,31 @@ export function AppLayout({ children, title, subtitle, actions }: {
 
           <div className="h-8 w-px bg-border" />
 
-          <button className="flex items-center gap-2.5 hover:bg-secondary rounded-lg pl-1 pr-2 py-1 transition-colors group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-xs font-semibold text-white shadow-sm">
-              SC
-            </div>
-            <div className="text-left hidden md:block">
-              <div className="text-xs font-semibold text-foreground leading-none">Sarah Chen</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">Sales Manager</div>
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2.5 hover:bg-secondary rounded-lg pl-1 pr-2 py-1 transition-colors group outline-none">
+                <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-xs font-semibold text-white shadow-sm">
+                  {session?.user?.name?.substring(0, 2).toUpperCase() || 'AD'}
+                </div>
+                <div className="text-left hidden md:block max-w-[120px]">
+                  <div className="text-xs font-semibold text-foreground leading-none truncate">
+                    {session?.user?.name || 'Admin User'}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                    {session?.user?.email || 'admin@manphis.com'}
+                  </div>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })} className="text-red-500 focus:text-red-500 cursor-pointer">
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <div className="h-8 w-px bg-border ml-2" />
 
