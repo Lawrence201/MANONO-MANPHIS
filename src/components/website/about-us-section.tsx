@@ -31,19 +31,19 @@ export function AboutUsSection() {
           {/* About Us Content */}
           <div className="text-center min-[1029px]:text-left relative pt-0 pb-12 flex-1 flex flex-col justify-start min-[1029px]:mt-[-20px] px-2 md:px-0 max-w-3xl mx-auto min-[1029px]:mx-0">
             <p className="text-[#eea000] font-bold tracking-[0.2em] text-[14px] md:text-[16px] uppercase mb-4 md:mb-6 text-center min-[1029px]:text-left">About Us</p>
-            <div className="space-y-4 md:space-y-6 text-gray-300 text-[16px] min-[480px]:text-[17px] md:text-[19px] leading-relaxed text-left">
+            <div className="space-y-3 md:space-y-4 text-gray-300 text-[16px] min-[480px]:text-[17px] md:text-[19px] leading-relaxed text-left">
               <p>
-                <strong className="text-white text-[19px] md:text-[22px] block mb-2">Manono Manphis is a trusted export company based in Ghana,</strong> 
+                <strong className="text-white text-[19px] md:text-[22px] block mb-2">Manono Manphis is a trusted multi-sector company based in Ghana,</strong> 
                 specializing in the supply of high-quality agricultural commodities including honey, cashew nuts, and shea butter. We connect local production with global markets through a structured and reliable trade process.
               </p>
               <p className="opacity-90">
-                Our focus is on delivering consistent quality, transparent transactions, and efficient logistics that meet international standards. We work closely with buyers across different regions to ensure smooth sourcing, processing, and delivery of bulk orders.
+                Beyond our core export operations, we provide professional construction and home improvement services. Whether undertaking residential renovations, custom builds, or commercial developments, our expert team ensures structural durability, precision, and complete customer satisfaction at every stage.
               </p>
               <p className="opacity-90">
-                In addition to our export operations, we also offer digital billboard advertising services, allowing businesses to promote their products through high-impact video displays. Clients can easily book advertising slots and showcase their brands to a wider audience through our modern outdoor media platforms.
+                We also offer premier digital billboard advertising services, allowing businesses to promote their products through high-impact video displays. Clients can easily book advertising slots and showcase their brands to a wider audience through our modern outdoor media platforms.
               </p>
               <p className="opacity-90">
-                At Manono Manphis, we are committed to creating value across both trade and media by combining reliability, visibility, and professional service delivery.
+                At Manono Manphis, we are committed to creating lasting value across trade, construction, and media by combining reliability, quality craftsmanship, and professional service delivery.
               </p>
             </div>
           </div>

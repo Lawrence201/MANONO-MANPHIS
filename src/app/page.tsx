@@ -13,6 +13,7 @@ import { MapSection } from "@/components/website/map-section";
 import { NewsletterBanner } from "@/components/website/newsletter-banner";
 import { WebsiteFooter } from "@/components/website/footer";
 import { OutdoorSolution } from "@/components/website/outdoor-solution";
+import { ConstructionCTASection } from "@/components/website/construction-cta-section";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export default function LandingPage() {
         <FeaturedProducts />
         <HowWeWork />
         <BillboardCatalog />
+        <ConstructionCTASection />
         <OutdoorSolution />
         <TestimonialsSection />
         <ContactSection />

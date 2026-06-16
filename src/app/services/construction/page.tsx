@@ -1,50 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Menu, ArrowUpRight, Hammer, Handshake, FileCheck } from "lucide-react";
+import { Search, Menu, ArrowUpRight, Hammer } from "lucide-react";
+import { ConstructionAboutSection } from "@/components/website/construction-about-section";
+import { ConstructionServicesSection } from "@/components/website/construction-services-section";
+import { ConstructionCTASection } from "@/components/website/construction-cta-section";
+import { ConstructionNav } from "@/components/website/construction-nav";
+import { ConstructionProcessSection } from "@/components/website/construction-process-section";
+import { ConstructionMarquee } from "@/components/website/construction-marquee";
+import { ConstructionProjectsSection } from "@/components/website/construction-projects-section";
+import { ConstructionContactSection } from "@/components/website/construction-contact-section";
+import { TopBar } from "@/components/website/top-bar";
+import { WebsiteFooter } from "@/components/website/footer";
 
 export default function ConstructionPage() {
   return (
     <div className="min-h-screen relative font-sans selection:bg-[#FFC700] selection:text-black">
+      {/* Top Bar */}
+      <TopBar />
       {/* Navigation Bar */}
-      <nav className="absolute top-6 md:top-10 left-1/2 -translate-x-1/2 w-[95%] max-w-[1500px] z-50 bg-[#313131] rounded-xl px-6 lg:px-10 py-5 flex items-center justify-between shadow-2xl">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-0">
-          <Image 
-            src="/logo.PNG" 
-            alt="Logo" 
-            width={80} 
-            height={80} 
-            className="object-contain h-10 md:h-12 w-auto"
-            priority
-          />
-          <span className="hidden min-[500px]:inline text-lg md:text-xl font-black text-white tracking-tight uppercase lg:-ml-2">
-            MANONO <span className="text-[#FFD100]">MANPHIS</span>
-          </span>
-        </Link>
-
-        {/* Links */}
-        <div className="hidden min-[900px]:flex items-center gap-10">
-          <Link href="/" className="text-[15px] font-bold text-[#FFD100]">Home</Link>
-          <Link href="/#about" className="text-[15px] font-bold text-white hover:text-[#FFD100] transition-colors">About</Link>
-          <Link href="/services" className="text-[15px] font-bold text-white hover:text-[#FFD100] transition-colors">Services</Link>
-          <Link href="/projects" className="text-[15px] font-bold text-white hover:text-[#FFD100] transition-colors">Projects</Link>
-          <Link href="/blog" className="text-[15px] font-bold text-white hover:text-[#FFD100] transition-colors">Blog</Link>
-          <Link href="/contact" className="text-[15px] font-bold text-white hover:text-[#FFD100] transition-colors">Contact</Link>
-        </div>
-
-        {/* Right side actions */}
-        <div className="flex items-center gap-4">
-          <Link href="/contact" className="hidden sm:flex items-center gap-2 bg-[#FFD100] text-black px-6 py-3 font-bold text-[15px] hover:bg-[#FFD100]/90 transition-colors">
-            Get Free Quote <ArrowUpRight className="w-5 h-5" />
-          </Link>
-          <button className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 transition-colors">
-            <Search className="w-5 h-5" />
-          </button>
-          <button className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 transition-colors">
-            <Menu className="w-5 h-5" />
-          </button>
-        </div>
-      </nav>
+      <ConstructionNav />
 
       {/* Hero Section */}
       <div className="relative min-h-screen pt-[100px] flex items-center bg-[#1a1a1a]">
@@ -62,25 +36,25 @@ export default function ConstructionPage() {
         </div>
 
         {/* Hero Content */}
-        <div className="container mx-auto px-4 md:px-8 lg:px-12 relative z-10 w-full mt-24 md:mt-32">
-          <div className="max-w-[700px]">
-            <h4 className="text-[#FFD100] text-[13px] font-bold tracking-[0.2em] uppercase mb-3">
+        <div className="container mx-auto px-4 md:px-8 lg:px-12 relative z-10 w-full mt-8 md:mt-12 max-[480px]:mt-0 max-[480px]:-translate-y-8">
+          <div className="max-w-[700px] opacity-0 animate-slide-in-left">
+            <h4 className="text-[#FFD100] text-[13px] max-[480px]:text-[11px] font-bold tracking-[0.2em] uppercase mb-3 max-[480px]:mb-2">
               Delivering Quality Construction
             </h4>
-            <h1 className="text-white text-5xl md:text-7xl lg:text-[85px] font-bold leading-[1.05] tracking-tight mb-5">
+            <h1 className="text-white text-5xl md:text-7xl lg:text-[85px] max-[480px]:text-4xl max-[480px]:leading-[1.1] font-bold leading-[1.05] tracking-tight mb-5 max-[480px]:mb-4">
               Built With<br />
               Strength And<br />
               Precision
             </h1>
             
-            <div className="w-[120px] h-[2px] bg-white/30 mb-5"></div>
+            <div className="w-[120px] max-[480px]:w-[80px] h-[2px] bg-white/30 mb-5 max-[480px]:mb-4"></div>
             
-            <p className="text-gray-300 text-[17px] leading-[1.8] mb-8 max-w-[580px]">
+            <p className="text-gray-300 text-[17px] max-[480px]:text-[15px] max-[480px]:leading-[1.6] leading-[1.8] mb-8 max-[480px]:mb-6 max-w-[580px]">
               We believe that every business is uniquids our approach is never one size fits all We tailor our strategies to fit your goals hub.
             </p>
 
-            <Link href="/contact" className="inline-flex items-center gap-2 bg-[#FFD100] text-black px-8 py-4 font-bold text-[15px] hover:bg-[#FFD100]/90 transition-colors">
-              Service Request <ArrowUpRight className="w-5 h-5" />
+            <Link href="/contact" className="inline-flex items-center gap-2 bg-[#FFD100] text-black px-8 py-4 max-[480px]:px-6 max-[480px]:py-3 font-bold text-[15px] max-[480px]:text-[14px] hover:bg-[#FFD100]/90 transition-colors">
+              Service Request <ArrowUpRight className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4" />
             </Link>
           </div>
         </div>
@@ -90,10 +64,10 @@ export default function ConstructionPage() {
       {/* Features Section */}
       <section className="bg-white py-20">
         <div className="container mx-auto px-4 md:px-8 lg:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             {/* Card 1 */}
-            <div className="bg-[#313131] p-8 md:p-10 flex flex-col gap-8 shadow-lg">
+            <div className="bg-[#313131] p-8 md:p-10 flex flex-col gap-8 shadow-lg rounded-2xl">
               <div className="flex items-center gap-5">
                 <div className="w-16 h-16 bg-[#404040] flex items-center justify-center shrink-0 rounded-md">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 423 453" fill="none" className="w-8 h-8 text-[#FFD100]">
@@ -111,10 +85,12 @@ export default function ConstructionPage() {
             </div>
 
             {/* Card 2 */}
-            <div className="bg-[#313131] p-8 md:p-10 flex flex-col gap-8 shadow-lg">
+            <div className="bg-[#313131] p-8 md:p-10 flex flex-col gap-8 shadow-lg rounded-2xl">
               <div className="flex items-center gap-5">
                 <div className="w-16 h-16 bg-[#404040] flex items-center justify-center shrink-0 rounded-md">
-                  <Handshake className="w-8 h-8 text-[#FFD100]" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 482 482" fill="none" className="w-8 h-8 text-[#FFD100]">
+                    <path d="M62.3757 137.84H419.626C422.936 137.84 425.626 135.15 425.626 131.84V89.9C425.626 86.59 422.936 83.9 419.626 83.9H380.966V47.95C380.966 44.64 378.276 41.95 374.966 41.95H336.306V6C336.306 2.69 333.616 0 330.306 0H151.696C148.386 0 145.696 2.69 145.696 6V41.95H107.036C103.726 41.95 101.036 44.64 101.036 47.95V83.9H62.3757C59.0657 83.9 56.3757 86.59 56.3757 89.9V131.85C56.3757 135.16 59.0657 137.84 62.3757 137.84ZM235.006 95.9V125.85H157.696V95.9H235.006ZM279.666 53.95V83.9H202.356V53.95H279.666ZM324.316 95.9V125.85H247.006V95.9H324.316ZM413.636 125.84H336.326V95.9H413.636V125.84ZM368.976 83.9H291.666V53.95H368.976V83.9ZM324.316 41.95H247.006V12H324.316V41.95ZM157.696 12H235.006V41.95H157.696V12ZM113.036 53.95H190.346V83.9H113.036V53.95ZM68.3757 95.9H145.686V125.85H68.3757V95.9ZM481.536 332.97L413.186 169.44C412.576 167.97 411.396 166.81 409.926 166.2C408.456 165.6 406.806 165.6 405.336 166.21L333.056 196.42C329.996 197.7 328.556 201.21 329.836 204.27L334.516 215.48C312.736 206.28 289.126 197.89 264.116 190.47C262.846 190.09 261.496 190.15 260.266 190.62C256.676 192 253.126 193.34 249.616 194.66C230.506 201.88 212.446 208.7 194.406 218.83C192.716 219.78 191.586 221.48 191.376 223.41C191.216 224.87 191.046 226.29 190.866 227.72L144.236 218.36L152.146 199.41C152.756 197.94 152.766 196.29 152.156 194.82C151.556 193.35 150.386 192.18 148.916 191.56L76.5857 161.36C73.5257 160.08 70.0157 161.53 68.7357 164.59L0.465694 328.15C-0.814306 331.21 0.635694 334.72 3.69569 336L76.0257 366.2C76.7657 366.51 77.5557 366.66 78.3357 366.66C79.1057 366.66 79.8857 366.51 80.6157 366.21C82.0857 365.61 83.2557 364.44 83.8757 362.97L91.7457 344.11L113.526 359.23L100.306 373.29C96.9957 376.82 95.2457 381.43 95.3957 386.28C95.5457 391.13 97.5657 395.63 101.096 398.94L111.366 408.59C113.726 410.81 116.536 412.25 119.476 412.97C118.296 418.91 120.086 425.31 124.816 429.76L135.086 439.41C138.586 442.7 143.056 444.33 147.516 444.33C150.516 444.33 153.516 443.59 156.206 442.12C157.176 444.31 158.576 446.31 160.366 448L170.636 457.65C174.136 460.94 178.606 462.57 183.066 462.57C185.586 462.57 188.096 462.04 190.436 461C191.386 463.36 192.836 465.57 194.806 467.42L205.076 477.07C208.576 480.36 213.046 481.99 217.506 481.99C222.346 481.99 227.166 480.07 230.736 476.28L249.256 456.58L267.776 472.95C271.226 476 275.516 477.49 279.786 477.49C284.816 477.49 289.816 475.42 293.396 471.37L302.726 460.81C304.526 458.78 305.756 456.45 306.486 454.01C308.366 454.64 310.316 454.97 312.276 454.97C317.306 454.97 322.306 452.9 325.886 448.85L335.216 438.29C336.876 436.41 338.076 434.28 338.826 432.04C341.116 433.02 343.546 433.53 345.986 433.53C351.016 433.53 356.016 431.46 359.596 427.41L368.926 416.85C372.136 413.22 373.736 408.56 373.436 403.71C373.346 402.31 373.086 400.95 372.706 399.64C375.566 398.65 378.226 396.95 380.376 394.53L389.706 383.97C396.336 376.47 395.626 364.98 388.126 358.35L383.506 354.27L390.556 349.52L398.196 367.8C398.806 369.27 399.986 370.43 401.456 371.04C402.186 371.34 402.956 371.49 403.736 371.49C404.526 371.49 405.306 371.34 406.046 371.03L478.326 340.82C481.376 339.54 482.816 336.03 481.536 332.97ZM75.1157 352.81L13.8557 327.23L77.5157 174.75L138.776 200.33L75.1157 352.81ZM109.316 390.21C106.846 387.89 106.726 383.99 109.046 381.52L140.206 348.37C142.496 345.93 146.256 345.76 148.766 347.97L159.326 357.31C160.676 358.5 161.316 359.84 161.396 361.63C161.476 363.42 160.966 364.81 159.746 366.12L128.286 399.59C125.966 402.06 122.066 402.18 119.596 399.86L109.316 390.21ZM143.306 430.68L133.036 421.03C131.846 419.91 131.166 418.39 131.106 416.74C131.056 415.09 131.646 413.53 132.766 412.34L137.016 407.82L137.026 407.81L168.476 374.35C168.476 374.35 168.476 374.34 168.486 374.34L176.086 366.26C177.306 364.97 178.926 364.31 180.566 364.31C182.016 364.31 183.466 364.82 184.646 365.86L195.206 375.19C196.536 376.37 197.196 377.74 197.276 379.51C197.356 381.31 196.846 382.7 195.616 384.01L159.586 422.35C159.586 422.35 159.586 422.35 159.576 422.36L152.006 430.41C149.676 432.88 145.776 433 143.306 430.68ZM178.846 448.92L168.576 439.27C167.386 438.15 166.706 436.63 166.656 434.98C166.606 433.33 167.196 431.77 168.316 430.58L198.846 398.1C201.136 395.66 204.896 395.49 207.406 397.7L217.966 407.03C219.316 408.22 219.956 409.56 220.036 411.35C220.116 413.15 219.606 414.54 218.376 415.85L187.546 448.64C185.226 451.12 181.326 451.24 178.846 448.92ZM221.976 468.07C219.656 470.54 215.756 470.66 213.276 468.34L203.006 458.69C200.536 456.37 200.416 452.47 202.736 449.99L227.106 424.07C227.276 423.89 227.426 423.69 227.586 423.5L227.616 423.52C229.906 421.08 233.666 420.91 236.176 423.12L246.736 432.46C248.066 433.64 248.726 435.01 248.806 436.78C248.886 438.58 248.376 439.97 247.146 441.28L221.976 468.07ZM380.706 376.04L371.376 386.6C369.126 389.14 365.236 389.38 362.696 387.14L292.566 325.15C290.086 322.96 286.296 323.19 284.096 325.67C281.896 328.15 282.136 331.94 284.616 334.14L354.746 396.13C355.756 397.03 356.856 397.77 357.996 398.4C358.336 399.08 358.796 399.71 359.406 400.24C360.626 401.32 361.356 402.82 361.466 404.47C361.566 406.12 361.026 407.7 359.946 408.92L350.616 419.48C348.366 422.02 344.476 422.26 341.936 420.02L258.236 346.05C255.756 343.86 251.966 344.09 249.766 346.57C247.576 349.05 247.806 352.84 250.286 355.04L325.696 421.69C328.236 423.94 328.476 427.83 326.226 430.37L316.896 440.93C314.646 443.47 310.756 443.71 308.216 441.47L235.716 377.39C233.236 375.19 229.436 375.43 227.246 377.91C225.056 380.39 225.286 384.18 227.766 386.38L293.196 444.22C295.736 446.47 295.976 450.36 293.736 452.9L284.406 463.46C282.156 466 278.266 466.24 275.726 464L257.366 447.77C259.816 444.44 261.016 440.51 260.816 436.27C260.586 431.25 258.466 426.84 254.706 423.51L244.146 414.17C240.626 411.05 236.256 409.56 231.926 409.61C231.426 405.1 229.386 401.13 225.926 398.07L215.366 388.74C213.326 386.94 211.006 385.69 208.576 384.95C209.126 383.06 209.376 381.07 209.276 379C209.046 373.98 206.936 369.57 203.166 366.24L192.606 356.91C186.686 351.68 178.406 350.97 171.876 354.58C170.846 352.25 169.316 350.14 167.296 348.36L156.736 339.03C149.336 332.49 138.246 333 131.486 340.2L121.856 350.45L96.4957 332.85L139.556 229.72L189.296 239.71C185.236 266.75 179.026 287.23 170.416 301.96C169.146 304.14 167.596 308.75 171.546 315.05C173.776 318.6 177.126 320.89 181.246 321.67L196.196 324.5C205.546 326.27 214.436 324.1 221.926 318.23C234.266 308.55 239.096 295.69 236.596 279.02L266.566 267L380.186 367.43C382.706 369.6 382.946 373.5 380.706 376.04ZM374.206 346.08L271.716 255.49C270.016 253.99 267.616 253.57 265.506 254.42L227.526 269.65C224.786 270.75 223.256 273.67 223.906 276.54C227.196 291.1 224.296 301.03 214.486 308.72C209.736 312.44 204.326 313.76 198.396 312.64L183.446 309.81C182.626 309.66 182.116 309.3 181.676 308.6C181.326 308.04 181.146 307.65 181.056 307.4C191.686 288.94 198.856 262.87 202.946 227.82C219.346 218.92 236.136 212.58 253.846 205.89C256.756 204.79 259.686 203.68 262.646 202.55C290.926 211.02 317.326 220.74 341.206 231.48L385.816 338.23L374.206 346.08ZM406.946 357.64L343.226 205.18L404.436 179.6L468.156 332.06L406.946 357.64Z" fill="currentColor"></path>
+                  </svg>
                 </div>
                 <h3 className="text-white text-xl md:text-2xl font-bold tracking-tight">Project Management</h3>
               </div>
@@ -127,10 +103,12 @@ export default function ConstructionPage() {
             </div>
 
             {/* Card 3 */}
-            <div className="bg-[#313131] p-8 md:p-10 flex flex-col gap-8 shadow-lg">
+            <div className="bg-[#313131] p-8 md:p-10 flex flex-col gap-8 shadow-lg rounded-2xl">
               <div className="flex items-center gap-5">
                 <div className="w-16 h-16 bg-[#404040] flex items-center justify-center shrink-0 rounded-md">
-                  <FileCheck className="w-8 h-8 text-[#FFD100]" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" className="w-8 h-8 text-[#FFD100]">
+                    <path d="M511.996 50.8416C512.027 43.8883 509.26 37.2146 504.315 32.3244L479.672 7.68033C474.805 2.75977 468.17 -0.00588751 461.249 9.41072e-06H461.164C454.284 0.0042215 447.696 2.77156 442.876 7.68033L331.091 119.466H110.933V25.6002C110.933 11.4611 99.4709 9.41072e-06 85.3326 9.41072e-06H68.2661C30.5814 0.0421303 0.0421209 30.5814 0 68.2661V445.872C2.13553 483.269 33.2847 512.385 70.7411 511.996H486.396C500.535 511.996 511.996 500.535 511.996 486.396V145.066C511.996 130.928 500.535 119.466 486.396 119.466H453.97L504.316 69.1195C509.215 64.2975 511.981 57.7157 511.996 50.8416ZM305.321 213.332C303.514 213.578 301.699 212.943 300.44 211.625C299.169 210.363 298.542 208.593 298.733 206.813L301.967 177.8C302.103 177.193 302.274 176.594 302.479 176.008L336.092 209.62C335.537 209.74 335.033 210.013 334.453 210.081L305.321 213.332ZM350.026 199.397L312.684 162.046L405.697 69.0344L443.021 106.35L350.026 199.397ZM417.729 56.9592L430.384 44.3128L467.691 81.6285L455.045 94.2833L417.729 56.9592ZM17.0665 68.2661C17.0952 40.0013 40.0013 17.0943 68.2661 17.0665H85.3326C90.0451 17.0665 93.8663 20.8869 93.8663 25.5994V366.93C93.8663 371.642 90.0459 375.463 85.3326 375.463H68.2661C48.6622 375.457 30.006 383.895 17.0665 398.622V68.2661ZM486.396 136.532C491.109 136.532 494.93 140.353 494.93 145.066V486.396C494.93 491.109 491.11 494.93 486.396 494.93H70.7411C42.5707 495.404 18.9712 473.717 17.0665 445.607V443.73C17.0952 415.465 40.0013 392.559 68.2661 392.53H85.3326C99.4709 392.53 110.932 381.069 110.932 366.931V136.532H314.024L294.645 155.911C289.235 161.242 285.831 168.277 285.011 175.828L281.777 204.9C281.51 207.736 281.78 210.595 282.57 213.331H136.532C131.82 213.331 127.999 217.152 127.999 221.865C127.999 226.577 131.819 230.398 136.532 230.398H162.132V460.796C162.132 465.509 165.953 469.33 170.666 469.33C175.379 469.33 179.2 465.509 179.2 460.796V341.331H273.065V409.597H213.332C208.62 409.597 204.799 413.417 204.799 418.129C204.799 422.842 208.62 426.663 213.332 426.663H383.997C393.423 426.663 401.064 419.022 401.064 409.597V281.598C401.064 276.886 397.243 273.064 392.531 273.064C387.818 273.064 383.997 276.885 383.997 281.598V324.264H179.199V230.399H304.706C305.539 230.4 306.371 230.355 307.198 230.262L336.356 226.943C343.757 226.103 350.664 222.814 355.983 217.599L436.947 136.533L486.396 136.532ZM383.997 341.331V409.597H290.131V341.331H383.997ZM492.284 57.019L479.757 69.5542L442.45 32.2469L454.985 19.7117C456.625 18.0286 458.873 17.075 461.223 17.0665C463.616 17.0724 465.905 18.0378 467.58 19.7463L492.259 44.3735C493.975 46.0634 494.938 48.3733 494.93 50.7817C494.922 53.1321 493.969 55.3805 492.284 57.019Z" fill="currentColor"></path>
+                  </svg>
                 </div>
                 <h3 className="text-white text-xl md:text-2xl font-bold tracking-tight">Certified Professionals</h3>
               </div>
@@ -145,6 +123,15 @@ export default function ConstructionPage() {
           </div>
         </div>
       </section>
+
+      <ConstructionAboutSection />
+      <ConstructionServicesSection />
+      <ConstructionCTASection />
+      <ConstructionProcessSection />
+      <ConstructionMarquee />
+      <ConstructionProjectsSection />
+      <ConstructionContactSection />
+      <WebsiteFooter />
     </div>
   );
 }

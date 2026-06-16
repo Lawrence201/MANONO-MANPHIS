@@ -256,11 +256,23 @@
   }
   .animate-fade-in-up { animation: fade-in-up 0.4s var(--transition-smooth); }
 
+  @keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-50px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .animate-slide-in-left { animation: slide-in-left 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
   @keyframes pulse-glow {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
   }
   .animate-pulse-glow { animation: pulse-glow 2s infinite; }
+
+  @keyframes drive-slow {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-15px); }
+  }
+  .animate-drive-slow { animation: drive-slow 5s ease-in-out infinite; }
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;

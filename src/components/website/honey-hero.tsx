@@ -14,10 +14,10 @@ const slides = [
     description: "Promote your brand, business, event, or campaign through our strategically positioned digital billboards. Reach targeted audiences with high-visibility advertising placements and flexible booking options."
   },
   {
-    image: "/hero_img.webp",
-    subtitle: "Global Trade Starts Here",
-    title: "BULK HONEY, CASHEW & SHEA EXPORTS",
-    description: "Supplying premium Ghanaian agricultural products to international buyers through reliable sourcing, quality assurance, and efficient export coordination."
+    image: "/construction/hero.jpg",
+    subtitle: "Professional Construction Services",
+    title: "BUILDING STRONG & FOUNDATIONS FOR SUCCESS",
+    description: "We provide high-quality construction solutions for residential, commercial, and industrial projects, ensuring durability, precision, and customer satisfaction at every stage."
   },
   {
     image: "/hero_img_2.png",
@@ -80,8 +80,8 @@ export function HoneyHero() {
                 priority={index === 0}
                 className="object-cover"
               />
-              {/* Dark Overlay (Conditional for slide 3) */}
-              <div className={`absolute inset-0 z-10 ${index === 2 ? "bg-black/65" : "bg-black/45"}`} />
+              {/* Dark Overlay */}
+              <div className={`absolute inset-0 z-10 ${index === 1 ? "bg-black/70" : index === 2 ? "bg-black/65" : "bg-black/45"}`} />
 
               {/* Main Content (within the slide) */}
               <div className="relative z-20 container mx-auto px-8 max-[480px]:px-5 py-24 max-[1080px]:py-16">

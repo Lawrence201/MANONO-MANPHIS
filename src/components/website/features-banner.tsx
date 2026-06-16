@@ -39,8 +39,8 @@ export function FeaturesBanner() {
     },
     {
       icon: "/svg_4.svg",
-      title: "Flexible Orders",
-      subtitle: "Custom quantities & pricing",
+      title: "Construction Services",
+      subtitle: "Expert building solutions",
     },
   ];
 

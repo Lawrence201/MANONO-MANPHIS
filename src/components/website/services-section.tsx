@@ -29,8 +29,15 @@ export function ServicesSection() {
       category: "ADVERTISING",
       title: "PREMIUM DIGITAL BILLBOARD",
       description: "We help businesses promote their products, services, and campaigns through high-visibility digital billboard advertising designed to maximize audience reach and brand exposure.",
-      image: "/billboards/first.jpg",
+      image: "/billboards/bill.jpg",
       badgeColor: "bg-[#d4b9f9]",
+    },
+    {
+      category: "CONSTRUCTION",
+      title: "PROFESSIONAL CONSTRUCTION",
+      description: "We provide high-quality construction solutions for residential, commercial, and industrial projects, ensuring durability, precision, and customer satisfaction at every stage.",
+      image: "/billboards/construction.webp",
+      badgeColor: "bg-[#FFD100]",
     },
     {
       category: "EXPORT SERVICES",
@@ -52,7 +59,7 @@ export function ServicesSection() {
     <section className="pt-24 pb-64 bg-white max-[1028px]:pt-12 max-[480px]:pb-32">
       <div className="container mx-auto pl-6 pr-4 md:pl-16 md:pr-4 lg:pl-28 lg:pr-4 max-w-[1600px]">
         {/* Header Section */}
-        <div className="lg:sticky lg:top-28 z-40 mb-24 max-[480px]:mb-12">
+        <div className="lg:sticky lg:top-28 z-40 mb-24 max-[480px]:mb-12 -translate-x-6 md:-translate-x-12 lg:-translate-x-16">
           <p 
             className="text-[12px] md:text-[16px] font-medium text-gray-500 mb-4 tracking-tight"
             style={{ fontFamily: "var(--font-jetbrains-mono)" }}
@@ -63,9 +70,9 @@ export function ServicesSection() {
             className="text-[46px] min-[480px]:text-[56px] md:text-[76px] font-bold text-[#1a1a1a] leading-[1.05] tracking-[-0.02em] uppercase max-w-4xl origin-left"
             style={{ fontFamily: "var(--font-antonio)" }}
           >
-            EXPORTING <br className="hidden md:block" />
-            PRODUCTS<br />
-            BUILDING BRANDS
+            EXPORTING PRODUCTS,<br />
+            BUILDING BRANDS <br className="hidden md:block" />
+            & CONSTRUCTION
           </h2>
         </div>
 

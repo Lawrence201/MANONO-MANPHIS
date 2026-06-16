@@ -22,7 +22,7 @@ export function WebsiteFooter() {
               </span>
             </Link>
             <p className="text-gray-400 text-[13px] leading-relaxed mb-6">
-              Manono Manphis is a trusted export company based in Ghana, specializing in the supply of high-quality agricultural commodities including honey, cashew nuts, and shea butter.
+              Manono Manphis is a trusted multi-sector company based in Ghana, specializing in high-quality agricultural exports, outdoor digital media solutions, and professional construction services.
             </p>
             <div className="flex flex-nowrap gap-2 sm:gap-2.5">
               <Link
@@ -61,6 +61,7 @@ export function WebsiteFooter() {
               <li><Link href="#" className="hover:text-[#eea000] transition-colors">Latest News</Link></li>
               <li><Link href="#" className="hover:text-[#eea000] transition-colors">Terms of Service</Link></li>
               <li><Link href="#" className="hover:text-[#eea000] transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/services/construction" className="hover:text-[#eea000] transition-colors">Construction Services</Link></li>
             </ul>
           </div>
 
@@ -98,7 +99,7 @@ export function WebsiteFooter() {
 
         <div className="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 font-medium">
           <p>© 2026 MANONO MANPHIS. All Rights Reserved.</p>
-          <p>Global Agricultural Export & Logistics.</p>
+          <p>Trade • Media • Construction</p>
         </div>
       </div>
     </footer>
