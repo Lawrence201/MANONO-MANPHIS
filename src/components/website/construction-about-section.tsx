@@ -26,7 +26,7 @@ export function ConstructionAboutSection() {
               <div className="absolute bottom-0 right-0 w-28 h-28 bg-[#FFD100] flex items-center justify-center rounded-tl-md p-2">
                 <div className="relative w-full h-full">
                   <Image 
-                    src="/logo.png" 
+                    src="/logo.PNG" 
                     alt="Logo" 
                     fill 
                     className="object-contain scale-110"
