@@ -9,7 +9,7 @@ export function ConstructionCTASection() {
       {/* Large Background Video */}
       <div className="relative w-full h-[500px] md:h-[600px]">
         <video 
-          src="/construction/vid_2.mp4"
+          src="/construction/vid_1.mp4"
           autoPlay
           loop
           muted
