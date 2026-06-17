@@ -298,6 +298,44 @@ function RightSidebar({ open, onClose, dark }: { open: boolean, onClose: () => v
                 ))}
               </nav>
             </div>
+            
+            {/* Construction Group */}
+            <div>
+              <div className={cn(
+                "text-[10px] uppercase tracking-widest font-semibold mb-4 px-4",
+                dark ? "text-[#a1a1a1]/40" : "text-muted-foreground/60"
+              )}>
+                Construction
+              </div>
+              <nav className="space-y-1">
+                <Link 
+                  href="/inventory/construction"
+                  className={cn(
+                    "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all group",
+                    dark ? "text-[#a1a1a1] hover:text-white" : "text-slate-600 hover:text-foreground hover:bg-secondary/50"
+                  )}
+                >
+                  <Settings className={cn("w-5 h-5 transition-colors", dark ? "text-[#a1a1a1] group-hover:text-white" : "text-slate-500 group-hover:text-foreground")} />
+                  <span className="text-sm font-medium tracking-tight">Services</span>
+                </Link>
+                <Link 
+                  href="/inventory/construction/add"
+                  className={cn(
+                    "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all group",
+                    dark ? "text-[#a1a1a1] hover:text-white" : "text-slate-600 hover:text-foreground hover:bg-secondary/50"
+                  )}
+                >
+                  <div className="relative">
+                    <Settings className={cn("w-5 h-5 transition-colors", dark ? "text-[#a1a1a1]/60 group-hover:text-white" : "text-slate-500 group-hover:text-foreground")} />
+                    <Plus className={cn(
+                      "absolute -top-1 -right-1 w-2.5 h-2.5 stroke-[4px] transition-all",
+                      dark ? "text-[#a1a1a1] opacity-70 group-hover:opacity-100 group-hover:text-white" : "text-slate-500 group-hover:text-foreground"
+                    )} />
+                  </div>
+                  <span className="text-sm font-medium tracking-tight">Add Services</span>
+                </Link>
+              </nav>
+            </div>
           </div>
         </div>
       </div>
