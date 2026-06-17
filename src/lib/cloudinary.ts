@@ -4,7 +4,7 @@ import path from 'path';
 
 // Configure Cloudinary
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
@@ -48,23 +48,39 @@ export async function uploadToCloudinary(file: File, folder: string): Promise<st
     }
 
     try {
-        // Convert File to base64
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const base64 = buffer.toString('base64');
-        const mimeType = file.type;
-        const dataUri = `data:${mimeType};base64,${base64}`;
 
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(dataUri, {
-            folder: `camp-elim-africa/${folder}`,
-            resource_type: 'auto', // Automatically detect file type (image/video)
+        return new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: `camp-elim-africa/${folder}`,
+                    resource_type: 'auto',
+                },
+                (error, result) => {
+                    if (error) {
+                        console.error('Cloudinary stream upload error:', error);
+                        reject(new Error(`Cloudinary upload failed: ${error.message}`));
+                    } else if (result) {
+                        resolve(result.secure_url);
+                    } else {
+                        reject(new Error('Unknown upload error'));
+                    }
+                }
+            );
+
+            const { Readable } = require('stream');
+            const readableStream = new Readable({
+                read() {
+                    this.push(buffer);
+                    this.push(null);
+                }
+            });
+            readableStream.pipe(uploadStream);
         });
-
-        return result.secure_url;
-    } catch (error) {
-        console.error('Cloudinary upload error:', error);
-        throw new Error('Failed to upload file to Cloudinary');
+    } catch (error: any) {
+        console.error('Cloudinary catch error:', error);
+        throw new Error(error.message || 'Failed to process file for Cloudinary upload');
     }
 }
 
