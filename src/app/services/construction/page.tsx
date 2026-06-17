@@ -126,7 +126,7 @@ export default function ConstructionPage() {
 
       <ConstructionAboutSection />
       <ConstructionServicesSection />
-      <ConstructionCTASection />
+      <ConstructionCTASection videoSrc="/construction/vid_2.mp4" />
       <ConstructionProcessSection />
       <ConstructionMarquee />
       <ConstructionProjectsSection />

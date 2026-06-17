@@ -3,13 +3,17 @@
 import Image from "next/image";
 import { Mail } from "lucide-react";
 
-export function ConstructionCTASection() {
+interface ConstructionCTASectionProps {
+  videoSrc?: string;
+}
+
+export function ConstructionCTASection({ videoSrc = "/construction/vid_1.mp4" }: ConstructionCTASectionProps) {
   return (
     <section className="relative w-full bg-white">
       {/* Large Background Video */}
       <div className="relative w-full h-[500px] md:h-[600px]">
         <video 
-          src="/construction/vid_1.mp4"
+          src={videoSrc}
           autoPlay
           loop
           muted
