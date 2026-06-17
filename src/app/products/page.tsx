@@ -244,16 +244,16 @@ function ShopSection({ title, subtitle, products, loading = false, categories, h
         {/* Sidebar */}
         <aside className="w-full lg:w-72 shrink-0 space-y-4">
           {/* Categories */}
-          <div className="bg-[#f9f9f9] p-6 rounded-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
-              <h3 className="text-[15px] font-black text-[#1a1a1a] uppercase tracking-wider">Shop By Categories</h3>
+          <div className="bg-[#f9f9f9] p-6 max-[480px]:p-4 rounded-sm border border-gray-100 transition-all">
+            <div className="flex items-center justify-between mb-6 max-[480px]:mb-4 border-b border-gray-100 pb-4 max-[480px]:pb-3 transition-all">
+              <h3 className="text-[15px] max-[480px]:text-[13px] font-black text-[#1a1a1a] uppercase tracking-wider transition-all">Shop By Categories</h3>
               <div className="w-4 h-0.5 bg-[#ffcc00]" />
             </div>
-            <ul className="space-y-4">
+            <ul className="space-y-4 max-[480px]:space-y-3 transition-all">
               {categories.map((cat) => (
-                <li key={cat} className="flex items-center gap-3 group cursor-pointer">
-                  <div className="w-4 h-4 border border-gray-200 bg-white group-hover:border-[#ffcc00] transition-colors" />
-                  <span className="text-[13px] text-gray-500 font-bold group-hover:text-[#ffcc00] transition-colors uppercase tracking-wide">{cat}</span>
+                <li key={cat} className="flex items-center gap-3 max-[480px]:gap-2 group cursor-pointer transition-all">
+                  <div className="w-4 h-4 max-[480px]:w-3 max-[480px]:h-3 border border-gray-200 bg-white group-hover:border-[#ffcc00] transition-colors" />
+                  <span className="text-[13px] max-[480px]:text-[12px] text-gray-500 font-bold group-hover:text-[#ffcc00] transition-all uppercase tracking-wide">{cat}</span>
                 </li>
               ))}
             </ul>
@@ -295,16 +295,16 @@ function ShopSection({ title, subtitle, products, loading = false, categories, h
         </aside>
 
         {/* Main Content */}
-        <div className="flex-1">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-gray-100">
-            <h2 className="text-[24px] font-black text-[#1a1a1a] uppercase tracking-tight">
+        <div className="flex-1 mt-4 max-[480px]:mt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-[480px]:gap-2 mb-10 max-[480px]:mb-6 pb-6 max-[480px]:pb-4 border-b border-gray-100 transition-all">
+            <h2 className="text-[24px] max-[480px]:text-[20px] font-black text-[#1a1a1a] uppercase tracking-tight text-center sm:text-left transition-all">
               {title} <span className={cardType === "cashew" ? "text-[#9c4921]" : "text-[#ffcc00]"}>Catalog</span>
             </h2>
-            <div className="flex items-center gap-6">
-              <p className="text-[13px] text-gray-400 font-bold uppercase tracking-widest">{subtitle}</p>
+            <div className="flex items-center gap-6 max-[480px]:gap-3 transition-all">
+              <p className="text-[13px] max-[480px]:text-[11px] text-gray-400 font-bold uppercase tracking-widest text-center sm:text-left transition-all">{subtitle}</p>
               <div className="flex items-center gap-1">
-                <div className={`p-2 ${cardType === "cashew" ? "text-[#9c4921]" : "text-[#ffcc00]"}`}>
-                  <LayoutGrid className="w-5 h-5" />
+                <div className={`p-2 max-[480px]:p-1 ${cardType === "cashew" ? "text-[#9c4921]" : "text-[#ffcc00]"} transition-all`}>
+                  <LayoutGrid className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4" />
                 </div>
               </div>
             </div>
