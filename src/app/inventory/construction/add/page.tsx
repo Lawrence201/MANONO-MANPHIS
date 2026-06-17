@@ -29,6 +29,9 @@ export default function AddConstructionServicePage() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [heroFile, setHeroFile] = useState<File | null>(null);
+  const [mainFile, setMainFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   
   const [newFeature, setNewFeature] = useState("");
   const [newHighlight, setNewHighlight] = useState("");
@@ -67,83 +70,91 @@ export default function AddConstructionServicePage() {
     }
 
     setIsSubmitting(true);
+    setIsUploading(true);
+
     try {
-      const result = await createConstructionService(formData);
+      let finalHeroUrl = formData.heroImage;
+      let finalMainUrl = formData.mainImage;
+      let finalGalleryUrls: string[] = [];
+
+      if (heroFile) {
+        const fd = new FormData(); fd.append("file", heroFile); fd.append("folder", "construction_services");
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) finalHeroUrl = data.url;
+        else throw new Error(data.error || "Failed to upload hero image");
+      }
+      if (mainFile) {
+        const fd = new FormData(); fd.append("file", mainFile); fd.append("folder", "construction_services");
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) finalMainUrl = data.url;
+        else throw new Error(data.error || "Failed to upload main image");
+      }
+      if (galleryFiles.length > 0) {
+        const uploadPromises = galleryFiles.map(async (file) => {
+          const fd = new FormData(); fd.append("file", file); fd.append("folder", "construction_services");
+          const res = await fetch('/api/upload', { method: 'POST', body: fd });
+          const data = await res.json(); return data.success ? data.url : null;
+        });
+        const urls = await Promise.all(uploadPromises);
+        finalGalleryUrls = urls.filter((url): url is string => url !== null);
+      }
+
+      const result = await createConstructionService({
+        ...formData,
+        heroImage: finalHeroUrl,
+        mainImage: finalMainUrl,
+        galleryImages: finalGalleryUrls
+      });
 
       if (result.success) {
         toast.success("Construction service created successfully!");
+        setHeroFile(null);
+        setMainFile(null);
+        setGalleryFiles([]);
         setFormData(initialFormState);
       } else {
         toast.error(result.error || "Failed to publish service.");
       }
-    } catch (error) {
-      toast.error("An error occurred during submission.");
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred during submission.");
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'main' | 'gallery') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'main' | 'gallery') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setIsUploading(true);
+    if (type === 'gallery') {
+      const newFiles = Array.from(files);
+      const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+      
+      setGalleryFiles(prev => [...prev, ...newFiles]);
+      setFormData(prev => ({ 
+        ...prev, 
+        galleryImages: [...prev.galleryImages, ...newPreviews] 
+      }));
+      toast.success(`${newFiles.length} gallery images queued!`);
+    } else {
+      const file = files[0];
+      const preview = URL.createObjectURL(file);
 
-    try {
-      if (type === 'gallery') {
-        const uploadPromises = Array.from(files).map(async (file) => {
-          const formDataUpload = new FormData();
-          formDataUpload.append("file", file);
-          formDataUpload.append("folder", "construction_services");
-          
-          const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formDataUpload,
-          });
-          const result = await response.json();
-          return result.success ? result.url : null;
-        });
-
-        const urls = await Promise.all(uploadPromises);
-        const validUrls = urls.filter((url): url is string => url !== null);
-        
-        if (validUrls.length > 0) {
-          setFormData(prev => ({ 
-            ...prev, 
-            galleryImages: [...prev.galleryImages, ...validUrls] 
-          }));
-          toast.success(`${validUrls.length} gallery images added!`);
-        }
-      } else {
-        const file = files[0];
-        const formDataUpload = new FormData();
-        formDataUpload.append("file", file);
-        formDataUpload.append("folder", "construction_services");
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formDataUpload,
-        });
-        const result = await response.json();
-
-        if (result.success && result.url) {
-          if (type === 'hero') {
-            setFormData(prev => ({ ...prev, heroImage: result.url as string }));
-            toast.success("Hero image uploaded!");
-          } else if (type === 'main') {
-            setFormData(prev => ({ ...prev, mainImage: result.url as string }));
-            toast.success("Main image uploaded!");
-          }
-        } else {
-          toast.error(result.error || "Upload failed");
-        }
+      if (type === 'hero') {
+        setHeroFile(file);
+        setFormData(prev => ({ ...prev, heroImage: preview }));
+        toast.success("Hero image queued!");
+      } else if (type === 'main') {
+        setMainFile(file);
+        setFormData(prev => ({ ...prev, mainImage: preview }));
+        toast.success("Main image queued!");
       }
-    } catch (error) {
-      toast.error("An error occurred during upload");
-    } finally {
-      setIsUploading(false);
-      e.target.value = '';
     }
+    
+    e.target.value = '';
   };
 
   const addArrayItem = (field: 'features' | 'highlightFeatures' | 'theResults', value: string, setter: (val: string) => void) => {
@@ -509,6 +520,7 @@ export default function AddConstructionServicePage() {
                               ...prev,
                               galleryImages: prev.galleryImages.filter((_, i) => i !== idx)
                             }));
+                            setGalleryFiles(prev => prev.filter((_, i) => i !== idx));
                           }}
                         >
                           <X className="w-3 h-3" />

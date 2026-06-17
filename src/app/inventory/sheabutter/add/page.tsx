@@ -31,6 +31,10 @@ export default function AddSheaButterPage() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [featureFile, setFeatureFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [certFiles, setCertFiles] = useState<File[]>([]);
   const [newCountry, setNewCountry] = useState("");
 
   const [formData, setFormData] = useState({
@@ -73,9 +77,53 @@ export default function AddSheaButterPage() {
     }
 
     setIsSubmitting(true);
+    setIsUploading(true);
+
     try {
+      let finalFeatureUrl = formData.featureImage;
+      let finalVideoUrl = formData.videoShowcase;
+      let finalGalleryUrls: string[] = [];
+      let finalCertUrls: string[] = [];
+
+      if (featureFile) {
+        const fd = new FormData(); fd.append("file", featureFile); fd.append("folder", "products");
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) finalFeatureUrl = data.url;
+        else throw new Error(data.error || "Failed to upload feature image");
+      }
+      if (videoFile) {
+        const fd = new FormData(); fd.append("file", videoFile); fd.append("folder", "products");
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) finalVideoUrl = data.url;
+        else throw new Error(data.error || "Failed to upload video");
+      }
+      if (galleryFiles.length > 0) {
+        const uploadPromises = galleryFiles.map(async (file) => {
+          const fd = new FormData(); fd.append("file", file); fd.append("folder", "products");
+          const res = await fetch('/api/upload', { method: 'POST', body: fd });
+          const data = await res.json(); return data.success ? data.url : null;
+        });
+        const urls = await Promise.all(uploadPromises);
+        finalGalleryUrls = urls.filter((url): url is string => url !== null);
+      }
+      if (certFiles.length > 0) {
+        const uploadPromises = certFiles.map(async (file) => {
+          const fd = new FormData(); fd.append("file", file); fd.append("folder", "certificates");
+          const res = await fetch('/api/upload', { method: 'POST', body: fd });
+          const data = await res.json(); return data.success ? data.url : null;
+        });
+        const urls = await Promise.all(uploadPromises);
+        finalCertUrls = urls.filter((url): url is string => url !== null);
+      }
+
       const result = await createProduct({
         ...formData,
+        featureImage: finalFeatureUrl,
+        videoShowcase: finalVideoUrl,
+        galleryImages: finalGalleryUrls,
+        certificates: finalCertUrls,
         moqValue: Number(formData.moqValue) || 0,
         stockQuantity: Number(formData.stockQuantity) || 0,
         pricePerUnit: Number(formData.pricePerUnit) || 0,
@@ -85,99 +133,60 @@ export default function AddSheaButterPage() {
 
       if (result.success) {
         toast.success("Shea Butter product registered successfully!");
+        setFeatureFile(null);
+        setVideoFile(null);
+        setGalleryFiles([]);
+        setCertFiles([]);
         router.push("/inventory");
       } else {
         toast.error(result.error || "Failed to publish product.");
       }
-    } catch (error) {
-      toast.error("An error occurred during submission.");
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred during submission.");
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'feature' | 'video' | 'gallery' | 'cert') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'feature' | 'video' | 'gallery' | 'cert') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setIsUploading(true);
+    if (type === 'gallery') {
+      const newFiles = Array.from(files);
+      const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+      
+      setGalleryFiles(prev => [...prev, ...newFiles]);
+      setFormData(prev => ({ 
+        ...prev, 
+        galleryImages: [...prev.galleryImages, ...newPreviews] 
+      }));
+      toast.success(`${newFiles.length} gallery images queued!`);
+    } else if (type === 'cert') {
+      const file = files[0];
+      setCertFiles(prev => [...prev, file]);
+      setFormData(prev => ({ 
+        ...prev, 
+        certificates: [...prev.certificates, file.name] 
+      }));
+      toast.success("Certificate queued!");
+    } else {
+      const file = files[0];
+      const preview = URL.createObjectURL(file);
 
-    try {
-      if (type === 'gallery') {
-        const uploadPromises = Array.from(files).map(async (file) => {
-          const formDataUpload = new FormData();
-          formDataUpload.append("file", file);
-          formDataUpload.append("folder", "products");
-          
-          const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formDataUpload,
-          });
-          const result = await response.json();
-          return result.success ? result.url : null;
-        });
-
-        const urls = await Promise.all(uploadPromises);
-        const validUrls = urls.filter((url): url is string => url !== null);
-        
-        if (validUrls.length > 0) {
-          setFormData(prev => ({ 
-            ...prev, 
-            galleryImages: [...prev.galleryImages, ...validUrls] 
-          }));
-          toast.success(`${validUrls.length} gallery images added!`);
-        }
-      } else if (type === 'cert') {
-        const file = files[0];
-        const formDataUpload = new FormData();
-        formDataUpload.append("file", file);
-        formDataUpload.append("folder", "certificates");
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formDataUpload,
-        });
-        const result = await response.json();
-
-        if (result.success && result.url) {
-          setFormData(prev => ({ 
-            ...prev, 
-            certificates: [...prev.certificates, result.url as string] 
-          }));
-          toast.success("Certificate uploaded successfully!");
-        } else {
-          toast.error(result.error || "Upload failed");
-        }
-      } else {
-        const file = files[0];
-        const formDataUpload = new FormData();
-        formDataUpload.append("file", file);
-        formDataUpload.append("folder", "products");
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formDataUpload,
-        });
-        const result = await response.json();
-
-        if (result.success && result.url) {
-          if (type === 'feature') {
-            setFormData(prev => ({ ...prev, featureImage: result.url as string }));
-            toast.success("Hero image uploaded!");
-          } else if (type === 'video') {
-            setFormData(prev => ({ ...prev, videoShowcase: result.url as string }));
-            toast.success("Video uploaded!");
-          }
-        } else {
-          toast.error(result.error || "Upload failed");
-        }
+      if (type === 'feature') {
+        setFeatureFile(file);
+        setFormData(prev => ({ ...prev, featureImage: preview }));
+        toast.success("Hero image queued!");
+      } else if (type === 'video') {
+        setVideoFile(file);
+        setFormData(prev => ({ ...prev, videoShowcase: preview }));
+        toast.success("Video queued!");
       }
-    } catch (error) {
-      toast.error("An error occurred during upload");
-    } finally {
-      setIsUploading(false);
-      e.target.value = '';
     }
+    
+    e.target.value = '';
   };
 
   const addCountry = () => {
@@ -348,6 +357,7 @@ export default function AddSheaButterPage() {
                       </div>
                       <X className="w-4 h-4 hover:text-red-500 cursor-pointer shrink-0" onClick={() => {
                         setFormData(prev => ({ ...prev, certificates: prev.certificates.filter((_, i) => i !== idx) }));
+                        setCertFiles(prev => prev.filter((_, i) => i !== idx));
                       }} />
                     </div>
                   ))}
@@ -479,6 +489,9 @@ export default function AddSheaButterPage() {
                             const newGallery = [...formData.galleryImages];
                             newGallery.splice(idx, 1);
                             setFormData({ ...formData, galleryImages: newGallery });
+                            const newFiles = [...galleryFiles];
+                            newFiles.splice(idx, 1);
+                            setGalleryFiles(newFiles);
                           }}
                         >
                           <X className="w-4 h-4" />

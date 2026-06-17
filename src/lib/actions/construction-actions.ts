@@ -2,6 +2,7 @@
 
 import { prisma as db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { deleteFromCloudinary } from "@/lib/cloudinary";
 
 export async function createConstructionService(data: any) {
   try {
@@ -93,6 +94,43 @@ export async function updateConstructionService(id: number, data: any) {
   try {
     const { galleryImages, ...serviceData } = data;
 
+    // Fetch the existing service to compare images
+    const oldService = await db.constructionService.findUnique({
+      where: { id },
+      include: { galleryImages: true }
+    });
+
+    if (oldService) {
+      const urlsToDelete: string[] = [];
+
+      // Check if heroImage changed
+      if (oldService.heroImage && serviceData.heroImage && oldService.heroImage !== serviceData.heroImage) {
+        urlsToDelete.push(oldService.heroImage);
+      }
+
+      // Check if mainImage changed
+      if (oldService.mainImage && serviceData.mainImage && oldService.mainImage !== serviceData.mainImage) {
+        urlsToDelete.push(oldService.mainImage);
+      }
+
+      // Check gallery images: if old image is NOT in the new galleryImages array, it was deleted
+      const newGalleryPaths = galleryImages || [];
+      oldService.galleryImages.forEach(img => {
+        if (img.imagePath && !newGalleryPaths.includes(img.imagePath)) {
+          urlsToDelete.push(img.imagePath);
+        }
+      });
+
+      // Delete obsolete images from storage
+      for (const url of urlsToDelete) {
+        try {
+          await deleteFromCloudinary(url);
+        } catch (e) {
+          console.error("Failed to delete old image:", url, e);
+        }
+      }
+    }
+
     // Delete existing gallery images first (since we will recreate the new set)
     await db.constructionGalleryImage.deleteMany({
       where: { serviceId: id }
@@ -124,6 +162,30 @@ export async function updateConstructionService(id: number, data: any) {
 
 export async function deleteConstructionService(id: number) {
   try {
+    // Fetch the service first to get all image URLs
+    const service = await db.constructionService.findUnique({
+      where: { id },
+      include: { galleryImages: true }
+    });
+
+    if (service) {
+      const urlsToDelete: string[] = [];
+      if (service.heroImage) urlsToDelete.push(service.heroImage);
+      if (service.mainImage) urlsToDelete.push(service.mainImage);
+      service.galleryImages.forEach(img => {
+        if (img.imagePath) urlsToDelete.push(img.imagePath);
+      });
+
+      // Delete all media from Cloudinary/Local storage
+      for (const url of urlsToDelete) {
+        try {
+          await deleteFromCloudinary(url);
+        } catch (e) {
+          console.error("Failed to delete image during service deletion:", url, e);
+        }
+      }
+    }
+
     await db.constructionService.delete({
       where: { id }
     });

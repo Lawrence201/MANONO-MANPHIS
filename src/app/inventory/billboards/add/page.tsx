@@ -30,6 +30,9 @@ export default function AddBillboardPage() {
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [featureFile, setFeatureFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [locationSearch, setLocationSearch] = useState("");
   const [zoom, setZoom] = useState(14);
   const [formData, setFormData] = useState({
@@ -137,16 +140,67 @@ export default function AddBillboardPage() {
     }
 
     setIsSubmitting(true);
+    setIsUploading(true);
+
     try {
+      let finalFeatureUrl = formData.featureImage;
+      let finalVideoUrl = formData.videoShowcase;
+      let finalGalleryUrls: string[] = [];
+
+      // 1. Upload Feature Image
+      if (featureFile) {
+        const fd = new FormData();
+        fd.append("file", featureFile);
+        fd.append("folder", "billboards");
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) finalFeatureUrl = data.url;
+        else throw new Error(data.error || "Failed to upload feature image");
+      }
+
+      // 2. Upload Video
+      if (videoFile) {
+        const fd = new FormData();
+        fd.append("file", videoFile);
+        fd.append("folder", "billboards");
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) finalVideoUrl = data.url;
+        else throw new Error(data.error || "Failed to upload video");
+      }
+
+      // 3. Upload Gallery Images
+      if (galleryFiles.length > 0) {
+        const uploadPromises = galleryFiles.map(async (file) => {
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("folder", "billboards");
+          const res = await fetch('/api/upload', { method: 'POST', body: fd });
+          const data = await res.json();
+          return data.success ? data.url : null;
+        });
+        const urls = await Promise.all(uploadPromises);
+        finalGalleryUrls = urls.filter((url): url is string => url !== null);
+      }
+
       const result = await createBillboard({
         ...formData,
+        featureImage: finalFeatureUrl,
+        videoShowcase: finalVideoUrl,
+        galleryImages: finalGalleryUrls,
         weeklyRate: Number(formData.weeklyRate) || 0,
         taxRate: Number(formData.taxRate) || 0,
         maxSlots: Number(formData.maxSlots) || 12,
         slotDuration: Number(formData.slotDuration) || 10,
       });
+
       if (result.success) {
         toast.success("Billboard registered successfully!");
+        
+        // Reset state
+        setFeatureFile(null);
+        setVideoFile(null);
+        setGalleryFiles([]);
         
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let newCode = "BB-";
@@ -190,74 +244,44 @@ export default function AddBillboardPage() {
       } else {
         toast.error(result.error || "Failed to publish billboard.");
       }
-    } catch (error) {
-      toast.error("An error occurred during submission.");
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred during submission.");
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'feature' | 'video' | 'gallery') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'feature' | 'video' | 'gallery') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setIsUploading(true);
+    if (type === 'gallery') {
+      const newFiles = Array.from(files);
+      const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+      
+      setGalleryFiles(prev => [...prev, ...newFiles]);
+      setFormData(prev => ({ 
+        ...prev, 
+        galleryImages: [...prev.galleryImages, ...newPreviews] 
+      }));
+      toast.success(`${newFiles.length} gallery images queued!`);
+    } else {
+      const file = files[0];
+      const preview = URL.createObjectURL(file);
 
-    try {
-      if (type === 'gallery') {
-        const uploadPromises = Array.from(files).map(async (file) => {
-          const formDataUpload = new FormData();
-          formDataUpload.append("file", file);
-          formDataUpload.append("folder", "billboards");
-          
-          const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formDataUpload,
-          });
-          const result = await response.json();
-          return result.success ? result.url : null;
-        });
-
-        const urls = await Promise.all(uploadPromises);
-        const validUrls = urls.filter((url): url is string => url !== null);
-        
-        if (validUrls.length > 0) {
-          setFormData(prev => ({ 
-            ...prev, 
-            galleryImages: [...prev.galleryImages, ...validUrls] 
-          }));
-          toast.success(`${validUrls.length} gallery images added!`);
-        }
-      } else {
-        const file = files[0];
-        const formDataUpload = new FormData();
-        formDataUpload.append("file", file);
-        formDataUpload.append("folder", "billboards");
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formDataUpload,
-        });
-        const result = await response.json();
-
-        if (result.success && result.url) {
-          if (type === 'feature') {
-            setFormData(prev => ({ ...prev, featureImage: result.url as string }));
-            toast.success("Hero image uploaded!");
-          } else if (type === 'video') {
-            setFormData(prev => ({ ...prev, videoShowcase: result.url as string }));
-            toast.success("Video uploaded!");
-          }
-        } else {
-          toast.error(result.error || "Upload failed");
-        }
+      if (type === 'feature') {
+        setFeatureFile(file);
+        setFormData(prev => ({ ...prev, featureImage: preview }));
+        toast.success("Hero image queued!");
+      } else if (type === 'video') {
+        setVideoFile(file);
+        setFormData(prev => ({ ...prev, videoShowcase: preview }));
+        toast.success("Video queued!");
       }
-    } catch (error) {
-      toast.error("An error occurred during upload");
-    } finally {
-      setIsUploading(false);
-      e.target.value = '';
     }
+    
+    e.target.value = '';
   };
 
   return (
@@ -958,6 +982,10 @@ export default function AddBillboardPage() {
                             const newGallery = [...formData.galleryImages];
                             newGallery.splice(idx, 1);
                             setFormData({ ...formData, galleryImages: newGallery });
+                            
+                            const newFiles = [...galleryFiles];
+                            newFiles.splice(idx, 1);
+                            setGalleryFiles(newFiles);
                           }}
                         >
                           <X className="w-4 h-4" />
