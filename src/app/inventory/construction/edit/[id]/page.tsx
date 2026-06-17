@@ -54,7 +54,7 @@ export default function EditConstructionServicePage() {
     theResults: [] as string[],
     status: "published",
     galleryImages: [] as string[],
-    subServices: []
+    subServices: [] as any[]
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -83,7 +83,7 @@ export default function EditConstructionServicePage() {
             theResults: s.theResults || [],
             status: s.status || "published",
             galleryImages: s.galleryImages?.map((img: any) => img.imagePath) || [],
-            subServices: s.subServices || []
+            subServices: (s.subServices as any[]) || []
           });
         } else {
           toast.error("Failed to load service details");

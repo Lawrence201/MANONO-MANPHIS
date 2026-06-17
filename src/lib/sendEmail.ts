@@ -80,13 +80,13 @@ export async function sendBookingNotification(booking: BookingDetails) {
         // Fetch client team emails
         let allRecipients: string[] = [];
         try {
-            const clientTeam = await prisma.clientTeam.findMany({ 
+            const admins = await prisma.admin.findMany({ 
                 select: { email: true } 
             });
             
-            allRecipients = clientTeam.map((t: { email: string }) => t.email);
+            allRecipients = admins.map((t: { email: string }) => t.email);
             
-            console.log(`[Email] Found ${clientTeam.length} client team member(s).`);
+            console.log(`[Email] Found ${admins.length} admin member(s).`);
             console.log('[Email] Recipients:', allRecipients);
         } catch (dbError) {
             console.error('[Email] Database error fetching recipients:', dbError);
