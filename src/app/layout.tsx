@@ -35,6 +35,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://manonomanphis.com"),
   title: "Manono Manphis — Trade, Export & Construction Services",
   description: "Enterprise platform for agricultural commodity exports, outdoor media solutions, and professional construction services.",
 };
