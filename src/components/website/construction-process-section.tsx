@@ -6,27 +6,47 @@ export function ConstructionProcessSection() {
   const processSteps = [
     {
       num: "01",
-      title: "Planning & Consultation",
-      desc: "We begin by understanding your current with state goals and the futur challenges.",
-      icon: <GitMerge className="w-7 h-7 text-[#FFD100]" />
+      title: "Consultation & Planning",
+      desc: "We begin by understanding your project needs, budget, and vision to create a clear construction plan.",
+      icon: <GitMerge className="w-7 h-7 text-[#FFD100]" />,
+      features: [
+        "Client discussion",
+        "Site evaluation",
+        "Project requirements analysis"
+      ]
     },
     {
       num: "02",
-      title: "Design & Engineering",
-      desc: "We begin by understanding your current with state goals and the futur challenges.",
-      icon: <PenTool className="w-7 h-7 text-[#FFD100]" />
+      title: "Design & Approval",
+      desc: "We develop detailed designs and layouts to ensure everything matches your expectations before construction begins.",
+      icon: <PenTool className="w-7 h-7 text-[#FFD100]" />,
+      features: [
+        "Architectural drawings",
+        "Design review",
+        "Client approval"
+      ]
     },
     {
       num: "03",
-      title: "Construction Execution",
-      desc: "We begin by understanding your current with state goals and the futur challenges.",
-      icon: <Users className="w-7 h-7 text-[#FFD100]" />
+      title: "Construction & Execution",
+      desc: "Our skilled team begins construction with strict attention to quality, safety, and timelines.",
+      icon: <Users className="w-7 h-7 text-[#FFD100]" />,
+      features: [
+        "Site preparation",
+        "Building and structure work",
+        "Quality supervision"
+      ]
     },
     {
       num: "04",
-      title: "Inspection & Handover",
-      desc: "We begin by understanding your current with state goals and the futur challenges.",
-      icon: <ClipboardCheck className="w-7 h-7 text-[#FFD100]" />
+      title: "Final Inspection & Handover",
+      desc: "We inspect every detail to ensure the project meets standards before officially handing it over.",
+      icon: <ClipboardCheck className="w-7 h-7 text-[#FFD100]" />,
+      features: [
+        "Quality checks",
+        "Final adjustments",
+        "Project delivery"
+      ]
     }
   ];
 
@@ -48,26 +68,6 @@ export function ConstructionProcessSection() {
             <p className="text-gray-500 text-[16px] max-[480px]:text-[14px] leading-[1.8] max-[480px]:leading-[1.6] max-w-[550px] font-medium">
               We support businesses in tech, retail, real estate, finance, healthcare, and more providing custom strategies that work in your world.
             </p>
-          </div>
-          
-          <div className="mt-10 lg:mt-0 flex flex-col items-start lg:items-end w-full lg:w-auto max-[480px]:hidden">
-            <div className="relative w-full md:w-[450px] lg:w-[480px] h-[140px] rounded-md overflow-hidden mb-6">
-              <Image 
-                src="/construction/slider_1.jpg" 
-                alt="Work Process" 
-                fill 
-                className="object-cover" 
-              />
-            </div>
-            <div className="flex items-center text-[14px] font-bold text-[#1a1a1a]">
-              <div className="bg-[#FFD100] text-black w-6 h-6 flex items-center justify-center mr-3 rounded-sm">
-                <ChevronRight className="w-4 h-4" strokeWidth={3} />
-              </div>
-              Have a Project in Mind? 
-              <Link href="/services/construction/services" className="underline ml-1.5 hover:text-[#FFD100] transition-colors decoration-2 underline-offset-4">
-                View All Services
-              </Link>
-            </div>
           </div>
         </div>
 
@@ -94,32 +94,21 @@ export function ConstructionProcessSection() {
               <h3 className="text-white text-[22px] max-[480px]:text-[18px] font-bold mb-4 max-[480px]:mb-3 tracking-tight">
                 {step.title}
               </h3>
-              <p className="text-gray-400 text-[15px] max-[480px]:text-[14px] leading-relaxed font-medium">
+              <p className="text-gray-400 text-[15px] max-[480px]:text-[14px] leading-relaxed font-medium mb-5">
                 {step.desc}
               </p>
+              {step.features && (
+                <ul className="space-y-2 mt-auto">
+                  {step.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-gray-300 text-[14px]">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#FFD100] shrink-0"></div>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
-        </div>
-
-        {/* Mobile only: Have a project in mind block moved below grid */}
-        <div className="hidden max-[480px]:flex mt-8 flex-col items-start w-full">
-          <div className="relative w-full h-[120px] rounded-md overflow-hidden mb-5">
-            <Image 
-              src="/construction/slider_1.jpg" 
-              alt="Work Process" 
-              fill 
-              className="object-cover" 
-            />
-          </div>
-          <div className="flex items-center text-[13px] flex-wrap font-bold text-[#1a1a1a]">
-            <div className="bg-[#FFD100] text-black w-6 h-6 flex max-[480px]:hidden items-center justify-center mr-3 rounded-sm shrink-0">
-              <ChevronRight className="w-4 h-4" strokeWidth={3} />
-            </div>
-            Have a Project in Mind? 
-            <Link href="/services/construction/services" className="underline ml-1.5 hover:text-[#FFD100] transition-colors decoration-2 underline-offset-4">
-              View All Services
-            </Link>
-          </div>
         </div>
       </div>
     </section>

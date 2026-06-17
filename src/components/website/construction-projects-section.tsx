@@ -21,28 +21,28 @@ export function ConstructionProjectsSection() {
       id: 1,
       title: "Green View Housing",
       category: "Residential",
-      image: "/construction/slider_1.jpg",
+      image: "/construction/cons/project_1.jpeg",
       desc: "This project reflects our commitment to quality construction, efficient project..."
     },
     {
       id: 2,
       title: "Modern Office Complex",
       category: "Commercial",
-      image: "/construction/img_1.png",
+      image: "/construction/cons/project_2.jpeg",
       desc: "This project reflects our commitment to quality construction, efficient project..."
     },
     {
       id: 3,
       title: "Industrial Warehouse",
       category: "Industrial",
-      image: "/construction/img_2.jpg",
+      image: "/construction/cons/project_3.jpeg",
       desc: "This project reflects our commitment to quality construction, efficient project..."
     },
     {
       id: 4,
       title: "Urban Architecture",
       category: "Construction",
-      image: "/construction/slider_1.jpg",
+      image: "/construction/cons/project_4.jpeg",
       desc: "This project reflects our commitment to quality construction, efficient project..."
     }
   ];

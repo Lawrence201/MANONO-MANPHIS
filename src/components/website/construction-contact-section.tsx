@@ -13,7 +13,7 @@ export function ConstructionContactSection() {
       {/* Left Image (touches bottom and left of section) - Desktop Only */}
       <div className="absolute left-0 bottom-0 lg:w-[38vw] xl:w-[35vw] lg:h-[85%] xl:h-[90%] overflow-hidden z-0 hidden lg:block">
         <Image 
-          src="/construction/slider_1.jpg" 
+          src="/construction/cons/img.png" 
           alt="Worker" 
           fill 
           className="object-cover" 
@@ -117,7 +117,7 @@ export function ConstructionContactSection() {
         {/* Big Image for Mobile/Tablet */}
         <div className="w-full h-[400px] md:h-[500px] max-[480px]:h-[300px] relative mt-16 max-[480px]:mt-10 lg:hidden rounded-lg overflow-hidden shadow-2xl z-20">
           <Image 
-            src="/construction/slider_1.jpg" 
+            src="/construction/cons/img.png" 
             alt="Worker" 
             fill 
             className="object-cover" 

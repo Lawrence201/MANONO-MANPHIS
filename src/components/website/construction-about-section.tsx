@@ -17,7 +17,7 @@ export function ConstructionAboutSection() {
           <div className="w-full lg:w-1/2 relative">
             <div className="relative aspect-[3/4] w-full max-w-[600px] mx-auto overflow-hidden rounded-md shadow-lg">
               <Image 
-                src="/construction/img_1.png" 
+                src="/construction/cons/img.png" 
                 alt="Construction Workers" 
                 fill 
                 className="object-cover"
@@ -41,17 +41,17 @@ export function ConstructionAboutSection() {
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1.5 h-1.5 rounded-full bg-[#FFD100]"></div>
               <h4 className="text-gray-500 text-[13px] max-[480px]:text-[11px] font-bold tracking-[0.1em] uppercase">
-                ABOUT BRICKZ CONSTRUCTION
+                ABOUT MANONO MANPHIS
               </h4>
             </div>
             
             <h2 className="text-4xl md:text-5xl lg:text-[46px] max-[480px]:text-3xl max-[480px]:leading-[1.15] font-black text-[#1a1a1a] leading-[1.15] mb-6 tracking-tight">
-              Experts Modern Construction<br />
-              Service & Solutions
+              Modern Construction &<br />
+              Multi-Service Solutions
             </h2>
             
             <p className="text-gray-500 text-[16px] max-[480px]:text-[14px] leading-relaxed mb-10 max-[480px]:mb-6 max-w-[600px] font-medium">
-              Our data analysis tools and techniques help you turn complex data into clear, strategic insights that improve performance and guide growth.
+              Manono Manphis delivers reliable construction services, digital advertising solutions, and global trade support. We combine innovation, skilled workmanship, and modern technology to build, promote, and connect businesses across industries.
             </p>
 
             {/* Tabs & Bottom Content */}
@@ -89,45 +89,25 @@ export function ConstructionAboutSection() {
                   {activeTab === 'mission' && (
                     <div className="animate-in fade-in duration-300">
                       <p className="text-gray-500 text-[15px] max-[480px]:text-[14px] leading-relaxed mb-6 font-medium max-w-[400px]">
-                        Our vision is to be the most trusted impactful business consulting firm globally, known for trans forming companies.
+                        To provide high-quality construction, advertising, and trade solutions that help businesses and individuals grow locally and globally.
                       </p>
-                      <ul className="space-y-3.5 max-[480px]:space-y-2.5">
-                        <li className="flex items-center gap-3 max-[480px]:gap-2 text-gray-500 font-medium text-[15px] max-[480px]:text-[14px]">
-                          <Check className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4 text-[#FFD100]" /> Regulatory Investigations
-                        </li>
-                        <li className="flex items-center gap-3 max-[480px]:gap-2 text-gray-500 font-medium text-[15px] max-[480px]:text-[14px]">
-                          <Check className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4 text-[#FFD100]" /> Anit- Competitive Conduct
-                        </li>
-                      </ul>
                     </div>
                   )}
                   {activeTab === 'vision' && (
                     <div className="animate-in fade-in duration-300">
                       <p className="text-gray-500 text-[15px] max-[480px]:text-[14px] leading-relaxed mb-6 font-medium max-w-[400px]">
-                        Our vision focuses on building sustainable infrastructure that stands the test of time, innovating for a better tomorrow.
+                        To become a leading multi-service company known for excellence in construction, digital advertising, and international trade across Africa and beyond.
                       </p>
-                      <ul className="space-y-3.5 max-[480px]:space-y-2.5">
-                        <li className="flex items-center gap-3 max-[480px]:gap-2 text-gray-500 font-medium text-[15px] max-[480px]:text-[14px]">
-                          <Check className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4 text-[#FFD100]" /> Sustainable Materials
-                        </li>
-                        <li className="flex items-center gap-3 max-[480px]:gap-2 text-gray-500 font-medium text-[15px] max-[480px]:text-[14px]">
-                          <Check className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4 text-[#FFD100]" /> Future-Proof Engineering
-                        </li>
-                      </ul>
                     </div>
                   )}
                   {activeTab === 'core' && (
                     <div className="animate-in fade-in duration-300">
-                      <p className="text-gray-500 text-[15px] max-[480px]:text-[14px] leading-relaxed mb-6 font-medium max-w-[400px]">
-                        Our core values revolve around integrity, excellence, and a commitment to delivering beyond expectations on every project.
-                      </p>
                       <ul className="space-y-3.5 max-[480px]:space-y-2.5">
-                        <li className="flex items-center gap-3 max-[480px]:gap-2 text-gray-500 font-medium text-[15px] max-[480px]:text-[14px]">
-                          <Check className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4 text-[#FFD100]" /> Uncompromised Safety
-                        </li>
-                        <li className="flex items-center gap-3 max-[480px]:gap-2 text-gray-500 font-medium text-[15px] max-[480px]:text-[14px]">
-                          <Check className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4 text-[#FFD100]" /> Transparent Practices
-                        </li>
+                        {["Integrity", "Quality", "Innovation", "Reliability", "Customer Satisfaction"].map(val => (
+                          <li key={val} className="flex items-center gap-3 max-[480px]:gap-2 text-gray-500 font-medium text-[15px] max-[480px]:text-[14px]">
+                            <Check className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4 text-[#FFD100]" /> {val}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   )}
@@ -142,20 +122,19 @@ export function ConstructionAboutSection() {
               <div className="w-full xl:w-[280px] flex flex-col gap-6 pt-2 xl:pt-0 shrink-0">
                 <div className="w-full h-[150px] relative rounded-md overflow-hidden shadow-md">
                   <Image 
-                    src="/construction/img_2.jpg" 
+                    src="/construction/cons/small.jpeg" 
                     alt="Construction Planning" 
                     fill 
                     className="object-cover"
                   />
                 </div>
-                <p className="text-gray-500 text-[14px] leading-relaxed font-medium">
-                  Our data analysis tools and techniques help you turn complex data.
-                </p>
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-6xl font-black text-[#1a1a1a] tracking-tighter">25</span>
-                  <span className="text-[#1a1a1a] font-extrabold text-[15px] leading-[1.2]">
-                    Years Of<br />Experience
-                  </span>
+                <div className="text-gray-500 text-[14px] leading-relaxed font-medium">
+                  <h5 className="text-[#1a1a1a] font-bold mb-1">What We Do:</h5>
+                  <ul className="space-y-1">
+                    <li>• Residential & commercial construction</li>
+                    <li>• Digital billboard advertising</li>
+                    <li>• Import & export solutions</li>
+                  </ul>
                 </div>
               </div>
               
