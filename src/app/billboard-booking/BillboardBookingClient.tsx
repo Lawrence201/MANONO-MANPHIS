@@ -78,6 +78,8 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
     const [slotsRequested, setSlotsRequested] = React.useState(1);
     const [description, setDescription] = React.useState('');
     const [advertFile, setAdvertFile] = React.useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+    const [uploadProgress, setUploadProgress] = React.useState<number | null>(null);
     const [isUploading, setIsUploading] = React.useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [paymentMethod, setPaymentMethod] = React.useState('card');
@@ -204,32 +206,21 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
         if (!files || files.length === 0) return;
 
         const file = files[0];
-        setIsUploading(true);
+        
+        // Validation: 150MB limit
+        if (file.size > 150 * 1024 * 1024) {
+            alert("File is too large. Maximum allowed size is 150MB.");
+            e.target.value = '';
+            return;
+        }
 
-        try {
-            const formDataUpload = new FormData();
-            formDataUpload.append("file", file);
-            formDataUpload.append("folder", "campaigns");
-
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formDataUpload,
-            });
-            const result = await response.json();
-
-            if (result.success && result.url) {
-                setAdvertFile(result.url);
-            } else {
-                alert(result.error || "File upload failed.");
-            }
-        } catch (error) {
-            console.error("Upload error:", error);
-            alert("An error occurred during file upload.");
-        } finally {
-            setIsUploading(false);
-            if (e.target) {
-                e.target.value = '';
-            }
+        // Generate local preview immediately instead of uploading
+        setSelectedFile(file);
+        setAdvertFile(URL.createObjectURL(file));
+        
+        // Reset input so the same file can be selected again if needed
+        if (e.target) {
+            e.target.value = '';
         }
     };
 
@@ -263,8 +254,60 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
         }
 
         setIsSubmitting(true);
+        setUploadProgress(null);
 
         try {
+            let finalAdvertUrl = advertFile;
+
+            // Direct-to-Cloudinary upload if there's a newly selected file
+            if (selectedFile) {
+                // Fetch secure signature
+                const sigRes = await fetch('/api/upload/signature');
+                const sigData = await sigRes.json();
+                
+                if (!sigData.success) {
+                    alert("Failed to securely connect to Cloudinary.");
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                setUploadProgress(0); // Show progress bar
+
+                finalAdvertUrl = await new Promise<string>((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", `https://api.cloudinary.com/v1_1/${sigData.cloud_name}/auto/upload`);
+
+                    xhr.upload.onprogress = (event) => {
+                        if (event.lengthComputable) {
+                            const percentComplete = Math.round((event.loaded / event.total) * 100);
+                            setUploadProgress(percentComplete);
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            const response = JSON.parse(xhr.responseText);
+                            resolve(response.secure_url);
+                        } else {
+                            reject(new Error("Upload to Cloudinary failed"));
+                        }
+                    };
+
+                    xhr.onerror = () => reject(new Error("Network error during upload"));
+
+                    const formData = new FormData();
+                    formData.append("file", selectedFile);
+                    formData.append("api_key", sigData.api_key);
+                    formData.append("timestamp", sigData.timestamp);
+                    formData.append("signature", sigData.signature);
+                    formData.append("folder", sigData.folder);
+
+                    xhr.send(formData);
+                });
+                
+                setAdvertFile(finalAdvertUrl); // Save URL
+            }
+
             // End Date calculation: Start Date + Duration (in months)
             const endDateObj = new Date(selectedDate);
             if (durationUnit === 'Weeks') {
@@ -289,7 +332,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                 endDate: endDateObj.toISOString(),
                 slotsRequested,
                 description: website ? `${description}\nClient Website: ${website}`.trim() : description || undefined,
-                advertFile: advertFile || undefined,
+                advertFile: finalAdvertUrl || undefined,
                 totalPrice,
                 taxRate: selectedBillboard ? Number((selectedBillboard as any).taxRate) || 10 : 10,
                 paymentMethod
@@ -470,25 +513,34 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                         zIndex: 9999,
                         backdropFilter: 'blur(8px)'
                     }}>
-                        <div style={{
-                            width: '60px',
-                            height: '60px',
-                            border: '5px solid #f3f3f3',
-                            borderTop: '5px solid #2563eb',
-                            borderRadius: '50%',
-                            animation: 'spin 1s linear infinite'
-                        }} />
-                        <style dangerouslySetInnerHTML={{
-                            __html: `
-                        @keyframes spin {
-                            0% { transform: rotate(0deg); }
-                            100% { transform: rotate(360deg); }
-                        }
-                    `}} />
-                        <h3 style={{ marginTop: '20px', color: '#1e293b', fontWeight: '600', fontSize: '1.25rem' }}>Processing Booking</h3>
-                        <p style={{ marginTop: '10px', color: '#64748b', textAlign: 'center', maxWidth: '300px' }}>
-                            Please wait while we finalize your booking and notify the administration...
-                        </p>
+                        {uploadProgress !== null && uploadProgress < 100 ? (
+                            <div style={{ width: '320px', textAlign: 'center' }}>
+                                <h3 style={{ marginTop: '20px', color: '#1e293b', fontWeight: '600', fontSize: '1.25rem' }}>Uploading Video...</h3>
+                                <div style={{ width: '100%', backgroundColor: '#e2e8f0', borderRadius: '8px', height: '14px', marginTop: '20px', overflow: 'hidden', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)' }}>
+                                    <div style={{ width: `${uploadProgress}%`, height: '100%', backgroundColor: '#2563eb', transition: 'width 0.3s ease-in-out' }}></div>
+                                </div>
+                                <p style={{ marginTop: '12px', color: '#64748b', fontSize: '15px', fontWeight: 'bold' }}>{uploadProgress}%</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div style={{
+                                    width: '60px',
+                                    height: '60px',
+                                    border: '5px solid #f3f3f3',
+                                    borderTop: '5px solid #2563eb',
+                                    borderRadius: '50%',
+                                    animation: 'spin 1s linear infinite'
+                                }} />
+                                <style dangerouslySetInnerHTML={{
+                                    __html: `
+                                @keyframes spin {
+                                    0% { transform: rotate(0deg); }
+                                    100% { transform: rotate(360deg); }
+                                }
+                            `}} />
+                                <h3 style={{ marginTop: '20px', color: '#1e293b', fontWeight: '600', fontSize: '1.25rem' }}>Processing Booking.</h3>
+                            </>
+                        )}
                     </div>
                 )}
 

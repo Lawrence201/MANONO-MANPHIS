@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { BookingSchema, type BookingInput } from "@/lib/schemas/booking";
 import { revalidatePath } from "next/cache";
 import { deleteFromCloudinary } from "@/lib/cloudinary";
+import { sendBillboardBookingEmail, sendAdminNotificationEmail } from "@/lib/mailer";
 
 export async function getBillboardBookings() {
   try {
@@ -254,6 +255,30 @@ export async function createBillboardBooking(data: BookingInput) {
         paymentStatus: "pending",
       },
     });
+
+    // Send confirmation email asynchronously (do not await so it doesn't block UI)
+    sendBillboardBookingEmail({
+      clientEmail: booking.email,
+      clientName: booking.fullName,
+      phone: booking.phone,
+      campaignTitle: booking.campaignTitle,
+      billboardName: billboard.name,
+      startDate: booking.startDate.toISOString(),
+      endDate: booking.endDate.toISOString(),
+      duration: booking.campaignDuration,
+      totalPrice: Number(booking.totalPrice),
+    }).catch(console.error);
+
+    // Notify all admins asynchronously
+    sendAdminNotificationEmail({
+      type: 'Billboard Booking',
+      reference: `#${booking.id}`,
+      clientName: booking.fullName,
+      clientEmail: booking.email,
+      phone: booking.phone,
+      details: `Billboard: ${billboard.name} | Campaign: ${booking.campaignTitle} | Type: ${booking.campaignType} | Dates: ${booking.startDate.toLocaleDateString()} - ${booking.endDate.toLocaleDateString()} | Duration: ${booking.campaignDuration}`,
+      totalPrice: Number(booking.totalPrice),
+    }).catch(console.error);
 
     // 3. Revalidate paths if necessary
     revalidatePath("/admin/bookings");

@@ -82,6 +82,7 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 // If neither, do a dummy comparison to prevent timing attacks
+                // This protects against attackers trying to guess if an email exists by measuring response time
                 const dummyHash = "$2a$10$dummyHashForTimingAttackPreventionXX";
                 await bcrypt.compare(credentials.password, dummyHash);
 
@@ -121,8 +122,9 @@ export const authOptions: NextAuthOptions = {
                 const idleTimeout = 30 * 60; // 30 minutes in seconds
 
                 if (token.lastSeen && now - (token.lastSeen as number) > idleTimeout) {
-                    // This will effectively invalidate the session
-                    return null as any; 
+                    // Return an object to indicate expiration instead of null
+                    // Returning null causes NextAuth "JWT Claims Set MUST be an object" error
+                    return { error: "SessionExpired" } as any; 
                 }
                 
                 // Update lastSeen on every request/refresh to provide idle timeout
@@ -136,7 +138,8 @@ export const authOptions: NextAuthOptions = {
             return token;
         },
         async session({ session, token }) {
-            if (!token) return null as any;
+            // If token has an error (like SessionExpired), return an empty session to force logout
+            if (!token || token.error === "SessionExpired") return {} as any;
 
             if (session.user) {
                 (session.user as any).role = token.role;
