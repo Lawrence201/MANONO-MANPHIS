@@ -1613,6 +1613,52 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
 
                                                         setIsSubmitting(true);
                                                         try {
+                                                            let finalAdvertUrl = advertFile;
+                                                            if (selectedFile) {
+                                                                const sigRes = await fetch('/api/upload/signature');
+                                                                const sigData = await sigRes.json();
+                                                                
+                                                                if (!sigData.success) {
+                                                                    toast.error("Failed to securely connect to Cloudinary.");
+                                                                    setIsSubmitting(false);
+                                                                    return;
+                                                                }
+
+                                                                setUploadProgress(0);
+
+                                                                finalAdvertUrl = await new Promise<string>((resolve, reject) => {
+                                                                    const xhr = new XMLHttpRequest();
+                                                                    xhr.open("POST", `https://api.cloudinary.com/v1_1/${sigData.cloud_name}/auto/upload`);
+
+                                                                    xhr.upload.onprogress = (event) => {
+                                                                        if (event.lengthComputable) {
+                                                                            const percentComplete = Math.round((event.loaded / event.total) * 100);
+                                                                            setUploadProgress(percentComplete);
+                                                                        }
+                                                                    };
+
+                                                                    xhr.onload = () => {
+                                                                        if (xhr.status === 200) {
+                                                                            const response = JSON.parse(xhr.responseText);
+                                                                            resolve(response.secure_url);
+                                                                        } else {
+                                                                            reject(new Error("Upload to Cloudinary failed"));
+                                                                        }
+                                                                    };
+
+                                                                    xhr.onerror = () => reject(new Error("Network error during upload"));
+
+                                                                    const formData = new FormData();
+                                                                    formData.append("file", selectedFile);
+                                                                    formData.append("api_key", sigData.api_key);
+                                                                    formData.append("timestamp", sigData.timestamp);
+                                                                    formData.append("signature", sigData.signature);
+                                                                    formData.append("folder", "campaign-media");
+
+                                                                    xhr.send(formData);
+                                                                });
+                                                            }
+
                                                             const b = selectedHallsData[0];
                                                             const res = await addToCart({
                                                                 itemType: 'billboard',
@@ -1620,13 +1666,13 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                                                 name: `${campaignTitle || 'Billboard Campaign'} - ${b.name}`,
                                                                 price: Number(totalPrice),
                                                                 quantity: 1, // Campaign represents 1 order item
-                                                                imagePath: advertFile || b.mainImagePath || '',
+                                                                imagePath: finalAdvertUrl || b.mainImagePath || '',
                                                                 details: {
                                                                     slotsRequested,
                                                                     campaignType,
                                                                     campaignDuration,
                                                                     durationUnit,
-                                                                    advertFile,
+                                                                    advertFile: finalAdvertUrl,
                                                                     fullName,
                                                                     email,
                                                                     phone,
