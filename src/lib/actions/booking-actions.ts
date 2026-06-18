@@ -109,6 +109,16 @@ export async function updateBillboardBookingDates(id: number, newStartDate: stri
 
 export async function updateBillboardBookingMedia(id: number, advertFile: string) {
   try {
+    // Delete the old media file first if it exists
+    const existingBooking = await prisma.billboardBooking.findUnique({ where: { id } });
+    if (existingBooking?.advertFile) {
+      try {
+        await deleteFromCloudinary(existingBooking.advertFile);
+      } catch (err) {
+        console.error("Failed to delete old media file:", err);
+      }
+    }
+
     await prisma.billboardBooking.update({
       where: { id },
       data: { advertFile },

@@ -930,7 +930,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                                 animation: 'spin 1s linear infinite'
                                             }} />
                                             <p style={{ color: '#2563eb', fontWeight: '500', fontSize: '14px', margin: 0 }}>
-                                                Uploading your {campaignType === 'video' ? 'video' : campaignType === 'image' ? 'image' : 'slideshow'} securely...
+                                                Uploading...
                                             </p>
                                             <p style={{ fontSize: '11px', color: '#60a5fa', margin: 0 }}>
                                                 Please do not close this page.

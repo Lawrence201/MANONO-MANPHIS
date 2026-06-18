@@ -129,10 +129,14 @@ export function ClientsTable({ initialClients }: { initialClients: any[] }) {
                     <tr key={client.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-xs font-semibold text-foreground">
-                            {initials}
-                          </div>
-                          <div>
+                          {client.profilePicture ? (
+                            <img src={client.profilePicture} alt={client.name} className="w-9 h-9 rounded-lg object-cover bg-secondary shrink-0" />
+                          ) : (
+                            <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-xs font-semibold text-foreground shrink-0">
+                              {initials}
+                            </div>
+                          )}
+                          <div className="min-w-0">
                             <div className="font-medium text-xs">{client.name || "Unknown Name"}</div>
                             <div className="text-[10px] text-muted-foreground">ID: #{client.id}</div>
                           </div>

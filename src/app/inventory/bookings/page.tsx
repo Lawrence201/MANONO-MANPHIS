@@ -377,14 +377,6 @@ export default function AdBookingsPage() {
                             <button className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
                               <Eye className="w-4 h-4" />
                             </button>
-                            <button 
-                              onClick={(e) => handleDelete(booking.id, e)}
-                              className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
-                              disabled={actionLoading === booking.id}
-                              title="Delete Booking"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
                           </div>
                         </td>
                       </tr>
@@ -404,14 +396,6 @@ export default function AdBookingsPage() {
                   <p className="text-xs text-muted-foreground mt-0.5">ID #{selectedBooking.id}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleDelete(selectedBooking.id)}
-                    className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                    title="Delete Booking"
-                    disabled={actionLoading === selectedBooking.id}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                   <button
                     onClick={() => setSelectedBooking(null)}
                     className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
@@ -642,8 +626,19 @@ export default function AdBookingsPage() {
                   </div>
                 )}
 
-                <div className="text-xs text-muted-foreground border-t border-border pt-3">
-                  Submitted {formatDate(selectedBooking.createdAt)}
+                <div className="pt-4 mt-2 border-t border-border flex flex-col gap-3">
+                  <div className="text-xs text-muted-foreground text-center">
+                    Submitted {formatDate(selectedBooking.createdAt)}
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full border-red-500/30 text-red-500 hover:bg-red-600 hover:text-white hover:border-red-600 gap-2"
+                    disabled={actionLoading === selectedBooking.id}
+                    onClick={() => handleDelete(selectedBooking.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Booking
+                  </Button>
                 </div>
               </div>
             </div>

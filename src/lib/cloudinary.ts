@@ -113,8 +113,10 @@ export async function deleteFromCloudinary(url: string): Promise<void> {
         // Get everything after 'upload/v{version}/'
         const publicIdWithExtension = urlParts.slice(uploadIndex + 2).join('/');
         const publicId = publicIdWithExtension.replace(/\.[^/.]+$/, ''); // Remove file extension
+        
+        const resourceType = urlParts[uploadIndex - 1] || 'image';
 
-        await cloudinary.uploader.destroy(publicId);
+        await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
     } catch (error) {
         console.error('Cloudinary delete error:', error);
         // Don't throw - deletion failure shouldn't break the main flow
