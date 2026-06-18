@@ -266,7 +266,7 @@ export async function createBillboardBooking(data: BookingInput) {
         billboardName: billboard.name,
         startDate: booking.startDate.toISOString(),
         endDate: booking.endDate.toISOString(),
-        duration: String(booking.campaignDuration || 1),
+        duration: `${booking.campaignDuration || 1} Month${(booking.campaignDuration || 1) > 1 ? 's' : ''}`,
         totalPrice: Number(booking.totalPrice),
       }),
       sendAdminNotificationEmail({
@@ -275,7 +275,7 @@ export async function createBillboardBooking(data: BookingInput) {
         clientName: booking.fullName,
         clientEmail: booking.email,
         phone: booking.phone || "Not provided",
-        details: `Billboard: ${billboard.name} | Campaign: ${booking.campaignTitle} | Type: ${booking.campaignType} | Dates: ${booking.startDate.toLocaleDateString()} - ${booking.endDate.toLocaleDateString()} | Duration: ${booking.campaignDuration}`,
+        details: `Billboard: ${billboard.name} | Campaign: ${booking.campaignTitle} | Type: ${booking.campaignType} | Dates: ${booking.startDate.toLocaleDateString()} - ${booking.endDate.toLocaleDateString()} | Duration: ${booking.campaignDuration} Month${(booking.campaignDuration || 1) > 1 ? 's' : ''}`,
         totalPrice: Number(booking.totalPrice),
       })
     ]).catch(console.error);
