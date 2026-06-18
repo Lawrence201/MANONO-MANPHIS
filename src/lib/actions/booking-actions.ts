@@ -256,29 +256,29 @@ export async function createBillboardBooking(data: BookingInput) {
       },
     });
 
-    // Send confirmation email asynchronously (do not await so it doesn't block UI)
-    sendBillboardBookingEmail({
-      clientEmail: booking.email,
-      clientName: booking.fullName,
-      phone: booking.phone || "Not provided",
-      campaignTitle: booking.campaignTitle,
-      billboardName: billboard.name,
-      startDate: booking.startDate.toISOString(),
-      endDate: booking.endDate.toISOString(),
-      duration: String(booking.campaignDuration || 1),
-      totalPrice: Number(booking.totalPrice),
-    }).catch(console.error);
-
-    // Notify all admins asynchronously
-    sendAdminNotificationEmail({
-      type: 'Billboard Booking',
-      reference: `#${booking.id}`,
-      clientName: booking.fullName,
-      clientEmail: booking.email,
-      phone: booking.phone || "Not provided",
-      details: `Billboard: ${billboard.name} | Campaign: ${booking.campaignTitle} | Type: ${booking.campaignType} | Dates: ${booking.startDate.toLocaleDateString()} - ${booking.endDate.toLocaleDateString()} | Duration: ${booking.campaignDuration}`,
-      totalPrice: Number(booking.totalPrice),
-    }).catch(console.error);
+    // Send confirmation and notification emails synchronously before Vercel kills the function
+    await Promise.allSettled([
+      sendBillboardBookingEmail({
+        clientEmail: booking.email,
+        clientName: booking.fullName,
+        phone: booking.phone || "Not provided",
+        campaignTitle: booking.campaignTitle,
+        billboardName: billboard.name,
+        startDate: booking.startDate.toISOString(),
+        endDate: booking.endDate.toISOString(),
+        duration: String(booking.campaignDuration || 1),
+        totalPrice: Number(booking.totalPrice),
+      }),
+      sendAdminNotificationEmail({
+        type: 'Billboard Booking',
+        reference: `#${booking.id}`,
+        clientName: booking.fullName,
+        clientEmail: booking.email,
+        phone: booking.phone || "Not provided",
+        details: `Billboard: ${billboard.name} | Campaign: ${booking.campaignTitle} | Type: ${booking.campaignType} | Dates: ${booking.startDate.toLocaleDateString()} - ${booking.endDate.toLocaleDateString()} | Duration: ${booking.campaignDuration}`,
+        totalPrice: Number(booking.totalPrice),
+      })
+    ]).catch(console.error);
 
     // 3. Revalidate paths if necessary
     revalidatePath("/admin/bookings");

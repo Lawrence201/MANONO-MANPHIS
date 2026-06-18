@@ -70,23 +70,25 @@ export async function submitExportOrder(data: any) {
       }
     });
 
-    sendOrderReceiptEmail({
-      clientEmail: data.email,
-      clientName: data.companyName || data.email,
-      orderId: referenceNumber,
-      itemsCount: Number(data.quantityRequested),
-      totalPrice: Number(data.totalEstimatedCost) || 0,
-      deliveryAddress: data.deliveryAddress || data.city,
-    }).catch(console.error);
-
-    sendAdminNotificationEmail({
-      type: 'Product Order',
-      reference: referenceNumber,
-      clientName: data.companyName || data.email,
-      clientEmail: data.email,
-      details: `Product ID: ${data.productId} | Quantity: ${data.quantityRequested}`,
-      totalPrice: Number(data.totalEstimatedCost) || 0,
-    }).catch(console.error);
+    // Send emails synchronously before Vercel kills the function
+    await Promise.allSettled([
+      sendOrderReceiptEmail({
+        clientEmail: data.email,
+        clientName: data.companyName || data.email,
+        orderId: referenceNumber,
+        itemsCount: Number(data.quantityRequested),
+        totalPrice: Number(data.totalEstimatedCost) || 0,
+        deliveryAddress: data.deliveryAddress || data.city,
+      }),
+      sendAdminNotificationEmail({
+        type: 'Product Order',
+        reference: referenceNumber,
+        clientName: data.companyName || data.email,
+        clientEmail: data.email,
+        details: `Product ID: ${data.productId} | Quantity: ${data.quantityRequested}`,
+        totalPrice: Number(data.totalEstimatedCost) || 0,
+      })
+    ]).catch(console.error);
 
     revalidatePath("/admin/export-orders"); // assuming this route might exist later
     
