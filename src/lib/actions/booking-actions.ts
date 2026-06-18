@@ -260,7 +260,7 @@ export async function createBillboardBooking(data: BookingInput) {
     sendBillboardBookingEmail({
       clientEmail: booking.email,
       clientName: booking.fullName,
-      phone: booking.phone,
+      phone: booking.phone || "Not provided",
       campaignTitle: booking.campaignTitle,
       billboardName: billboard.name,
       startDate: booking.startDate.toISOString(),
@@ -275,7 +275,7 @@ export async function createBillboardBooking(data: BookingInput) {
       reference: `#${booking.id}`,
       clientName: booking.fullName,
       clientEmail: booking.email,
-      phone: booking.phone,
+      phone: booking.phone || "Not provided",
       details: `Billboard: ${billboard.name} | Campaign: ${booking.campaignTitle} | Type: ${booking.campaignType} | Dates: ${booking.startDate.toLocaleDateString()} - ${booking.endDate.toLocaleDateString()} | Duration: ${booking.campaignDuration}`,
       totalPrice: Number(booking.totalPrice),
     }).catch(console.error);
