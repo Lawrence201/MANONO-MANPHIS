@@ -146,6 +146,7 @@ function AdminModal({
   const [newStartDate, setNewStartDate] = useState(toInputDate(booking.startDate));
   const [newEndDate, setNewEndDate] = useState(toInputDate(booking.endDate));
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -161,23 +162,69 @@ function AdminModal({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 150 * 1024 * 1024) {
+      toast.error("File is too large. Maximum allowed size is 150MB.");
+      e.target.value = "";
+      return;
+    }
+
     setUploading(true);
+    setUploadProgress(0);
+
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("folder", "campaign-media");
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (data.success) {
-        await onMediaUpdate(booking.id, data.url);
-      } else {
-        toast.error("Upload failed");
+      // Fetch secure signature
+      const sigRes = await fetch('/api/upload/signature');
+      const sigData = await sigRes.json();
+      
+      if (!sigData.success) {
+        toast.error("Failed to securely connect to Cloudinary.");
+        setUploading(false);
+        return;
       }
+
+      const finalUrl = await new Promise<string>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${sigData.cloud_name}/auto/upload`);
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } else {
+            reject(new Error("Upload to Cloudinary failed"));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Network error during upload"));
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("api_key", sigData.api_key);
+        formData.append("timestamp", sigData.timestamp);
+        formData.append("signature", sigData.signature);
+        formData.append("folder", "campaign-media");
+
+        xhr.send(formData);
+      });
+
+      await onMediaUpdate(booking.id, finalUrl);
+      toast.success("Media updated successfully");
+      
     } catch {
       toast.error("Upload error");
+    } finally {
+      setUploading(false);
+      setUploadProgress(null);
+      e.target.value = "";
     }
-    setUploading(false);
-    e.target.value = "";
   };
 
   return (
@@ -326,16 +373,31 @@ function AdminModal({
               accept="image/*,video/*"
               onChange={handleFileChange}
             />
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full gap-2"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-            >
-              <Upload className="w-4 h-4" />
-              {uploading ? "Uploading…" : booking.advertFile ? "Replace Media File" : "Upload Media File"}
-            </Button>
+            {uploadProgress !== null ? (
+              <div className="w-full mt-2">
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>Uploading...</span>
+                  <span className="font-bold">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden shadow-inner">
+                  <div 
+                    className="bg-accent h-full rounded-full transition-all duration-300" 
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+              >
+                <Upload className="w-4 h-4" />
+                {booking.advertFile ? "Replace Media File" : "Upload Media File"}
+              </Button>
+            )}
           </div>
 
           {/* ── Section 4: Danger Zone ── */}
