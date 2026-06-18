@@ -43,7 +43,11 @@ export function TopBar() {
           {session ? (
             <>
               <div className="flex items-center gap-2 cursor-default">
-                <User className="w-3.5 h-3.5 text-[#eea000]" />
+                {session.user?.image ? (
+                  <img src={session.user.image} alt={firstName || "Profile"} className="w-4 h-4 rounded-full object-cover border border-white/20" />
+                ) : (
+                  <User className="w-3.5 h-3.5 text-[#eea000]" />
+                )}
                 <span className="max-[1028px]:hidden font-semibold text-white">Welcome, {firstName}</span>
               </div>
               <div className="w-px h-3 bg-white/20 max-[1028px]:hidden" />
