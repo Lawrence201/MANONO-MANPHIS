@@ -265,7 +265,7 @@ export async function createBillboardBooking(data: BookingInput) {
       billboardName: billboard.name,
       startDate: booking.startDate.toISOString(),
       endDate: booking.endDate.toISOString(),
-      duration: booking.campaignDuration,
+      duration: String(booking.campaignDuration || 1),
       totalPrice: Number(booking.totalPrice),
     }).catch(console.error);
 
