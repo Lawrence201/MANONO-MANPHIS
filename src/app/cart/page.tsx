@@ -323,6 +323,8 @@ function CartPageContent() {
                               <video
                                 src={item.image}
                                 className="object-cover w-full h-full"
+                                autoPlay
+                                loop
                                 muted
                                 playsInline
                               />
@@ -426,7 +428,7 @@ function CartPageContent() {
                       {/* Product Image */}
                       <div className="relative w-24 h-24 border border-gray-100 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center flex-shrink-0">
                         {item.image.toLowerCase().includes('.mp4') || item.image.toLowerCase().includes('video') ? (
-                          <video src={item.image} className="object-cover w-full h-full" muted playsInline />
+                          <video src={item.image} className="object-cover w-full h-full" autoPlay loop muted playsInline />
                         ) : item.image.toLowerCase().endsWith('.pdf') ? (
                           <div className="flex flex-col items-center justify-center w-full h-full bg-gray-100 text-gray-400">
                             <span className="text-xs font-medium">PDF</span>
