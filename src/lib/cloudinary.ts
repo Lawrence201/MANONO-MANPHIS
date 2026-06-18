@@ -41,8 +41,8 @@ async function saveToLocal(file: File, folder: string): Promise<string> {
  * @returns The secure URL of the uploaded file
  */
 export async function uploadToCloudinary(file: File, folder: string): Promise<string> {
-    // Use local storage in development
-    if (process.env.NODE_ENV === 'development') {
+    // Only use Cloudinary in production, otherwise use local storage
+    if (process.env.NODE_ENV !== 'production') {
         console.log(`[DEV] Uploading ${file.name} to local storage...`);
         return saveToLocal(file, folder);
     }

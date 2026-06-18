@@ -929,8 +929,8 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                                 borderRadius: '50%',
                                                 animation: 'spin 1s linear infinite'
                                             }} />
-                                            <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e3a8a', margin: 0 }}>
-                                                Uploading your asset to GCB Storage...
+                                            <p style={{ color: '#2563eb', fontWeight: '500', fontSize: '14px', margin: 0 }}>
+                                                Uploading your {campaignType === 'video' ? 'video' : campaignType === 'image' ? 'image' : 'slideshow'} securely...
                                             </p>
                                             <p style={{ fontSize: '11px', color: '#60a5fa', margin: 0 }}>
                                                 Please do not close this page.
@@ -1097,7 +1097,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                                 Upload Campaign {campaignType === 'video' ? 'Video' : campaignType === 'image' ? 'Image' : 'Slideshow'}
                                             </p>
                                             <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
-                                                Show the screen playing an ad. Click to browse.
+                                                Show the screen {campaignType === 'video' ? 'playing an ad' : campaignType === 'image' ? 'displaying an image' : 'playing a slideshow'}. Click to browse.
                                             </p>
                                         </div>
                                     )}

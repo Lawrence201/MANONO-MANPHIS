@@ -142,7 +142,7 @@ export default function DashboardPage() {
 
   const [mapTab, setMapTab] = useState<"world" | "ghana" | "billboard">("world");
   const [expandedReviews, setExpandedReviews] = useState<Record<number, boolean>>({});
-  const [selectedBillboard, setSelectedBillboard] = useState<{ id: number; name: string; city: string; latitude: number; longitude: number; image?: string | null; clients?: { name: string; duration: string; daysRemaining: number }[] } | null>(null);
+  const [selectedBillboard, setSelectedBillboard] = useState<{ id: number; name: string; city: string; latitude: number; longitude: number; image?: string | null; clients?: { name: string; profilePicture?: string | null; duration: string; daysRemaining: number }[] } | null>(null);
   const [showClientsModal, setShowClientsModal] = useState(false);
   const [showBillboardPanel, setShowBillboardPanel] = useState(false);
 
@@ -219,7 +219,7 @@ export default function DashboardPage() {
     commodityPerformance?: { product: string; revenue: number }[];
     adPerformance?: { product: string; revenue: number }[];
     topAdLocations?: { name: string; revenue: number; share: number }[];
-    activeBillboardLocations?: { id: number; name: string; city: string; latitude: number; longitude: number; image?: string | null; clients?: { name: string; duration: string; daysRemaining: number }[] }[];
+    activeBillboardLocations?: { id: number; name: string; city: string; latitude: number; longitude: number; image?: string | null; clients?: { name: string; profilePicture?: string | null; duration: string; daysRemaining: number }[] }[];
   }>({
     totalRevenue: 0,
     activeBillboardsCount: 0,
@@ -961,7 +961,18 @@ export default function DashboardPage() {
                           <tbody className="divide-y divide-border">
                             {selectedBillboard.clients.map((client: any, idx: number) => (
                               <tr key={idx} className="hover:bg-muted/30 transition-colors">
-                                <td className="px-3 py-2.5 font-medium text-foreground text-xs leading-tight">{client.name}</td>
+                                <td className="px-3 py-2.5 font-medium text-foreground text-xs leading-tight">
+                                  <div className="flex items-center gap-2">
+                                    {client.profilePicture ? (
+                                      <img src={client.profilePicture} alt={client.name} className="w-6 h-6 rounded-full object-cover shrink-0 border border-border" />
+                                    ) : (
+                                      <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center shrink-0 border border-border text-muted-foreground font-bold text-[8px]">
+                                        {(client.name || "U").substring(0, 2).toUpperCase()}
+                                      </div>
+                                    )}
+                                    <span className="truncate max-w-[100px]" title={client.name}>{client.name}</span>
+                                  </div>
+                                </td>
                                 <td className="px-3 py-2.5 text-muted-foreground text-[10px] whitespace-normal leading-tight min-w-[70px] max-w-[80px] break-words">{client.duration}</td>
                                 <td className="px-3 py-2.5 text-right">
                                   <div className="flex flex-col items-end gap-1">
@@ -1115,8 +1126,19 @@ export default function DashboardPage() {
                 <tr key={o.id} className="border-b border-black/10 dark:border-white/[0.06] last:border-0 hover:bg-secondary/30 transition-colors">
                   <td className="px-5 py-3.5 font-mono text-xs font-semibold">{o.id}</td>
                   <td className="px-5 py-3.5">
-                    <div className="font-medium text-xs">{o.customer}</div>
-                    <div className="text-[10px] text-muted-foreground">{o.company} · {o.country}</div>
+                    <div className="flex items-center gap-2">
+                      {o.clientProfilePicture ? (
+                        <img src={o.clientProfilePicture} alt={o.customer} className="w-8 h-8 rounded-full object-cover shrink-0 border border-border" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 border border-border text-muted-foreground font-bold text-[10px]">
+                          {(o.customer || o.company || "U").substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="font-medium text-xs truncate max-w-[120px]">{o.customer}</div>
+                        <div className="text-[10px] text-muted-foreground truncate max-w-[120px]">{o.company} · {o.country}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-5 py-3.5 text-xs">
                     <div className="flex items-center gap-3">

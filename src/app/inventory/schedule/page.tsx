@@ -27,6 +27,7 @@ type Booking = {
     name: string;
     city: string;
     address: string;
+    featureImage?: string | null;
   };
 };
 
@@ -352,14 +353,20 @@ export default function CampaignSchedulePage() {
                     return (
                       <div key={board.id} className="px-4 py-3">
                         <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <Monitor className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <div className="flex items-center gap-3">
+                            {board.featureImage ? (
+                              <img src={board.featureImage} alt={board.name} className="w-10 h-10 rounded-md object-cover shrink-0 border border-border" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0 border border-border">
+                                <Monitor className="w-5 h-5 text-muted-foreground" />
+                              </div>
+                            )}
                             <div>
-                              <p className="text-sm font-semibold text-foreground">{board.name}</p>
-                              <p className="text-xs text-muted-foreground">{board.city || board.address}</p>
+                              <p className="text-sm font-semibold text-foreground max-w-[150px] truncate" title={board.name}>{board.name}</p>
+                              <p className="text-xs text-muted-foreground max-w-[150px] truncate">{board.city || board.address}</p>
                             </div>
                           </div>
-                          <span className="text-xs text-muted-foreground">{bkgs.length} campaign{bkgs.length !== 1 ? "s" : ""}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">{bkgs.length} campaign{bkgs.length !== 1 ? "s" : ""}</span>
                         </div>
                         <div className="flex gap-1.5 mt-2">
                           {activeCount > 0 && (

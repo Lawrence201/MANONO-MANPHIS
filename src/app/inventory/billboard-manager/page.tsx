@@ -38,6 +38,7 @@ type Booking = {
   status: string;
   paymentStatus: string;
   advertFile: string | null;
+  clientProfilePicture?: string | null;
   billboard: {
     id: number;
     name: string;
@@ -470,12 +471,20 @@ function CampaignCard({ booking, onAdminClick }: {
 
       {/* ── Client Info ── */}
       <div className="p-4 pb-3 flex items-center gap-3">
-        <div className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-xs font-display",
-          getAvatarColor(booking.id)
-        )}>
-          {getInitials(displayName)}
-        </div>
+        {booking.clientProfilePicture ? (
+          <img
+            src={booking.clientProfilePicture}
+            alt={displayName}
+            className="w-10 h-10 rounded-xl object-cover shrink-0 border border-border"
+          />
+        ) : (
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-xs font-display",
+            getAvatarColor(booking.id)
+          )}>
+            {getInitials(displayName)}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-foreground text-sm truncate">{displayName}</p>
           <p className="text-xs text-muted-foreground truncate">

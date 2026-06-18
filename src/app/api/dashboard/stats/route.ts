@@ -73,6 +73,7 @@ export async function GET() {
                 totalPrice: true, 
                 createdAt: true, 
                 fullName: true,
+                email: true,
                 startDate: true,
                 endDate: true,
                 status: true,
@@ -81,6 +82,15 @@ export async function GET() {
         });
 
         const uniqueActiveBillboards = new Map();
+        
+        // Fetch clients for all bookings to get profile pictures
+        const bookingEmails = [...new Set(allBookings.map(b => b.email))];
+        const clientsForBillboards = await prisma.client.findMany({
+            where: { email: { in: bookingEmails } },
+            select: { email: true, profilePicture: true }
+        });
+        const clientProfileMap = new Map(clientsForBillboards.map(c => [c.email.toLowerCase(), c.profilePicture]));
+
         allBookings.forEach(b => {
             if (b.billboard && b.billboard.latitude && b.billboard.longitude) {
                 const bId = b.billboard.id;
@@ -104,6 +114,7 @@ export async function GET() {
                 
                 billboardEntry.clients.push({
                     name: b.fullName,
+                    profilePicture: clientProfileMap.get(b.email.toLowerCase()) || null,
                     duration: `${new Date(b.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} - ${new Date(b.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`,
                     daysRemaining: daysRemaining
                 });
@@ -154,6 +165,28 @@ export async function GET() {
             }
         });
 
+        // Fetch recent export orders
+        const recentExportOrders = await prisma.exportOrder.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+            include: { 
+                product: {
+                    include: { galleryImages: true }
+                } 
+            }
+        });
+
+        // Collect emails and fetch profile pictures
+        const recentEmails = [
+            ...recentBookings.map(b => b.email),
+            ...recentExportOrders.map(o => o.email)
+        ];
+        const recentClients = await prisma.client.findMany({
+            where: { email: { in: recentEmails } },
+            select: { email: true, profilePicture: true }
+        });
+        const recentClientMap = new Map(recentClients.map(c => [c.email.toLowerCase(), c.profilePicture]));
+
         const formattedBookings = recentBookings.map(b => {
             const orderId = `BKG-${String(b.id).padStart(4, '0')}`;
             
@@ -186,6 +219,7 @@ export async function GET() {
             return {
                 id: orderId,
                 customer: b.fullName,
+                clientProfilePicture: recentClientMap.get(b.email.toLowerCase()) || null,
                 company: b.companyName || "Personal Booking",
                 country: b.billboard.city || "Ghana",
                 product: b.billboard.name,
@@ -201,23 +235,13 @@ export async function GET() {
             };
         });
 
-        // Fetch recent export orders
-        const recentExportOrders = await prisma.exportOrder.findMany({
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-            include: { 
-                product: {
-                    include: { galleryImages: true }
-                } 
-            }
-        });
-
         const formattedExportOrders = recentExportOrders.map(o => {
             const calculatedAmount = Number(o.totalEstimatedCost) || Number(o.customsValue) || (Number(o.quantityRequested) * Number(o.product.pricePerUnit || 0));
             
             return {
                 id: o.referenceNumber,
                 customer: o.companyName || o.buyerType,
+                clientProfilePicture: recentClientMap.get(o.email.toLowerCase()) || null,
                 company: o.companyName,
                 country: o.destinationCountry,
                 product: o.product.name,

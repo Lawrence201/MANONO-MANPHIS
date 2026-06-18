@@ -12,6 +12,13 @@ export async function getBillboardBookings() {
       orderBy: { createdAt: "desc" },
     });
 
+    const emails = bookings.map(b => b.email);
+    const clients = await prisma.client.findMany({
+      where: { email: { in: emails } },
+      select: { email: true, profilePicture: true }
+    });
+    const clientMap = new Map(clients.map(c => [c.email.toLowerCase(), c.profilePicture]));
+
     const now = new Date();
     
     const serialized = bookings.map((b) => {
@@ -29,6 +36,7 @@ export async function getBillboardBookings() {
         updatedAt: b.updatedAt.toISOString(),
         startDate: b.startDate.toISOString(),
         endDate: b.endDate.toISOString(),
+        clientProfilePicture: clientMap.get(b.email.toLowerCase()) || null,
         billboard: {
           ...b.billboard,
           weeklyRate: Number(b.billboard.weeklyRate),

@@ -173,8 +173,19 @@ export function OrdersTable({
                         <div className="text-[10px] text-muted-foreground">{date}</div>
                       </td>
                       <td className="px-5 py-3.5">
-                        <div className="font-medium text-xs">{o.companyName || o.buyerType}</div>
-                        <div className="text-[10px] text-muted-foreground">{o.destinationCountry}</div>
+                        <div className="flex items-center gap-2">
+                          {o.clientProfilePicture ? (
+                            <img src={o.clientProfilePicture} alt={o.companyName || o.buyerType} className="w-8 h-8 rounded-full object-cover shrink-0 border border-border" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 border border-border text-muted-foreground font-bold text-[10px]">
+                              {(o.companyName || o.buyerType || "U").substring(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="font-medium text-xs truncate max-w-[120px]">{o.companyName || o.buyerType}</div>
+                            <div className="text-[10px] text-muted-foreground truncate max-w-[120px]">{o.destinationCountry}</div>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-5 py-3.5 text-xs">
                         <div className="font-medium">{o.product.name}</div>

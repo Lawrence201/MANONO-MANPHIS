@@ -50,9 +50,17 @@ export async function getExportOrders(params?: {
       prisma.exportOrder.count({ where: whereClause })
     ]);
 
+    const emails = orders.map(o => o.email);
+    const clients = await prisma.client.findMany({
+      where: { email: { in: emails } },
+      select: { email: true, profilePicture: true }
+    });
+    const clientMap = new Map(clients.map(c => [c.email.toLowerCase(), c.profilePicture]));
+
     // Serialize Decimal and DateTime for Client Components
     const serialized = orders.map((o) => ({
       ...o,
+      clientProfilePicture: clientMap.get(o.email.toLowerCase()) || null,
       quantityRequested: Number(o.quantityRequested),
       totalEstimatedCost: o.totalEstimatedCost ? Number(o.totalEstimatedCost) : null,
       customsValue: o.customsValue ? Number(o.customsValue) : null,

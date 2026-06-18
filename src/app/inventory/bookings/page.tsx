@@ -32,6 +32,7 @@ type Booking = {
   status: string;
   paymentStatus: string;
   createdAt: string;
+  clientProfilePicture?: string | null;
   billboard: {
     id: number;
     name: string;
@@ -332,9 +333,20 @@ export default function AdBookingsPage() {
                           selectedBooking?.id === booking.id && "bg-accent/5 border-l-2 border-l-accent"
                         )}
                       >
-                        <td className="px-4 py-0 overflow-hidden max-w-[140px]">
-                          <div className="font-medium text-foreground truncate max-w-[140px]">{booking.fullName}</div>
-                          <div className="text-xs text-muted-foreground truncate max-w-[140px]">{booking.companyName || booking.email}</div>
+                        <td className="px-4 py-0 overflow-hidden max-w-[180px]">
+                          <div className="flex items-center gap-3 py-2">
+                            {booking.clientProfilePicture ? (
+                              <img src={booking.clientProfilePicture} alt={booking.fullName} className="w-8 h-8 rounded-full object-cover shrink-0 border border-border" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 border border-border">
+                                <Users className="w-4 h-4 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <div className="font-medium text-foreground truncate max-w-[130px]">{booking.fullName}</div>
+                              <div className="text-xs text-muted-foreground truncate max-w-[130px]">{booking.companyName || booking.email}</div>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-4 py-0 overflow-hidden">
                           <div className="font-medium text-foreground truncate max-w-[160px]">{booking.campaignTitle}</div>
@@ -526,30 +538,38 @@ export default function AdBookingsPage() {
                 {/* Client Info */}
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Client</p>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-foreground">
-                      <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="font-medium">{selectedBooking.fullName}</span>
-                      {selectedBooking.clientType && (
-                        <span className="text-xs text-muted-foreground capitalize">({selectedBooking.clientType})</span>
+                  <div className="flex items-start gap-3 bg-muted/40 p-3 rounded-lg">
+                    {selectedBooking.clientProfilePicture ? (
+                      <img src={selectedBooking.clientProfilePicture} alt={selectedBooking.fullName} className="w-10 h-10 rounded-full object-cover shrink-0 border border-border" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shrink-0 border border-border">
+                        <Users className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="space-y-1.5 text-sm min-w-0">
+                      <div className="flex items-center gap-2 text-foreground">
+                        <span className="font-medium truncate">{selectedBooking.fullName}</span>
+                        {selectedBooking.clientType && (
+                          <span className="text-xs text-muted-foreground capitalize shrink-0">({selectedBooking.clientType})</span>
+                        )}
+                      </div>
+                      {selectedBooking.companyName && (
+                        <div className="flex items-center gap-2 text-foreground">
+                          <Building2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                          <span className="truncate">{selectedBooking.companyName}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Mail className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{selectedBooking.email}</span>
+                      </div>
+                      {selectedBooking.phone && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{selectedBooking.phone}</span>
+                        </div>
                       )}
                     </div>
-                    {selectedBooking.companyName && (
-                      <div className="flex items-center gap-2 text-foreground">
-                        <Building2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                        {selectedBooking.companyName}
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Mail className="w-3.5 h-3.5 shrink-0" />
-                      {selectedBooking.email}
-                    </div>
-                    {selectedBooking.phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="w-3.5 h-3.5 shrink-0" />
-                        {selectedBooking.phone}
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -604,25 +624,14 @@ export default function AdBookingsPage() {
                           View
                         </a>
                         <a
-                          href={selectedBooking.advertFile}
-                          download
-                          onClick={async (e) => {
-                            e.preventDefault();
-                            try {
-                              const res = await fetch(selectedBooking.advertFile!);
-                              const blob = await res.blob();
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement("a");
-                              a.href = url;
-                              a.download = `campaign-media-${selectedBooking.id}`;
-                              document.body.appendChild(a);
-                              a.click();
-                              document.body.removeChild(a);
-                              URL.revokeObjectURL(url);
-                            } catch {
-                              window.open(selectedBooking.advertFile!, "_blank");
-                            }
-                          }}
+                          href={
+                            selectedBooking.advertFile?.includes('res.cloudinary.com')
+                              ? selectedBooking.advertFile.replace('/upload/', '/upload/fl_attachment/')
+                              : selectedBooking.advertFile
+                          }
+                          download={`campaign-media-${selectedBooking.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-accent text-accent-foreground hover:opacity-90 text-xs font-semibold transition-colors"
                         >
                           <Download className="w-3.5 h-3.5" />
