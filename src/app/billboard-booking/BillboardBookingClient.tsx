@@ -1653,7 +1653,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                                                     formData.append("api_key", sigData.api_key);
                                                                     formData.append("timestamp", sigData.timestamp);
                                                                     formData.append("signature", sigData.signature);
-                                                                    formData.append("folder", "campaign-media");
+                                                                    formData.append("folder", sigData.folder);
 
                                                                     xhr.send(formData);
                                                                 });
