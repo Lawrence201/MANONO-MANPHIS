@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Search, Menu, ArrowUpRight, X, LayoutGrid } from "lucide-react";
 
 export function ConstructionNav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,12 +33,11 @@ export function ConstructionNav() {
   }, [isMenuOpen]);
 
   const navLinks = [
-    { name: "Home", href: "/" },
+    { name: "Construction", href: "/services/construction" },
     { name: "About", href: "/#about" },
     { name: "Services", href: "/services/construction/services" },
     { name: "Projects", href: "#projects" },
-    { name: "Blog", href: "/blog" },
-    { name: "Contact", href: "/contact" },
+    { name: "Contact", href: "/services/construction/request" },
   ];
 
   return (
@@ -65,17 +66,16 @@ export function ConstructionNav() {
 
       {/* Links */}
       <div className="hidden min-[900px]:flex items-center gap-10">
-        <Link href="/" className="text-[15px] font-bold text-[#FFD100]">Home</Link>
+        <Link href="/services/construction" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${pathname === '/services/construction' ? 'text-[#FFD100]' : isScrolled ? 'text-[#1a1a1a]' : 'text-white'}`}>Construction</Link>
         <Link href="/#about" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${isScrolled ? "text-[#1a1a1a]" : "text-white"}`}>About</Link>
-        <Link href="/services/construction/services" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${isScrolled ? "text-[#1a1a1a]" : "text-white"}`}>Services</Link>
+        <Link href="/services/construction/services" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${pathname === '/services/construction/services' ? 'text-[#FFD100]' : isScrolled ? 'text-[#1a1a1a]' : 'text-white'}`}>Services</Link>
         <Link href="#projects" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${isScrolled ? "text-[#1a1a1a]" : "text-white"}`}>Projects</Link>
-        <Link href="/blog" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${isScrolled ? "text-[#1a1a1a]" : "text-white"}`}>Blog</Link>
-        <Link href="/contact" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${isScrolled ? "text-[#1a1a1a]" : "text-white"}`}>Contact</Link>
+        <Link href="/services/construction/request" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${pathname === '/services/construction/request' ? 'text-[#FFD100]' : isScrolled ? 'text-[#1a1a1a]' : 'text-white'}`}>Contact</Link>
       </div>
 
       {/* Right side actions */}
       <div className="flex items-center gap-4">
-        <Link href="/contact" className={`hidden sm:flex items-center gap-2 text-black px-6 font-bold text-[15px] transition-all duration-500 ${
+        <Link href="/services/construction/request" className={`hidden sm:flex items-center gap-2 text-black px-6 font-bold text-[15px] transition-all duration-500 ${
           isScrolled ? "bg-[#FFD100] py-2.5 hover:bg-[#FFD100]/90 rounded-sm" : "bg-[#FFD100] py-3 hover:bg-[#FFD100]/90"
         }`}>
           Get Free Quote <ArrowUpRight className="w-5 h-5" />
@@ -149,7 +149,7 @@ export function ConstructionNav() {
                 <div className="flex items-center justify-between">
                   <Link
                     href={link.href}
-                    className="flex-1 py-4 text-[24px] max-[768px]:text-[20px] max-[480px]:text-[17px] max-[380px]:text-[15px] font-semibold tracking-tight text-white hover:text-[#FFD100] transition-colors"
+                    className={`flex-1 py-4 text-[24px] max-[768px]:text-[20px] max-[480px]:text-[17px] max-[380px]:text-[15px] font-semibold tracking-tight transition-colors ${pathname === link.href ? 'text-[#FFD100]' : 'text-white hover:text-[#FFD100]'}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {link.name}
@@ -167,7 +167,7 @@ export function ConstructionNav() {
             style={{ transitionDelay: isMenuOpen ? `${(navLinks.length + 1) * 100}ms` : "0ms" }}
           >
             <Link 
-              href="/contact" 
+              href="/services/construction/request" 
               onClick={() => setIsMenuOpen(false)}
               className="flex items-center justify-center gap-2 bg-[#FFD100] text-[#1a1a1a] px-6 py-4 font-bold text-[16px] hover:bg-white transition-colors rounded-sm"
             >

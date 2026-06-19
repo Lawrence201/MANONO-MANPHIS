@@ -52,8 +52,8 @@ export default function ConstructionPage() {
               Every project we undertake is driven by quality, safety, and a commitment to creating spaces that inspire confidence and stand the test of time.
             </p>
 
-            <Link href="/contact" className="inline-flex items-center gap-2 bg-[#FFD100] text-black px-8 py-4 max-[480px]:px-6 max-[480px]:py-3 font-bold text-[15px] max-[480px]:text-[14px] hover:bg-[#FFD100]/90 transition-colors">
-              Service Request <ArrowUpRight className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4" />
+            <Link href="/services/construction/services" className="inline-flex items-center gap-2 bg-[#FFD100] text-black px-8 py-4 max-[480px]:px-6 max-[480px]:py-3 font-bold text-[15px] max-[480px]:text-[14px] hover:bg-[#FFD100]/90 transition-colors">
+              Explore Services <ArrowUpRight className="w-5 h-5 max-[480px]:w-4 max-[480px]:h-4" />
             </Link>
           </div>
         </div>

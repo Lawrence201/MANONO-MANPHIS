@@ -77,7 +77,7 @@ export default async function AllServicesPage() {
               </h4>
               <div className="w-1.5 h-1.5 max-[480px]:w-1 max-[480px]:h-1 rounded-full bg-[#FFD100]"></div>
             </div>
-            <h2 className="text-3xl md:text-5xl lg:text-[50px] max-[480px]:text-2xl font-black text-[#1a1a1a] leading-[1.15] max-[480px]:leading-[1.2] tracking-tight max-w-[800px]">
+            <h2 className="text-3xl md:text-4xl lg:text-[40px] max-[480px]:text-2xl font-bold text-[#1a1a1a] leading-[1.15] max-[480px]:leading-[1.2] tracking-tight max-w-[800px]">
               Modern Construction Services Built for Quality & Reliability
             </h2>
           </div>

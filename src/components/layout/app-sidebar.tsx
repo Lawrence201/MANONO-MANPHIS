@@ -9,6 +9,7 @@ import {
   Receipt, Package, Truck, BarChart3, Globe2, Settings,
   Sparkles, FileBarChart, ShieldCheck, Map, Ship, UserCog,
   ScrollText, Bell, Workflow, Factory, MessageSquare, Monitor, Layers, Calendar, Megaphone,
+  HardHat, Inbox, ImagePlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,10 +42,11 @@ const navGroups = [
     ],
   },
   {
-    label: "Communication",
+    label: "Construction",
     items: [
-      { title: "Leads & CRM", url: "/leads", icon: Users, badge: "12" },
-      { title: "Communications", url: "/communications", icon: MessageSquare, badge: "2" },
+      { title: "Service Requests", url: "/construction/requests", icon: Inbox },
+      { title: "Active Projects", url: "/construction/projects", icon: HardHat },
+      { title: "Portfolio", url: "/construction/portfolio", icon: ImagePlus },
     ],
   },
   {
@@ -55,16 +57,10 @@ const navGroups = [
     ],
   },
   {
-    label: "Compliance",
+    label: "Communication",
     items: [
-      { title: "Documents", url: "/documents", icon: ShieldCheck },
-    ],
-  },
-  {
-    label: "Website Control",
-    items: [
-      { title: "Public Products", url: "/services/billboards", icon: Globe2 },
-      { title: "Content Manager", url: "/settings/content", icon: FileText },
+      { title: "Leads & CRM", url: "/leads", icon: Users, badge: "12" },
+      { title: "Communications", url: "/communications", icon: MessageSquare, badge: "2" },
     ],
   },
   {
