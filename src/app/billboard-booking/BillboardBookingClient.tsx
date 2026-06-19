@@ -74,7 +74,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
 
     const [campaignTitle, setCampaignTitle] = React.useState('');
     const [campaignType, setCampaignType] = React.useState('video');
-    const [campaignDuration, setCampaignDuration] = React.useState(1); // In months
+    const [campaignDuration, setCampaignDuration] = React.useState<number | ''>(1); // In months
     const [slotsRequested, setSlotsRequested] = React.useState(1);
     const [description, setDescription] = React.useState('');
     const [advertFile, setAdvertFile] = React.useState<string | null>(null);
@@ -119,12 +119,13 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
     const calculatedEndDate = React.useMemo(() => {
         if (!selectedDate) return null;
         const end = new Date(selectedDate);
+        const durationNum = campaignDuration || 1;
         if (durationUnit === 'Weeks') {
-            end.setDate(end.getDate() + campaignDuration * 7);
+            end.setDate(end.getDate() + durationNum * 7);
         } else if (durationUnit === 'Days') {
-            end.setDate(end.getDate() + campaignDuration);
+            end.setDate(end.getDate() + durationNum);
         } else {
-            end.setMonth(end.getMonth() + campaignDuration);
+            end.setMonth(end.getMonth() + durationNum);
         }
         return end;
     }, [selectedDate, campaignDuration, durationUnit]);
@@ -133,7 +134,8 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
     const totalPrice = React.useMemo(() => {
         if (!selectedBillboard) return 0;
         const baseRate = parsePrice(selectedBillboard.price);
-        const subtotal = baseRate * campaignDuration * slotsRequested;
+        const durationNum = campaignDuration || 1;
+        const subtotal = baseRate * durationNum * slotsRequested;
         const taxRate = (selectedBillboard as any).taxRate || 10;
         const taxAmount = (subtotal * taxRate) / 100;
         return subtotal + taxAmount;
@@ -142,7 +144,8 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
     const durationPriceInfo = React.useMemo(() => {
         if (!selectedBillboard) return null;
         const baseRate = parsePrice(selectedBillboard.price);
-        const subtotal = baseRate * campaignDuration * slotsRequested;
+        const durationNum = campaignDuration || 1;
+        const subtotal = baseRate * durationNum * slotsRequested;
         const taxRate = (selectedBillboard as any).taxRate || 10;
         const taxAmount = (subtotal * taxRate) / 100;
         const total = subtotal + taxAmount;
@@ -152,7 +155,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
             taxRate,
             taxAmount,
             total,
-            isValid: campaignDuration > 0
+            isValid: durationNum > 0
         };
     }, [selectedBillboard, campaignDuration, slotsRequested]);
 
@@ -310,12 +313,13 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
 
             // End Date calculation: Start Date + Duration (in months)
             const endDateObj = new Date(selectedDate);
+            const durationNum = campaignDuration || 1;
             if (durationUnit === 'Weeks') {
-                endDateObj.setDate(endDateObj.getDate() + campaignDuration * 7);
+                endDateObj.setDate(endDateObj.getDate() + durationNum * 7);
             } else if (durationUnit === 'Days') {
-                endDateObj.setDate(endDateObj.getDate() + campaignDuration);
+                endDateObj.setDate(endDateObj.getDate() + durationNum);
             } else {
-                endDateObj.setMonth(endDateObj.getMonth() + campaignDuration);
+                endDateObj.setMonth(endDateObj.getMonth() + durationNum);
             }
 
             const bookingPayload = {
@@ -327,7 +331,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                 clientType: clientType === 'other' ? customClientType.trim() : clientType,
                 campaignTitle,
                 campaignType,
-                campaignDuration,
+                campaignDuration: durationNum,
                 startDate: selectedDate.toISOString(),
                 endDate: endDateObj.toISOString(),
                 slotsRequested,
@@ -401,9 +405,10 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
 
         const reqStart = date.getTime();
         const end = new Date(date);
-        if (durationUnit === 'Weeks') end.setDate(end.getDate() + campaignDuration * 7);
-        else if (durationUnit === 'Days') end.setDate(end.getDate() + campaignDuration);
-        else end.setMonth(end.getMonth() + campaignDuration);
+        const durationNum = campaignDuration || 1;
+        if (durationUnit === 'Weeks') end.setDate(end.getDate() + durationNum * 7);
+        else if (durationUnit === 'Days') end.setDate(end.getDate() + durationNum);
+        else end.setMonth(end.getMonth() + durationNum);
         const reqEnd = end.getTime();
 
         let baseSlots = 0;
@@ -1159,12 +1164,28 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                     <div className={styles.inputGroup}>
                                         <label className={styles.label}>Campaign Duration ({durationUnit}) *</label>
                                         <input
-                                            type="number"
-                                            min={1}
+                                            type="text"
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
                                             className={styles.input}
                                             placeholder={`Enter duration in ${durationUnit.toLowerCase()}`}
                                             value={campaignDuration}
-                                            onChange={(e) => setCampaignDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === '') {
+                                                    setCampaignDuration('');
+                                                } else {
+                                                    const parsed = parseInt(val, 10);
+                                                    if (!isNaN(parsed)) {
+                                                        setCampaignDuration(parsed);
+                                                    }
+                                                }
+                                            }}
+                                            onBlur={() => {
+                                                if (campaignDuration === '' || (campaignDuration as number) < 1) {
+                                                    setCampaignDuration(1);
+                                                }
+                                            }}
                                         />
                                     </div>
                                     <div className={styles.inputGroup}>
@@ -1210,7 +1231,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                         </div>
                                         <div className={styles.summaryItem}>
                                             <span style={{ color: '#64748b' }}>Duration:</span>
-                                            <span style={{ fontWeight: '600', color: '#1e293b' }}>{campaignDuration} {durationUnit === 'Weeks' ? 'Week(s)' : durationUnit === 'Days' ? 'Day(s)' : 'Month(s)'}</span>
+                                            <span style={{ fontWeight: '600', color: '#1e293b' }}>{campaignDuration || 1} {durationUnit === 'Weeks' ? 'Week(s)' : durationUnit === 'Days' ? 'Day(s)' : 'Month(s)'}</span>
                                         </div>
                                         <div className={styles.summaryItem}>
                                             <span style={{ color: '#64748b' }}>Slots Booked:</span>
@@ -1347,7 +1368,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                                                 {(activeBillboard as any).address || 'Legon Campus'}, {(activeBillboard as any).city || 'Accra'}
                                                             </p>
                                                             <p style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: '6px 0 0 0' }}>
-                                                                GHS {activeBaseRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / month
+                                                                GH₵ {activeBaseRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / month
                                                             </p>
 
                                                         </div>
@@ -1415,7 +1436,7 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
                                                             <span>Slot price:</span>
                                                             <span style={{ fontWeight: '400', color: '#1e293b' }}>
-                                                                GHS {activeBaseRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                GH₵ {activeBaseRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                             </span>
                                                         </div>
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
@@ -1450,14 +1471,14 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ fontSize: '15px', color: '#64748b', fontWeight: '500' }}>Original price</span>
                                         <span style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
-                                            GHS {selectedBillboard && durationPriceInfo ? durationPriceInfo.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+                                            GH₵ {selectedBillboard && durationPriceInfo ? durationPriceInfo.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                                         </span>
                                     </div>
 
                                     <div style={{ display: 'none', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ fontSize: '15px', color: '#64748b', fontWeight: '500' }}>Savings</span>
                                         <span style={{ fontSize: '16px', fontWeight: '700', color: '#22c55e' }}>
-                                            -GHS 0.00
+                                            -GH₵ 0.00
                                         </span>
                                     </div>
 
@@ -1471,14 +1492,14 @@ const HallBookingPageContent = ({ userProfile }: { userProfile?: UserProfile }) 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ fontSize: '15px', color: '#64748b', fontWeight: '500' }}>Tax</span>
                                         <span style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
-                                            GHS {selectedBillboard && durationPriceInfo ? durationPriceInfo.taxAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+                                            GH₵ {selectedBillboard && durationPriceInfo ? durationPriceInfo.taxAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                                         </span>
                                     </div>
 
                                     <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '18px', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ fontSize: '17px', fontWeight: '800', color: '#eea000' }}>Total</span>
                                         <span style={{ fontSize: '19px', fontWeight: '800', color: '#eea000' }}>
-                                            GHS {selectedBillboard && durationPriceInfo ? durationPriceInfo.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+                                            GH₵ {selectedBillboard && durationPriceInfo ? durationPriceInfo.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                                         </span>
                                     </div>
                                 </div>
