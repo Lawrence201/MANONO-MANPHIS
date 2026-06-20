@@ -49,8 +49,8 @@ export default function ConstructionRequestPage() {
 
           {/* Paragraph */}
           <div className="relative inline-block max-w-[700px]">
-            <p className="text-[15px] md:text-[16px] text-gray-300 leading-relaxed font-medium">
-              Construction is the process of planning, designing, and building infrastructure<br className="hidden md:block" />
+            <p className="text-[15px] max-[480px]:text-[14px] min-[1028px]:text-[16px] text-gray-300 leading-relaxed font-medium">
+              Construction is the process of planning, designing, and building infrastructure<br className="hidden min-[1028px]:block" />
               such as residential homes, commercial and industrial facilities.
             </p>
           </div>

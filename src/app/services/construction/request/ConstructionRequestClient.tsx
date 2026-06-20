@@ -212,9 +212,9 @@ export default function ConstructionRequestClient() {
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
+      <div className="flex flex-col min-[1029px]:flex-row gap-12 min-[1029px]:gap-16 items-start">
         {/* LEFT COLUMN: FORM */}
-        <div className="w-full lg:w-[65%] xl:w-[70%] bg-[#f6f6f6] p-8 md:p-10 rounded-sm">
+        <div className="w-full min-[1029px]:w-[65%] xl:w-[70%] bg-transparent sm:bg-[#f6f6f6] p-0 sm:p-8 md:p-10 rounded-sm">
           {/* Header from Design */}
           <div className="mb-10">
             <h4 className="text-[11px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-2">Start Your Journey Today</h4>
@@ -222,7 +222,7 @@ export default function ConstructionRequestClient() {
           </div>
 
       {/* Form Content */}
-      <div className="bg-white border border-gray-200 rounded-sm p-6 md:p-10 min-h-[550px]">
+      <div className="bg-white border border-gray-200 rounded-sm p-5 sm:p-6 md:p-10 min-h-[550px]">
         
         {/* Loading Overlay */}
         {isSubmitting && (
@@ -242,7 +242,7 @@ export default function ConstructionRequestClient() {
               <div>
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Service Required *</label>
                 <select 
-                  className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                  className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                   value={serviceRequired}
                   onChange={(e) => setServiceRequired(e.target.value)}
                 >
@@ -261,7 +261,7 @@ export default function ConstructionRequestClient() {
                   <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
                     <input 
                       type="text"
-                      className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                      className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                       placeholder="Please specify the service you need..."
                       value={otherService}
                       onChange={(e) => setOtherService(e.target.value)}
@@ -292,7 +292,7 @@ export default function ConstructionRequestClient() {
               <div>
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Estimated Budget *</label>
                 <select 
-                  className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                  className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                   value={estimatedBudget}
                   onChange={(e) => setEstimatedBudget(e.target.value)}
                 >
@@ -319,7 +319,7 @@ export default function ConstructionRequestClient() {
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Project Description *</label>
                 <p className="text-[13px] text-gray-500 mb-2">Please explain what needs to be done in detail.</p>
                 <textarea 
-                  className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all min-h-[150px] resize-y"
+                  className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all min-h-[150px] resize-y"
                   placeholder="E.g., We need a full kitchen remodel including new cabinets, plumbing repositioning, and floor tiling..."
                   value={projectDescription}
                   onChange={(e) => setProjectDescription(e.target.value)}
@@ -395,7 +395,7 @@ export default function ConstructionRequestClient() {
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Property Address *</label>
                 <input 
                   type="text"
-                  className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                  className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                   placeholder="Street address or plot location"
                   value={propertyAddress}
                   onChange={(e) => setPropertyAddress(e.target.value)}
@@ -406,7 +406,7 @@ export default function ConstructionRequestClient() {
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">City / Region *</label>
                 <input 
                   type="text"
-                  className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                  className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                   placeholder="E.g., Accra, Greater Accra Region"
                   value={cityRegion}
                   onChange={(e) => setCityRegion(e.target.value)}
@@ -421,7 +421,7 @@ export default function ConstructionRequestClient() {
                   </div>
                   <input 
                     type="date"
-                    className="w-full border border-gray-300 rounded-md py-4 pl-12 pr-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                    className="w-full border border-gray-300 rounded-md py-4 pl-12 pr-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                     value={preferredStartDate}
                     onChange={(e) => setPreferredStartDate(e.target.value)}
                   />
@@ -436,7 +436,7 @@ export default function ConstructionRequestClient() {
                   </div>
                   <input 
                     type="date"
-                    className="w-full border border-gray-300 rounded-md py-4 pl-12 pr-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                    className="w-full border border-gray-300 rounded-md py-4 pl-12 pr-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                     value={projectDeadline}
                     onChange={(e) => setProjectDeadline(e.target.value)}
                   />
@@ -456,7 +456,7 @@ export default function ConstructionRequestClient() {
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Full Name *</label>
                 <input 
                   type="text"
-                  className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                  className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                   placeholder="John Doe"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -467,7 +467,7 @@ export default function ConstructionRequestClient() {
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Email Address *</label>
                 <input 
                   type="email"
-                  className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                  className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                   placeholder="john@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -480,7 +480,7 @@ export default function ConstructionRequestClient() {
                   country={'gh'}
                   value={phone}
                   onChange={(phone: string) => setPhone(phone)}
-                  inputStyle={{ width: '100%', height: '54px', fontSize: '15px', borderRadius: '0.375rem', borderColor: '#d1d5db' }}
+                  inputStyle={{ width: '100%', height: '54px', fontSize: '16px', borderRadius: '0.375rem', borderColor: '#d1d5db' }}
                   buttonStyle={{ borderColor: '#d1d5db', borderTopLeftRadius: '0.375rem', borderBottomLeftRadius: '0.375rem', backgroundColor: '#f9fafb' }}
                 />
               </div>
@@ -489,7 +489,7 @@ export default function ConstructionRequestClient() {
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Company Name (Optional)</label>
                 <input 
                   type="text"
-                  className="w-full border border-gray-300 rounded-md p-4 text-[15px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                  className="w-full border border-gray-300 rounded-md p-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                   placeholder="Your Company LLC"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
@@ -510,7 +510,7 @@ export default function ConstructionRequestClient() {
                       onChange={(e) => setContactMethod(e.target.value)}
                       className="w-4 h-4 text-[#1a1a1a] focus:ring-[#1a1a1a] border-gray-300"
                     />
-                    <span className="text-[15px] text-gray-700">{method}</span>
+                    <span className="text-[16px] text-gray-700">{method}</span>
                   </label>
                 ))}
               </div>
@@ -617,45 +617,45 @@ export default function ConstructionRequestClient() {
         </div>
 
         {/* RIGHT COLUMN: CONTACT INFO */}
-        <div className="w-full lg:w-[35%] xl:w-[30%] bg-[#f6f6f6] p-8 md:p-10 rounded-sm flex flex-col gap-10">
+        <div className="w-full min-[1029px]:w-[35%] xl:w-[30%] bg-transparent sm:bg-[#f6f6f6] p-0 sm:p-8 md:p-10 rounded-sm grid grid-cols-1 sm:grid-cols-2 min-[1029px]:flex min-[1029px]:flex-col gap-6 sm:gap-10 mt-8 min-[1029px]:mt-0">
           
-          <div className="flex items-center gap-5 border-b border-gray-200 pb-8">
-            <div className="w-16 h-16 bg-[#222222] rounded-md flex items-center justify-center shrink-0">
-              <Mail className="w-6 h-6 text-[#FFD100]" strokeWidth={1.5} />
+          <div className="flex items-center gap-4 sm:gap-5 border-0 pb-0 min-[1029px]:border-b min-[1029px]:border-gray-200 min-[1029px]:pb-8">
+            <div className="w-12 h-12 min-[480px]:w-16 min-[480px]:h-16 bg-[#222222] rounded-md flex items-center justify-center shrink-0">
+              <Mail className="w-5 h-5 min-[480px]:w-6 min-[480px]:h-6 text-[#FFD100]" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="text-[18px] font-black text-[#1a1a1a] mb-1">Email Support</h3>
-              <p className="text-[14px] text-gray-500 font-medium">manonomanphis@gmail.com</p>
+              <h3 className="text-[16px] min-[480px]:text-[18px] font-black text-[#1a1a1a] mb-1">Email Support</h3>
+              <p className="text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">manonomanphis@gmail.com</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-5 border-b border-gray-200 pb-8">
-            <div className="w-16 h-16 bg-[#222222] rounded-md flex items-center justify-center shrink-0">
-              <Phone className="w-6 h-6 text-[#FFD100]" strokeWidth={1.5} />
+          <div className="flex items-center gap-4 sm:gap-5 border-0 pb-0 min-[1029px]:border-b min-[1029px]:border-gray-200 min-[1029px]:pb-8">
+            <div className="w-12 h-12 min-[480px]:w-16 min-[480px]:h-16 bg-[#222222] rounded-md flex items-center justify-center shrink-0">
+              <Phone className="w-5 h-5 min-[480px]:w-6 min-[480px]:h-6 text-[#FFD100]" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="text-[18px] font-black text-[#1a1a1a] mb-1">Call Our Office</h3>
-              <p className="text-[14px] text-gray-500 font-medium">+233 542883496</p>
+              <h3 className="text-[16px] min-[480px]:text-[18px] font-black text-[#1a1a1a] mb-1">Call Our Office</h3>
+              <p className="text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">+233 542883496</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-5 border-b border-gray-200 pb-8">
-            <div className="w-16 h-16 bg-[#222222] rounded-md flex items-center justify-center shrink-0">
-              <MapPin className="w-6 h-6 text-[#FFD100]" strokeWidth={1.5} />
+          <div className="flex items-center gap-4 sm:gap-5 border-0 pb-0 min-[1029px]:border-b min-[1029px]:border-gray-200 min-[1029px]:pb-8">
+            <div className="w-12 h-12 min-[480px]:w-16 min-[480px]:h-16 bg-[#222222] rounded-md flex items-center justify-center shrink-0">
+              <MapPin className="w-5 h-5 min-[480px]:w-6 min-[480px]:h-6 text-[#FFD100]" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="text-[18px] font-black text-[#1a1a1a] mb-1">Visit Our Office</h3>
-              <p className="text-[14px] text-gray-500 font-medium">Dansoman accra</p>
+              <h3 className="text-[16px] min-[480px]:text-[18px] font-black text-[#1a1a1a] mb-1">Visit Our Office</h3>
+              <p className="text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">Dansoman accra</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-[#222222] rounded-md flex items-center justify-center shrink-0">
-              <MessageCircle className="w-6 h-6 text-[#FFD100]" strokeWidth={1.5} />
+          <div className="flex items-center gap-4 sm:gap-5">
+            <div className="w-12 h-12 min-[480px]:w-16 min-[480px]:h-16 bg-[#222222] rounded-md flex items-center justify-center shrink-0">
+              <MessageCircle className="w-5 h-5 min-[480px]:w-6 min-[480px]:h-6 text-[#FFD100]" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="text-[18px] font-black text-[#1a1a1a] mb-1">WhatsApp Support</h3>
-              <p className="text-[14px] text-gray-500 font-medium">+233 542883496</p>
+              <h3 className="text-[16px] min-[480px]:text-[18px] font-black text-[#1a1a1a] mb-1">WhatsApp Support</h3>
+              <p className="text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">+233 542883496</p>
             </div>
           </div>
 
