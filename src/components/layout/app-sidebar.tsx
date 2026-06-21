@@ -44,7 +44,7 @@ const navGroups = [
   {
     label: "Construction",
     items: [
-      { title: "Service Requests", url: "/construction/requests", icon: Inbox },
+      { title: "Service Requests", url: "/construction/requests", icon: Inbox, badge: "0" },
       { title: "Active Projects", url: "/construction/projects", icon: HardHat },
       { title: "Portfolio", url: "/construction/portfolio", icon: ImagePlus },
     ],
@@ -83,6 +83,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
+  const [pendingConstructionCount, setPendingConstructionCount] = useState<number>(0);
 
   useEffect(() => {
     async function fetchPendingCount() {
@@ -92,6 +93,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
         if (json.success && json.data) {
           setPendingCount(json.data.pendingApprovalsCount || 0);
           setPendingOrdersCount(json.data.pendingOrdersCount || 0);
+          setPendingConstructionCount(json.data.pendingConstructionRequestsCount || 0);
         }
       } catch (err) {
         console.error("Failed to fetch sidebar pending approvals count:", err);
@@ -101,10 +103,12 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
     
     window.addEventListener("bookingsUpdated", fetchPendingCount);
     window.addEventListener("cartUpdated", fetchPendingCount);
+    window.addEventListener("constructionRequestsUpdated", fetchPendingCount);
 
     return () => {
       window.removeEventListener("bookingsUpdated", fetchPendingCount);
       window.removeEventListener("cartUpdated", fetchPendingCount);
+      window.removeEventListener("constructionRequestsUpdated", fetchPendingCount);
     };
   }, []);
 
@@ -179,13 +183,17 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                         {"badge" in item && item.badge && (
                           <span className={cn(
                             "text-[10px] font-semibold bg-accent/20 text-accent px-1.5 py-0.5 rounded-md ml-2",
-                            (item.title === "Ad Bookings" && pendingCount === 0) || (item.title === "Orders" && pendingOrdersCount === 0) ? "hidden" : ""
+                            (item.title === "Ad Bookings" && pendingCount === 0) || 
+                            (item.title === "Orders" && pendingOrdersCount === 0) ||
+                            (item.title === "Service Requests" && pendingConstructionCount === 0) ? "hidden" : ""
                           )}>
                             {item.title === "Ad Bookings" 
                               ? pendingCount 
                               : item.title === "Orders" 
                                 ? pendingOrdersCount 
-                                : item.badge}
+                                : item.title === "Service Requests"
+                                  ? pendingConstructionCount
+                                  : item.badge}
                           </span>
                         )}
                       </div>

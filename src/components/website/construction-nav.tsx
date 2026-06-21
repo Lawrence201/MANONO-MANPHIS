@@ -4,12 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Search, Menu, ArrowUpRight, X, LayoutGrid } from "lucide-react";
+import { Search, Menu, ArrowUpRight, X, LayoutGrid, User, LogOut, Building2, Info, Settings, Briefcase, PhoneCall } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 
 export function ConstructionNav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const firstName = session?.user?.name ? session.user.name.split(" ")[0] : "";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +42,18 @@ export function ConstructionNav() {
     { name: "Projects", href: "#projects" },
     { name: "Contact", href: "/services/construction/request" },
   ];
+
+  const getLinkIcon = (name: string, isActive: boolean) => {
+    const iconColor = isActive ? "text-[#FFD100]" : "text-gray-400";
+    switch (name) {
+      case "Construction": return <Building2 className={`w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 ${iconColor}`} />;
+      case "About": return <Info className={`w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 ${iconColor}`} />;
+      case "Services": return <Settings className={`w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 ${iconColor}`} />;
+      case "Projects": return <Briefcase className={`w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 ${iconColor}`} />;
+      case "Contact": return <PhoneCall className={`w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 ${iconColor}`} />;
+      default: return null;
+    }
+  };
 
   return (
     <>
@@ -146,25 +161,69 @@ export function ConstructionNav() {
                 }`}
                 style={{ transitionDelay: isMenuOpen ? `${(index + 1) * 100}ms` : "0ms" }}
               >
-                <div className="flex items-center justify-between">
-                  <Link
-                    href={link.href}
-                    className={`flex-1 py-4 text-[24px] max-[768px]:text-[20px] max-[480px]:text-[17px] max-[380px]:text-[15px] font-semibold tracking-tight transition-colors ${pathname === link.href ? 'text-[#FFD100]' : 'text-white hover:text-[#FFD100]'}`}
-                    onClick={() => setIsMenuOpen(false)}
+                <Link
+                  href={link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center justify-between w-full group"
+                >
+                  <div
+                    className={`flex-1 py-4 text-[24px] max-[768px]:text-[20px] max-[480px]:text-[17px] max-[380px]:text-[15px] font-semibold tracking-tight transition-colors ${pathname === link.href ? 'text-[#FFD100]' : 'text-white group-hover:text-[#FFD100]'}`}
                   >
                     {link.name}
-                  </Link>
-                </div>
+                  </div>
+                  <div className="p-4 max-[480px]:p-2 flex items-center">
+                    {getLinkIcon(link.name, pathname === link.href)}
+                  </div>
+                </Link>
               </div>
             ))}
           </div>
           
+          {/* Mobile Login / Register */}
+          <div 
+            className={`mt-6 transition-all duration-500 ease-out transform ${
+              isMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
+            }`}
+            style={{ transitionDelay: isMenuOpen ? `${(navLinks.length + 1) * 100}ms` : "0ms" }}
+          >
+            <div className="flex flex-nowrap items-center gap-4 max-[768px]:gap-3 max-[480px]:gap-2 text-[20px] max-[480px]:text-[17px] max-[380px]:text-[15px] font-semibold text-white whitespace-nowrap">
+              {session ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <User className="w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 text-[#FFD100]" />
+                    <span>Welcome, {firstName}</span>
+                  </div>
+                  <div className="w-[1px] h-5 bg-gray-400" />
+                  <button 
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      signOut();
+                    }}
+                    className="flex items-center gap-2 hover:text-[#ff8080] transition-colors"
+                  >
+                    <LogOut className="w-6 h-6 max-[480px]:w-5 max-[480px]:h-5" />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 hover:text-[#FFD100] transition-colors">
+                    <User className="w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 text-[#FFD100]" />
+                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
+                  </div>
+                  <div className="w-[1px] h-5 bg-gray-400" />
+                  <Link href="/register" onClick={() => setIsMenuOpen(false)} className="hover:text-[#FFD100] transition-colors">Register</Link>
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Mobile Get Quote Button */}
           <div 
             className={`mt-10 transition-all duration-500 ease-out transform ${
               isMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
             }`}
-            style={{ transitionDelay: isMenuOpen ? `${(navLinks.length + 1) * 100}ms` : "0ms" }}
+            style={{ transitionDelay: isMenuOpen ? `${(navLinks.length + 2) * 100}ms` : "0ms" }}
           >
             <Link 
               href="/services/construction/request" 

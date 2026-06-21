@@ -413,30 +413,30 @@ export default function ConstructionRequestClient() {
                 />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Preferred Start Date *</label>
-                <div className="relative">
+                <div className="relative min-w-0">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Calendar className="h-5 w-5 text-gray-400" />
                   </div>
                   <input 
                     type="date"
-                    className="w-full border border-gray-300 rounded-md py-4 pl-12 pr-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                    className="w-full min-w-0 appearance-none border border-gray-300 rounded-md py-4 pl-12 pr-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                     value={preferredStartDate}
                     onChange={(e) => setPreferredStartDate(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="block text-[13px] font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">Project Deadline (Optional)</label>
-                <div className="relative">
+                <div className="relative min-w-0">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Calendar className="h-5 w-5 text-gray-400" />
                   </div>
                   <input 
                     type="date"
-                    className="w-full border border-gray-300 rounded-md py-4 pl-12 pr-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
+                    className="w-full min-w-0 appearance-none border border-gray-300 rounded-md py-4 pl-12 pr-4 text-[16px] text-gray-700 bg-white focus:outline-none focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] transition-all"
                     value={projectDeadline}
                     onChange={(e) => setProjectDeadline(e.target.value)}
                   />

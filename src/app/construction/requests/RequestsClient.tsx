@@ -1,14 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { saveConstructionInvoice, updateConstructionRequestStatus } from "@/lib/actions/construction-request-actions";
 import {
   Search, Filter, Eye, CheckCircle2, XCircle, Clock, 
-  MapPin, Phone, Mail, FileText, Download, Building2, HardHat, Home, Trash2, Calendar, ClipboardList
+  MapPin, Phone, Mail, FileText, Download, Building2, HardHat, Home, Trash2, Calendar, ClipboardList, Plus, Minus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import type { ConstructionRequest } from "@prisma/client";
+import { InvoiceDocument } from "@/components/invoice/InvoiceDocument";
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
@@ -17,6 +33,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   site_visit: { label: "Site Visit",   color: "text-indigo-500", bg: "bg-indigo-500/10", icon: MapPin },
   quoted:     { label: "Quote Sent",   color: "text-emerald-500",bg: "bg-emerald-500/10", icon: FileText },
   accepted:   { label: "Accepted",     color: "text-emerald-600",bg: "bg-emerald-600/10", icon: CheckCircle2 },
+  approved:   { label: "Approved",     color: "text-emerald-600",bg: "bg-emerald-600/10", icon: CheckCircle2 },
   rejected:   { label: "Rejected",     color: "text-red-500",    bg: "bg-red-500/10",    icon: XCircle },
 };
 
@@ -52,10 +69,26 @@ function StatCard({ label, value, sub, icon: Icon, accent }: { label: string; va
 }
 
 // ── Client Component ──────────────────────────────────────────────────────
-export function RequestsClient({ requests }: { requests: ConstructionRequest[] }) {
+export function RequestsClient({ requests }: { requests: any[] }) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedReq, setSelectedReq] = useState<ConstructionRequest | null>(null);
+  const [selectedReq, setSelectedReq] = useState<any | null>(null);
+  
+  const [isBlankInvoiceOpen, setIsBlankInvoiceOpen] = useState(false);
+  const [isFillInvoiceOpen, setIsFillInvoiceOpen] = useState(false);
+  const [vatPercentage, setVatPercentage] = useState("15");
+  
+  const [fillName, setFillName] = useState("");
+  const [fillService, setFillService] = useState("");
+  const [fillAddress, setFillAddress] = useState("");
+  const [fillDate, setFillDate] = useState("");
+  const [fillVat, setFillVat] = useState("15");
+  const [fillItems, setFillItems] = useState([{ qty: 1, desc: "", price: 0 }]);
+  
+  // Hidden invoice state for PDF generation
+  const [activeInvoiceNo, setActiveInvoiceNo] = useState("0031");
+  const [activeVat, setActiveVat] = useState("15");
 
   const filtered = requests.filter(r => {
     const matchSearch = !searchTerm ||
@@ -76,9 +109,26 @@ export function RequestsClient({ requests }: { requests: ConstructionRequest[] }
     <div className="flex flex-col gap-6 p-6">
       
       {/* Header */}
-      <div>
-        <h1 className="font-display font-bold text-2xl text-foreground">Service Requests</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Manage incoming construction inquiries and quotes.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display font-bold text-2xl text-foreground">Service Requests</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage incoming construction inquiries and quotes.</p>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button style={{ backgroundColor: '#6aabfc', color: '#fff' }} className="hover:opacity-90 transition-opacity">
+              Generate invoice
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setIsBlankInvoiceOpen(true)}>
+              Blank Invoice
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsFillInvoiceOpen(true)}>
+              Fill from Request
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Stats */}
@@ -222,9 +272,55 @@ export function RequestsClient({ requests }: { requests: ConstructionRequest[] }
                   <StatusBadge status={selectedReq.status} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
+                  {selectedReq.status === "pending" && !selectedReq.invoiceData && (
+                    <Button 
+                      size="sm" 
+                      className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={() => {
+                        setFillName(selectedReq.fullName);
+                        setFillService(selectedReq.serviceRequired);
+                        setFillAddress(selectedReq.propertyAddress);
+                        setFillDate(new Date().toISOString().split('T')[0]);
+                        setFillItems([{ qty: 1, desc: "", price: 0 }]); // Reset items
+                        setIsFillInvoiceOpen(true);
+                      }}
+                    >
+                      <FileText className="w-3.5 h-3.5" /> Generate Invoice
+                    </Button>
+                  )}
                   {selectedReq.status === "pending" && (
-                    <Button size="sm" className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white">
-                      <Phone className="w-3.5 h-3.5" /> Mark Contacted
+                    <Button 
+                      size="sm" 
+                      className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                      onClick={async () => {
+                        await updateConstructionRequestStatus(selectedReq.id, "approved");
+                        setSelectedReq({ ...selectedReq, status: "approved" });
+                        router.refresh();
+                      }}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                    </Button>
+                  )}
+                  {selectedReq.invoiceData && (
+                    <Button 
+                      size="sm" 
+                      className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => {
+                        const itemsJson = encodeURIComponent(JSON.stringify(selectedReq?.invoiceData?.items || []));
+                        const params = new URLSearchParams({
+                          name: selectedReq.fullName,
+                          service: selectedReq.serviceRequired,
+                          address: selectedReq.propertyAddress,
+                          date: selectedReq?.invoiceData?.date || new Date().toISOString().split('T')[0],
+                          vat: selectedReq?.invoiceData?.vat || '15',
+                          invoiceNo: selectedReq.invoiceNo || '',
+                          items: itemsJson,
+                          autoPrint: 'true'
+                        });
+                        window.open(`/invoice-template-2?${params.toString()}`, '_blank');
+                      }}
+                    >
+                      <Download className="w-3.5 h-3.5" /> Download Invoice
                     </Button>
                   )}
                   {selectedReq.status === "contacted" && (
@@ -349,6 +445,174 @@ export function RequestsClient({ requests }: { requests: ConstructionRequest[] }
         )}
 
       </div>
+
+      <Dialog open={isBlankInvoiceOpen} onOpenChange={setIsBlankInvoiceOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Generate Blank Invoice</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="text-sm font-medium mb-1.5 block">VAT Percentage (%)</label>
+            <Input 
+              type="number" 
+              value={vatPercentage}
+              onChange={e => setVatPercentage(e.target.value)}
+              placeholder="e.g. 15"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBlankInvoiceOpen(false)}>Cancel</Button>
+            <Button 
+              style={{ backgroundColor: '#6aabfc', color: '#fff' }}
+              onClick={() => {
+                const uniqueNo = `INV-${Math.floor(100000 + Math.random() * 900000)}`;
+                window.open(`/invoice-template?vat=${vatPercentage}&invoiceNo=${uniqueNo}&autoPrint=true`, '_blank');
+                setIsBlankInvoiceOpen(false);
+              }}
+            >
+              Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Fill Invoice Dialog */}
+      <Dialog open={isFillInvoiceOpen} onOpenChange={setIsFillInvoiceOpen}>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Generate Invoice</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 space-y-4">
+            
+            <div className="bg-muted/30 p-3 rounded-lg text-sm mb-4">
+              <p><strong>Client:</strong> {fillName}</p>
+              <p><strong>Service:</strong> {fillService}</p>
+              <p><strong>Address:</strong> {fillAddress}</p>
+              <p><strong>Date:</strong> {fillDate}</p>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">Invoice Items</label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-7 text-xs"
+                  onClick={() => setFillItems([...fillItems, { qty: 1, desc: "", price: 0 }])}
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add Row
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {fillItems.map((item, index) => (
+                  <div key={index} className="flex gap-2 items-center bg-card border rounded-lg p-2">
+                    <Input 
+                      type="number" 
+                      className="w-16 h-8 text-sm" 
+                      placeholder="Qty" 
+                      value={item.qty || ""} 
+                      onChange={(e) => {
+                        const newItems = [...fillItems];
+                        newItems[index].qty = Number(e.target.value);
+                        setFillItems(newItems);
+                      }} 
+                    />
+                    <Input 
+                      className="flex-1 h-8 text-sm" 
+                      placeholder="Description" 
+                      value={item.desc} 
+                      onChange={(e) => {
+                        const newItems = [...fillItems];
+                        newItems[index].desc = e.target.value;
+                        setFillItems(newItems);
+                      }} 
+                    />
+                    <Input 
+                      type="number" 
+                      className="w-24 h-8 text-sm" 
+                      placeholder="Price" 
+                      value={item.price || ""} 
+                      onChange={(e) => {
+                        const newItems = [...fillItems];
+                        newItems[index].price = Number(e.target.value);
+                        setFillItems(newItems);
+                      }} 
+                    />
+                    <div className="w-20 text-right text-sm font-semibold whitespace-nowrap">
+                      GH₵ {(item.qty * item.price).toLocaleString()}
+                    </div>
+                    {fillItems.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-red-500 hover:text-red-600 shrink-0"
+                        onClick={() => {
+                          const newItems = fillItems.filter((_, i) => i !== index);
+                          setFillItems(newItems);
+                        }}
+                      >
+                        <Minus className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t mt-4">
+              <div className="w-48">
+                <label className="text-sm font-medium mb-1.5 block">VAT (%)</label>
+                <Input type="number" value={fillVat} onChange={e => setFillVat(e.target.value)} placeholder="15" />
+              </div>
+            </div>
+
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFillInvoiceOpen(false)}>Cancel</Button>
+            <Button 
+              style={{ backgroundColor: '#6aabfc', color: '#fff' }}
+              onClick={async () => {
+                const uniqueNo = `INV-${Math.floor(100000 + Math.random() * 900000)}`;
+                const itemsJson = encodeURIComponent(JSON.stringify(fillItems));
+                const params = new URLSearchParams({
+                  name: fillName,
+                  service: fillService,
+                  address: fillAddress,
+                  date: fillDate,
+                  vat: fillVat,
+                  invoiceNo: uniqueNo,
+                  items: itemsJson,
+                  autoPrint: 'true'
+                });
+                
+                if (selectedReq) {
+                  const invoiceData = {
+                    date: fillDate,
+                    vat: fillVat,
+                    items: fillItems
+                  };
+                  await saveConstructionInvoice(selectedReq.id, uniqueNo, invoiceData);
+                  router.refresh();
+                  setSelectedReq({
+                    ...selectedReq,
+                    invoiceNo: uniqueNo,
+                    invoiceData: invoiceData
+                  });
+                }
+                
+                // Need to avoid URL too long issues if items are massive, but typically it's fine for < 2000 chars.
+                // Modern browsers support 64k+ chars in URL.
+                window.open(`/invoice-template-2?${params.toString()}`, '_blank');
+                setIsFillInvoiceOpen(false);
+              }}
+            >
+              Generate & Print
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

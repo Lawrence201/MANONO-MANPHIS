@@ -68,3 +68,32 @@ export async function submitConstructionRequest(formData: FormData) {
     return { success: false, error: error.message || "An unexpected error occurred" };
   }
 }
+
+export async function saveConstructionInvoice(requestId: number, invoiceNo: string, invoiceData: any) {
+  try {
+    await prisma.constructionRequest.update({
+      where: { id: requestId },
+      data: {
+        invoiceNo,
+        invoiceData,
+      },
+    });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error saving invoice:", error);
+    return { success: false, error: error.message || "Failed to save invoice" };
+  }
+}
+
+export async function updateConstructionRequestStatus(requestId: number, status: string) {
+  try {
+    await prisma.constructionRequest.update({
+      where: { id: requestId },
+      data: { status },
+    });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updating status:", error);
+    return { success: false, error: error.message || "Failed to update status" };
+  }
+}

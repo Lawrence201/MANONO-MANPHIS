@@ -388,6 +388,8 @@ model ConstructionRequest {
   phone              String   @db.VarChar(50)
   agreedTerms        Boolean  @default(false) @map("agreed_terms")
   status             String   @default("pending") @db.VarChar(50)
+  invoiceNo          String?  @map("invoice_no") @db.VarChar(100)
+  invoiceData        Json?    @map("invoice_data")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 

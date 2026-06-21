@@ -50,6 +50,13 @@ export async function GET() {
             }
         });
 
+        // Count Pending Construction Requests
+        const pendingConstructionRequestsCount = await prisma.constructionRequest.count({
+            where: {
+                status: 'pending'
+            }
+        });
+
         // 4. Count Total Clients (unique emails across billboard bookings + export orders)
         const [billboardEmails, exportEmails] = await Promise.all([
             prisma.billboardBooking.findMany({ select: { email: true } }),
@@ -597,6 +604,7 @@ export async function GET() {
                 totalBillboards,
                 pendingApprovalsCount,
                 pendingOrdersCount,
+                pendingConstructionRequestsCount,
                 totalClientsCount,
                 totalBookingsCount,
                 monthlyData,

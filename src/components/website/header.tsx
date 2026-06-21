@@ -239,25 +239,27 @@ export function WebsiteHeader() {
                 }`}
                 style={{ transitionDelay: isMenuOpen ? `${(index + 1) * 100}ms` : "0ms" }}
               >
-                <div className="flex items-center justify-between">
-                  <Link
-                    href={link.href}
-                    className={`flex-1 py-4 text-[24px] max-[768px]:text-[20px] max-[480px]:text-[17px] max-[380px]:text-[15px] font-semibold tracking-tight ${
-                      link.active ? "text-[#eea000]" : "text-[#1a1a1a]"
+                <Link
+                  href={link.href}
+                  className="flex items-center justify-between w-full group"
+                  onClick={(e) => {
+                    if (link.hasDropdown) {
+                      e.preventDefault();
+                      setActiveDropdown(activeDropdown === link.name ? null : link.name);
+                    }
+                  }}
+                >
+                  <div
+                    className={`flex-1 py-4 text-[24px] max-[768px]:text-[20px] max-[480px]:text-[17px] max-[380px]:text-[15px] font-semibold tracking-tight transition-colors ${
+                      link.active ? "text-[#eea000]" : "text-[#1a1a1a] group-hover:text-[#eea000]"
                     }`}
-                    onClick={(e) => {
-                      if (link.hasDropdown) {
-                        e.preventDefault();
-                        setActiveDropdown(activeDropdown === link.name ? null : link.name);
-                      }
-                    }}
                   >
                     {link.name}
-                  </Link>
-                  <div className="p-4 flex items-center">
+                  </div>
+                  <div className="p-4 flex items-center transition-colors">
                     {getLinkIcon(link.name, !!link.active)}
                   </div>
-                </div>
+                </Link>
 
                 {/* Mobile Dropdown Content */}
                 {link.hasDropdown && (
