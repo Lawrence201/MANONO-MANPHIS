@@ -34,11 +34,11 @@ export default function LogosTemplate() {
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `}} />
-      <div id="logos-container" className="w-[210mm] h-[297mm] overflow-hidden bg-white p-10 shadow-lg print:shadow-none print:p-8 print:m-0 flex flex-col justify-between">
+      <div id="logos-container" className="w-[210mm] h-[297mm] overflow-hidden bg-white px-10 pt-4 pb-16 shadow-lg print:shadow-none print:px-8 print:pt-2 print:pb-14 print:m-0 flex flex-col justify-start">
         
         <div className="grid grid-cols-2 grid-rows-4 gap-x-8 gap-y-8 h-full min-h-[230mm] place-items-center">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="flex flex-col items-center justify-center p-4 w-full h-[160px] text-center print:border-[0.5px] print:border-dashed print:border-gray-400">
+            <div key={i} className={`flex flex-col items-center justify-center p-4 w-full h-[160px] text-center print:border-[0.5px] print:border-dashed print:border-gray-400 ${i >= 6 ? 'relative -top-3' : ''}`}>
               <img 
                 src="/billboards/White_Logo.png" 
                 alt={`Whitecap Logo ${i + 1}`} 
