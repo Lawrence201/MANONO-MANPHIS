@@ -192,17 +192,121 @@ export async function sendOrderReceiptEmail(data: OrderEmailData) {
 }
 
 // ----------------------------------------------------------------------------------
-// 3. ADMIN NOTIFICATION EMAIL
+// 3. CONSTRUCTION REQUEST EMAIL
+// ----------------------------------------------------------------------------------
+
+type ConstructionRequestEmailData = {
+  clientName: string;
+  clientEmail: string;
+  phone: string;
+  referenceId: string;
+  serviceRequired: string;
+  projectType: string;
+  estimatedBudget: string;
+};
+
+export async function sendConstructionRequestEmail(data: ConstructionRequestEmailData) {
+  try {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn('[Email] SMTP credentials missing.');
+      return { success: false, error: 'SMTP credentials missing' };
+    }
+
+    const transporter = getTransporter();
+    
+    const subject = `Construction Request Received: ${data.referenceId}`;
+    const htmlContent = `
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <!-- Header -->
+        <div style="background-color: #f59e0b; padding: 30px 20px; text-align: center; color: white;">
+          <h2 style="margin: 0; font-size: 24px; font-weight: 700;">Construction Request Received!</h2>
+          <p style="margin: 10px 0 0 0; font-size: 14px; color: #fef3c7;">Reference: ${data.referenceId}</p>
+        </div>
+        
+        <!-- Body -->
+        <div style="padding: 30px 20px;">
+          <p style="color: #374151; font-size: 16px; margin-top: 0;">Dear <strong>${data.clientName}</strong>,</p>
+          <p style="color: #4b5563; font-size: 15px; line-height: 1.5;">Your construction request has been successfully received and is currently being reviewed by our team.</p>
+          
+          <!-- Customer Details Card -->
+          <div style="background-color: white; border-radius: 8px; padding: 25px; margin-top: 25px; margin-bottom: 20px; border: 1px solid #f3f4f6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+            <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #374151;">Your Details</h3>
+            <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 12px 0; color: #6b7280; font-weight: 500; width: 35%; border-bottom: 1px solid #f3f4f6;">Name:</td>
+                <td style="padding: 12px 0; color: #111827; border-bottom: 1px solid #f3f4f6;">${data.clientName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #6b7280; font-weight: 500; border-bottom: 1px solid #f3f4f6;">Email:</td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+                  <a href="mailto:${data.clientEmail}" style="color: #2563eb; text-decoration: none;">${data.clientEmail}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #6b7280; font-weight: 500; border-bottom: 1px solid #f3f4f6;">Phone:</td>
+                <td style="padding: 12px 0; color: #111827; border-bottom: 1px solid #f3f4f6;">${data.phone}</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Request Details Card -->
+          <div style="background-color: white; border-radius: 8px; padding: 25px; margin-bottom: 30px; border: 1px solid #f3f4f6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+            <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #374151;">Request Details</h3>
+            <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 12px 0; color: #6b7280; font-weight: 500; width: 35%; border-bottom: 1px solid #f3f4f6;">Service:</td>
+                <td style="padding: 12px 0; color: #111827; border-bottom: 1px solid #f3f4f6;">${data.serviceRequired}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #6b7280; font-weight: 500; border-bottom: 1px solid #f3f4f6;">Project Type:</td>
+                <td style="padding: 12px 0; color: #111827; border-bottom: 1px solid #f3f4f6;">${data.projectType}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #6b7280; font-weight: 500; border-bottom: 1px solid #f3f4f6;">Est. Budget:</td>
+                <td style="padding: 12px 0; color: #111827; border-bottom: 1px solid #f3f4f6;">${data.estimatedBudget}</td>
+              </tr>
+            </table>
+          </div>
+
+          <p style="color: #4b5563; font-size: 14px; text-align: center;">Thank you for choosing Manono Manphis. We will be in touch shortly.</p>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; padding: 20px; font-size: 12px; color: #9ca3af; background-color: #f8fafc; border-top: 1px solid #e5e7eb;">
+          <p style="margin: 0 0 5px 0;">Manono Manphis System</p>
+          <p style="margin: 0;">&copy; ${new Date().getFullYear()} Manono Manphis. All rights reserved.</p>
+        </div>
+      </div>
+    `;
+
+    const info = await transporter.sendMail({
+      from: `"Manono Manphis" <${process.env.SMTP_USER}>`,
+      to: data.clientEmail,
+      subject: subject,
+      html: htmlContent,
+    });
+
+    console.log('[Email] Construction Request Email Sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('[Email] Failed to send construction request email:', error);
+    return { success: false, error: String(error) };
+  }
+}
+
+// ----------------------------------------------------------------------------------
+// 4. ADMIN NOTIFICATION EMAIL
 // ----------------------------------------------------------------------------------
 
 type AdminNotificationData = {
-  type: 'Billboard Booking' | 'Product Order';
+  type: 'Billboard Booking' | 'Product Order' | 'Construction Request';
   reference: string;
   clientName: string;
   clientEmail: string;
   phone?: string;
   details: string;
-  totalPrice: number;
+  totalPrice: number | string;
 };
 
 export async function sendAdminNotificationEmail(data: AdminNotificationData) {
@@ -276,8 +380,8 @@ export async function sendAdminNotificationEmail(data: AdminNotificationData) {
             <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
               ${detailsRows}
               <tr>
-                <td style="padding: 20px 0 5px 0; color: #6b7280; font-weight: 500;">Amount:</td>
-                <td style="padding: 20px 0 5px 0; color: #10b981; font-size: 22px; font-weight: bold;">GH₵ ${data.totalPrice.toLocaleString()}</td>
+                <td style="padding: 20px 0 5px 0; color: #6b7280; font-weight: 500;">${data.type === 'Construction Request' ? 'Budget' : 'Amount'}:</td>
+                <td style="padding: 20px 0 5px 0; color: #10b981; font-size: 22px; font-weight: bold;">${data.type === 'Construction Request' ? data.totalPrice : 'GH₵ ' + data.totalPrice.toLocaleString()}</td>
               </tr>
             </table>
           </div>

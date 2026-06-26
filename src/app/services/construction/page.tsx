@@ -12,7 +12,12 @@ import { ConstructionContactSection } from "@/components/website/construction-co
 import { TopBar } from "@/components/website/top-bar";
 import { WebsiteFooter } from "@/components/website/footer";
 
-export default function ConstructionPage() {
+import { getConstructionProjects } from "@/lib/actions/construction-actions";
+
+export default async function ConstructionPage() {
+  const result = await getConstructionProjects();
+  const dbProjects = result.projects ? result.projects.filter((p: any) => p.status === "published") : [];
+
   return (
     <div className="min-h-screen relative font-sans selection:bg-[#FFC700] selection:text-black">
       {/* Top Bar */}
@@ -128,7 +133,7 @@ export default function ConstructionPage() {
       <ConstructionCTASection videoSrc="/construction/vid_2.mp4" />
       <ConstructionProcessSection />
       <ConstructionMarquee />
-      <ConstructionProjectsSection />
+      <ConstructionProjectsSection dbProjects={dbProjects} />
       <ConstructionContactSection />
       <WebsiteFooter />
     </div>

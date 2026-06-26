@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveConstructionInvoice, updateConstructionRequestStatus } from "@/lib/actions/construction-request-actions";
+import { saveConstructionInvoice, updateConstructionRequestStatus, deleteConstructionRequest } from "@/lib/actions/construction-request-actions";
 import {
   Search, Filter, Eye, CheckCircle2, XCircle, Clock, 
   MapPin, Phone, Mail, FileText, Download, Building2, HardHat, Home, Trash2, Calendar, ClipboardList, Plus, Minus
@@ -74,6 +74,7 @@ export function RequestsClient({ requests }: { requests: any[] }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedReq, setSelectedReq] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const [isBlankInvoiceOpen, setIsBlankInvoiceOpen] = useState(false);
   const [isFillInvoiceOpen, setIsFillInvoiceOpen] = useState(false);
@@ -204,8 +205,19 @@ export function RequestsClient({ requests }: { requests: any[] }) {
                     )}
                   >
                     <td className="px-5 py-4">
-                      <div className="font-bold text-foreground text-sm">{req.fullName}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{req.referenceId}</div>
+                      <div className="flex items-center gap-2">
+                        {req.clientProfilePicture ? (
+                          <img src={req.clientProfilePicture} alt={req.fullName} className="w-8 h-8 rounded-full object-cover shrink-0 border border-border" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 border border-border text-muted-foreground font-bold text-[10px]">
+                            {(req.fullName || "U").substring(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="font-bold text-foreground text-sm truncate max-w-[120px]">{req.fullName}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{req.referenceId}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-5 py-4">
                       <div className="font-medium text-foreground">{req.serviceRequired}</div>
@@ -433,10 +445,28 @@ export function RequestsClient({ requests }: { requests: any[] }) {
                 )}
               </div>
 
-              {/* Danger Zone */}
               <div className="pt-4">
-                <Button variant="ghost" size="sm" className="w-full text-red-500 hover:bg-red-500/10 hover:text-red-600 gap-2">
-                  <Trash2 className="w-3.5 h-3.5" /> Delete Request
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full text-red-500 hover:bg-red-500/10 hover:text-red-600 gap-2"
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to delete this request? This action cannot be undone.")) {
+                      setIsDeleting(true);
+                      const res = await deleteConstructionRequest(selectedReq.id);
+                      if (res.success) {
+                        setSelectedReq(null);
+                        router.refresh();
+                      } else {
+                        alert(res.error || "Failed to delete request");
+                      }
+                      setIsDeleting(false);
+                    }
+                  }}
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> 
+                  {isDeleting ? "Deleting..." : "Delete Request"}
                 </Button>
               </div>
 

@@ -248,7 +248,7 @@ export default function ActiveProjectsPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Active" value={total - completed} sub="Ongoing projects" icon={HardHat} />
-          <StatCard label="On Track" value={onTrack} sub="Meeting deadlines" icon={TrendingUp} accent />
+          <StatCard label="On Track" value={onTrack} sub="Meeting deadlines" icon={TrendingUp} />
           <StatCard label="Delayed" value={delayed} sub="Requires attention" icon={AlertTriangle} />
           <StatCard label="Completed" value={completed} sub="Finished this year" icon={CheckCircle2} />
         </div>
@@ -290,7 +290,7 @@ export default function ActiveProjectsPage() {
             <p className="text-muted-foreground font-medium">No projects found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filtered.map(project => {
               const StatusIcon = STATUS_CONFIG[project.status].icon;
               return (

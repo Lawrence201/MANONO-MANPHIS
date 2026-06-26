@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { sendConstructionRequestEmail, sendAdminNotificationEmail } from "@/lib/mailer";
 
 export async function submitConstructionRequest(formData: FormData) {
   try {
@@ -62,6 +63,28 @@ export async function submitConstructionRequest(formData: FormData) {
       },
     });
 
+    // Send Email to Client
+    await sendConstructionRequestEmail({
+      clientName: fullName,
+      clientEmail: email,
+      phone,
+      referenceId: request.referenceId,
+      serviceRequired,
+      projectType,
+      estimatedBudget,
+    });
+
+    // Send Notification to Admins
+    await sendAdminNotificationEmail({
+      type: 'Construction Request',
+      reference: request.referenceId,
+      clientName: fullName,
+      clientEmail: email,
+      phone,
+      details: `Service: ${serviceRequired} | Project Type: ${projectType} | Address: ${propertyAddress}`,
+      totalPrice: estimatedBudget, // We pass estimatedBudget as totalPrice, since it accepts number | string now
+    });
+
     return { success: true, referenceId: request.referenceId };
   } catch (error: any) {
     console.error("Error submitting construction request:", error);
@@ -97,3 +120,16 @@ export async function updateConstructionRequestStatus(requestId: number, status:
     return { success: false, error: error.message || "Failed to update status" };
   }
 }
+
+export async function deleteConstructionRequest(requestId: number) {
+  try {
+    await prisma.constructionRequest.delete({
+      where: { id: requestId },
+    });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error deleting request:", error);
+    return { success: false, error: error.message || "Failed to delete request" };
+  }
+}
+

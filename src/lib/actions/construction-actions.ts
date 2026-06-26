@@ -38,6 +38,174 @@ export async function createConstructionService(data: any) {
   }
 }
 
+export async function getConstructionProjects() {
+  try {
+    const projects = await db.constructionProject.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        galleryImages: true,
+      },
+    });
+    return { success: true, projects };
+  } catch (error: any) {
+    console.error("Error fetching projects:", error);
+    return { success: false, error: error.message || "Failed to fetch projects" };
+  }
+}
+
+export async function createConstructionProject(data: any) {
+  try {
+    const { galleryImages, ...projectData } = data;
+    
+    // Check if slug is unique
+    const existing = await db.constructionProject.findUnique({
+      where: { slug: projectData.slug }
+    });
+    if (existing) {
+      return { success: false, error: "A project with this slug already exists. Please choose a different title or slug." };
+    }
+
+    const project = await db.constructionProject.create({
+      data: {
+        ...projectData,
+        galleryImages: {
+          create: galleryImages?.map((url: string) => ({
+            imagePath: url
+          })) || []
+        }
+      }
+    });
+    
+    return { success: true, project };
+  } catch (error: any) {
+    console.error("Error creating project:", error);
+    return { success: false, error: error.message || "Failed to create project" };
+  }
+}
+
+export async function deleteConstructionProject(id: number) {
+  try {
+    await db.constructionProject.delete({
+      where: { id }
+    });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error deleting project:", error);
+    return { success: false, error: error.message || "Failed to delete project" };
+  }
+}
+
+export async function getConstructionProjectBySlug(slug: string) {
+  try {
+    const project = await db.constructionProject.findUnique({
+      where: { slug },
+      include: {
+        galleryImages: true,
+      },
+    });
+    return { success: true, project };
+  } catch (error: any) {
+    console.error("Error fetching project:", error);
+    return { success: false, error: error.message || "Failed to fetch project" };
+  }
+}
+
+export async function getConstructionProjectById(id: number) {
+  try {
+    const project = await db.constructionProject.findUnique({
+      where: { id },
+      include: {
+        galleryImages: true,
+      },
+    });
+    if (!project) return { success: false, error: "Project not found" };
+    return { success: true, project };
+  } catch (error: any) {
+    console.error("Error fetching project by id:", error);
+    return { success: false, error: error.message || "Failed to fetch project" };
+  }
+}
+
+export async function updateConstructionProject(id: number, data: any) {
+  try {
+    const { galleryImages, ...projectData } = data;
+
+    // Check if slug is unique to another project
+    const existing = await db.constructionProject.findUnique({
+      where: { slug: projectData.slug }
+    });
+    if (existing && existing.id !== id) {
+      return { success: false, error: "A project with this slug already exists. Please choose a different title or slug." };
+    }
+
+    // Fetch the existing project to compare images
+    const oldProject = await db.constructionProject.findUnique({
+      where: { id },
+      include: { galleryImages: true }
+    });
+
+    if (oldProject) {
+      const urlsToDelete: string[] = [];
+      if (oldProject.heroImage && projectData.heroImage && oldProject.heroImage !== projectData.heroImage) {
+        urlsToDelete.push(oldProject.heroImage);
+      }
+      if (oldProject.mainImage && projectData.mainImage && oldProject.mainImage !== projectData.mainImage) {
+        urlsToDelete.push(oldProject.mainImage);
+      }
+      const newGalleryPaths = galleryImages || [];
+      oldProject.galleryImages.forEach((img: any) => {
+        if (img.imagePath && !newGalleryPaths.includes(img.imagePath)) {
+          urlsToDelete.push(img.imagePath);
+        }
+      });
+      for (const url of urlsToDelete) {
+        try {
+          await deleteFromCloudinary(url);
+        } catch (e) {
+          console.error("Failed to delete old image:", url, e);
+        }
+      }
+    }
+
+    await db.constructionProjectGalleryImage.deleteMany({
+      where: { projectId: id }
+    });
+
+    const project = await db.constructionProject.update({
+      where: { id },
+      data: {
+        ...projectData,
+        galleryImages: {
+          create: galleryImages?.map((url: string) => ({
+            imagePath: url
+          })) || []
+        }
+      }
+    });
+
+    revalidatePath("/services/construction/projects");
+    revalidatePath(`/services/construction/project-details/${project.slug}`);
+    
+    return { success: true, project };
+  } catch (error: any) {
+    console.error("Error updating project:", error);
+    return { success: false, error: error.message || "Failed to update project" };
+  }
+}
+
+export async function updateConstructionProjectStatus(id: number, status: string) {
+  try {
+    await db.constructionProject.update({
+      where: { id },
+      data: { status }
+    });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updating project status:", error);
+    return { success: false, error: error.message || "Failed to update project status" };
+  }
+}
+
 export async function getConstructionServices() {
   try {
     const services = await db.constructionService.findMany({

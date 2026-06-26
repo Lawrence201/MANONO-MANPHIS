@@ -86,14 +86,16 @@ export async function ConstructionServicesSection() {
         </div>
 
         {/* Bottom Notice */}
-        <div className="flex items-center justify-center gap-2 max-[480px]:gap-1.5 pt-6 max-[480px]:pt-2 text-center">
-          <div className="w-5 h-5 bg-[#FFD100] flex items-center justify-center rounded-sm shrink-0">
-            <ChevronRight className="w-3 h-3 text-[#1a1a1a]" strokeWidth={3} />
-          </div>
-          <p className="text-gray-600 text-[15px] max-[480px]:text-[12px] font-medium leading-[1.6] flex items-center gap-1.5 flex-wrap justify-center">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-[15px] max-[480px]:text-[13px] font-bold text-[#1a1a1a] pt-6 max-[480px]:pt-2">
+          <div className="flex items-center gap-2">
+            <div className="bg-[#FFD100] text-black w-6 h-6 flex items-center justify-center rounded-sm shrink-0">
+              <ChevronRight className="w-4 h-4" strokeWidth={3} />
+            </div>
             <span>Facing obstacles in business growth?</span>
-            <Link href="/services/construction/services" className="text-[#1a1a1a] font-bold underline decoration-2 underline-offset-4 decoration-gray-300 hover:decoration-[#FFD100] transition-colors whitespace-nowrap">View All Services</Link>
-          </p>
+          </div>
+          <Link href="/services/construction/services" className="bg-[#1a1a1a] text-white hover:bg-[#FFD100] hover:text-[#1a1a1a] px-6 py-2.5 max-[480px]:px-5 max-[480px]:py-2 text-[14px] font-bold transition-all duration-300 rounded-sm whitespace-nowrap inline-flex items-center">
+            View All Services
+          </Link>
         </div>
 
       </div>

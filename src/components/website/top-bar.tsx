@@ -27,11 +27,11 @@ export function TopBar() {
         <div className="flex items-center gap-6 max-[1028px]:gap-4">
           <div className="flex items-center gap-2 text-white/80 hover:text-white transition-colors cursor-default">
             <Mail className="w-3.5 h-3.5 text-[#eea000]" />
-            <span>info@worldshipping.com</span>
+            <span>manonomanphis@gmail.com</span>
           </div>
           <div className="flex items-center gap-2 text-white/80 hover:text-white transition-colors cursor-default">
             <Phone className="w-3.5 h-3.5 text-[#eea000]" />
-            <span>+88 01911 837404</span>
+            <span>+233 54 288 3496</span>
           </div>
           <div className="flex items-center gap-2 text-white/80 hover:text-white transition-colors cursor-default border-l border-white/20 pl-6 max-[1028px]:hidden">
             <Clock className="w-3.5 h-3.5 text-[#eea000]" />

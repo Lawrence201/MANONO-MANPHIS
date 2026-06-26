@@ -395,3 +395,45 @@ model ConstructionRequest {
 
   @@map("construction_requests")
 }
+
+model ConstructionProject {
+  id                      Int      @id @default(autoincrement())
+  title                   String   @db.VarChar(255)
+  slug                    String   @unique @db.VarChar(255)
+  shortDescription        String?  @db.Text
+  
+  heroImage               String?  @map("hero_image") @db.VarChar(500)
+  mainImage               String?  @map("main_image") @db.VarChar(500)
+  
+  clientName              String?  @map("client_name") @db.VarChar(255)
+  serviceType             String?  @map("service_type") @db.VarChar(255)
+  projectDate             String?  @map("project_date") @db.VarChar(100)
+  websiteUrl              String?  @map("website_url") @db.VarChar(255)
+
+  accomplishedTitle       String?  @map("accomplished_title") @db.VarChar(255)
+  accomplishedDescription String?  @map("accomplished_description") @db.Text
+  accomplishedQuote       String?  @map("accomplished_quote") @db.Text
+  
+  overviewTitle           String?  @map("overview_title") @db.VarChar(255)
+  overviewDescription     String?  @map("overview_description") @db.Text
+  
+  highlightFeatures       String[] @map("highlight_features") // Bullet points
+  theResults              String[] @map("the_results") // Bullet points
+  
+  status                  String   @default("published") @db.VarChar(50)
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  galleryImages           ConstructionProjectGalleryImage[]
+  @@map("construction_projects")
+}
+
+model ConstructionProjectGalleryImage {
+  id          Int                 @id @default(autoincrement())
+  projectId   Int                 @map("project_id")
+  imagePath   String              @map("image_path") @db.VarChar(500)
+  project     ConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("construction_project_gallery_images")
+}

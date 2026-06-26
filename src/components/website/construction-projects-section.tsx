@@ -5,47 +5,29 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowUpRight, ChevronRight, ArrowUp } from "lucide-react";
 
-export function ConstructionProjectsSection() {
+export function ConstructionProjectsSection({ dbProjects = [] }: { dbProjects?: any[] }) {
   const [activeFilter, setActiveFilter] = useState("All Projects");
   
   const filters = [
-    "All Projects",
-    "Commercial (04)",
-    "Construction (04)",
-    "Industrial (04)",
-    "Residential (04)"
+    { name: "All Projects", count: dbProjects.length },
+    { name: "Commercial", count: dbProjects.filter(p => p.serviceType === "Commercial").length },
+    { name: "Construction", count: dbProjects.filter(p => p.serviceType === "Construction").length },
+    { name: "Industrial", count: dbProjects.filter(p => p.serviceType === "Industrial").length },
+    { name: "Residential", count: dbProjects.filter(p => p.serviceType === "Residential").length }
   ];
 
-  const projects = [
-    {
-      id: 1,
-      title: "Green View Housing",
-      category: "Residential",
-      image: "/construction/cons/project_1.jpeg",
-      desc: "This project reflects our commitment to quality construction, efficient project..."
-    },
-    {
-      id: 2,
-      title: "Modern Office Complex",
-      category: "Commercial",
-      image: "/construction/cons/project_2.jpeg",
-      desc: "This project reflects our commitment to quality construction, efficient project..."
-    },
-    {
-      id: 3,
-      title: "Industrial Warehouse",
-      category: "Industrial",
-      image: "/construction/cons/project_3.jpeg",
-      desc: "This project reflects our commitment to quality construction, efficient project..."
-    },
-    {
-      id: 4,
-      title: "Urban Architecture",
-      category: "Construction",
-      image: "/construction/cons/project_4.jpeg",
-      desc: "This project reflects our commitment to quality construction, efficient project..."
-    }
-  ];
+  const formattedProjects = dbProjects.map((p) => ({
+    id: p.id,
+    title: p.title,
+    category: p.serviceType,
+    image: p.heroImage || p.mainImage || "/construction/cons/project_1.jpeg",
+    desc: p.shortDescription || "This project reflects our commitment to quality construction...",
+    slug: p.slug
+  }));
+
+  const filteredProjects = activeFilter === "All Projects" 
+    ? formattedProjects 
+    : formattedProjects.filter(p => p.category === activeFilter);
 
   return (
     <section className="bg-[#313131] pt-24 pb-0 relative" id="projects">
@@ -67,15 +49,15 @@ export function ConstructionProjectsSection() {
         <div className="flex flex-wrap items-center justify-center gap-3 max-[480px]:gap-2">
           {filters.map((filter) => (
             <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
+              key={filter.name}
+              onClick={() => setActiveFilter(filter.name)}
               className={`px-7 py-3 max-[480px]:px-4 max-[480px]:py-2 text-[14px] max-[480px]:text-[13px] font-bold transition-all duration-300 ${
-                activeFilter === filter 
+                activeFilter === filter.name 
                   ? "bg-[#FFD100] text-[#1a1a1a]" 
                   : "bg-transparent border border-white/10 text-white hover:bg-white/10"
               }`}
             >
-              {filter}
+              {filter.name === "All Projects" ? filter.name : `${filter.name} (${filter.count.toString().padStart(2, '0')})`}
             </button>
           ))}
         </div>
@@ -100,7 +82,7 @@ export function ConstructionProjectsSection() {
           }
         `}} />
         <div className="flex h-full animate-marquee">
-          {[...projects, ...projects].map((project, index) => (
+          {[...filteredProjects, ...filteredProjects].map((project, index) => (
             <div key={`${project.id}-${index}`} className="relative w-[100vw] md:w-[50vw] lg:w-[25vw] h-full group overflow-hidden cursor-pointer shrink-0">
               <Image 
                 src={project.image} 
@@ -120,7 +102,7 @@ export function ConstructionProjectsSection() {
                   {project.desc}
                 </p>
                 <div className="flex items-center justify-between">
-                  <Link href="/services/construction/projects" className="flex items-center text-white text-[15px] font-bold hover:text-[#FFD100] transition-colors group/link">
+                  <Link href={`/services/construction/project-details/${project.slug}`} className="flex items-center text-white text-[15px] font-bold hover:text-[#FFD100] transition-colors group/link">
                     More Details 
                     <ArrowUpRight className="inline-block w-5 h-5 ml-1.5 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
                   </Link>
@@ -138,12 +120,14 @@ export function ConstructionProjectsSection() {
       {/* Bottom Bar */}
       <div className="bg-white py-6 max-[480px]:py-4 relative">
         <div className="container mx-auto px-4 flex justify-center items-center">
-          <div className="flex items-center justify-center gap-2 max-[480px]:gap-1.5 text-[14px] max-[480px]:text-[11px] font-bold text-[#1a1a1a]">
-            <div className="bg-[#FFD100] text-black w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 flex items-center justify-center rounded-sm shrink-0">
-              <ChevronRight className="w-4 h-4 max-[480px]:w-3 max-[480px]:h-3" strokeWidth={3} />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-[15px] max-[480px]:text-[13px] font-bold text-[#1a1a1a]">
+            <div className="flex items-center gap-2">
+              <div className="bg-[#FFD100] text-black w-6 h-6 flex items-center justify-center rounded-sm shrink-0">
+                <ChevronRight className="w-4 h-4" strokeWidth={3} />
+              </div>
+              <span>Facing Obstacles in Construction Project?</span>
             </div>
-            <span>Facing Obstacles in Construction Project?</span>
-            <Link href="/services/construction/projects" className="underline hover:text-[#FFD100] transition-colors decoration-2 underline-offset-4 whitespace-nowrap">
+            <Link href="/services/construction/projects" className="bg-[#1a1a1a] text-white hover:bg-[#FFD100] hover:text-[#1a1a1a] px-6 py-2.5 max-[480px]:px-5 max-[480px]:py-2 text-[14px] font-bold transition-all duration-300 rounded-sm whitespace-nowrap inline-flex items-center">
               View All Projects
             </Link>
           </div>

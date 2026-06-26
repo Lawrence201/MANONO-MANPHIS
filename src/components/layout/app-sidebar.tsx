@@ -9,7 +9,7 @@ import {
   Receipt, Package, Truck, BarChart3, Globe2, Settings,
   Sparkles, FileBarChart, ShieldCheck, Map, Ship, UserCog,
   ScrollText, Bell, Workflow, Factory, MessageSquare, Monitor, Layers, Calendar, Megaphone,
-  HardHat, Inbox, ImagePlus,
+  HardHat, Inbox, ImagePlus, PlusCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +47,7 @@ const navGroups = [
       { title: "Service Requests", url: "/construction/requests", icon: Inbox, badge: "0" },
       { title: "Active Projects", url: "/construction/projects", icon: HardHat },
       { title: "Portfolio", url: "/construction/portfolio", icon: ImagePlus },
+      { title: "Add Project", url: "/inventory/construction/projects/add", icon: PlusCircle },
     ],
   },
   {
