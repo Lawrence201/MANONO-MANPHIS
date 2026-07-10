@@ -79,7 +79,7 @@ export function AboutUsSection() {
           {/* Right Image */}
           <div className="flex-[2.5] relative min-h-[300px] md:min-h-[480px]">
             <Image 
-              src="/about_honey_horizontal.png" 
+              src="/images/hony.png" 
               alt="Natural Honeycomb" 
               fill
               className="object-cover"
