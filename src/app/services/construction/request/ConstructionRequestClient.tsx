@@ -625,7 +625,7 @@ export default function ConstructionRequestClient() {
             </div>
             <div>
               <h3 className="text-[16px] min-[480px]:text-[18px] font-black text-[#1a1a1a] mb-1">Email Support</h3>
-              <p className="text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">manonomanphis@gmail.com</p>
+              <p className="text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">manono@manonomanphis.com</p>
             </div>
           </div>
 
@@ -635,7 +635,11 @@ export default function ConstructionRequestClient() {
             </div>
             <div>
               <h3 className="text-[16px] min-[480px]:text-[18px] font-black text-[#1a1a1a] mb-1">Call Our Office</h3>
-              <p className="text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">+233 542883496</p>
+              <div className="flex flex-col gap-1 text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">
+                <span>+233 54 288 3496</span>
+                <span>+233 55 860 0605</span>
+                <span>+233 59 450 0059</span>
+              </div>
             </div>
           </div>
 
@@ -655,7 +659,11 @@ export default function ConstructionRequestClient() {
             </div>
             <div>
               <h3 className="text-[16px] min-[480px]:text-[18px] font-black text-[#1a1a1a] mb-1">WhatsApp Support</h3>
-              <p className="text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">+233 542883496</p>
+              <div className="flex flex-col gap-1 text-[13px] min-[480px]:text-[14px] text-gray-500 font-medium">
+                <span>+233 54 288 3496</span>
+                <span>+233 55 860 0605</span>
+                <span>+233 59 450 0059</span>
+              </div>
             </div>
           </div>
 

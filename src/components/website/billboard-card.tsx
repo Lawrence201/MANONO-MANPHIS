@@ -201,6 +201,7 @@ export function BillboardCatalogCard({ item }: { item: ProductItem }) {
               src={`https://static-maps.yandex.ru/1.x/?lang=en_US&ll=${lng},${lat}&z=13&l=map&size=150,150`}
               alt="Google Maps Location"
               fill
+              unoptimized
               className="object-cover transition-transform duration-700 group-hover/map:scale-110"
             />
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
