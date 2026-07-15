@@ -8,6 +8,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
   {
+    image: "/images/hony.png",
+    subtitle: "100% Pure Organic Honey",
+    title: "PREMIUM NATURAL & ORGANIC HONEY",
+    description: "Sustainably harvested and pure organic honey, rich in natural goodness and perfect for health, culinary, and commercial applications globally. For more info contact +233 54 288 3496 | +233 55 860 0605 | +233 59 450 0059"
+  },
+  {
     image: "/bill_board.png",
     subtitle: "Premium Outdoor Advertising",
     title: "DIGITAL BILLBOARD & ADVERTISING SOLUTIONS",
