@@ -50,7 +50,24 @@ export function WebsiteHeader() {
   // Close menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
+    setActiveDropdown(null);
   }, [pathname]);
+
+  // Close dropdown when clicking or tapping outside of nav items
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as HTMLElement;
+      if (activeDropdown && !target.closest("[data-nav-dropdown='true']")) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [activeDropdown]);
 
   const updateCartCount = async () => {
     try {
@@ -121,24 +138,41 @@ export function WebsiteHeader() {
               <li 
                 key={link.name} 
                 className="relative group"
+                data-nav-dropdown="true"
+                onMouseLeave={() => {
+                  if (activeDropdown === link.name) {
+                    setActiveDropdown(null);
+                  }
+                }}
               >
                 <Link
                   href={link.href}
+                  onClick={(e) => {
+                    if (link.hasDropdown) {
+                      e.preventDefault();
+                      setActiveDropdown(activeDropdown === link.name ? null : link.name);
+                    }
+                  }}
                   className={`px-4 py-8 text-[14px] font-semibold tracking-wide transition-all border-t-4 border-transparent hover:text-[#eea000] flex items-center gap-1.5 ${
-                    link.active ? "text-[#eea000] border-[#eea000]" : "text-[#1a1a1a]"
+                    link.active || activeDropdown === link.name ? "text-[#eea000] border-[#eea000]" : "text-[#1a1a1a]"
                   }`}
                 >
                   {link.name}
-                  {link.hasDropdown && <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" />}
+                  {link.hasDropdown && <ChevronDown className={`w-3.5 h-3.5 transition-transform group-hover:rotate-180 ${activeDropdown === link.name ? "rotate-180" : ""}`} />}
                 </Link>
 
                 {/* Dropdown Menu */}
                 {link.hasDropdown && (
-                  <ul className="absolute top-full left-0 w-64 bg-white shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 border-t-2 border-[#eea000] py-2">
+                  <ul className={`absolute top-full left-0 w-64 bg-white shadow-2xl transition-all duration-300 border-t-2 border-[#eea000] py-2 ${
+                    activeDropdown === link.name
+                      ? "opacity-100 translate-y-0 pointer-events-auto"
+                      : "opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                  }`}>
                     {(link.name === "SERVICES" ? serviceItems : trackingItems).map((item) => (
                       <li key={item.name}>
                         <Link 
                           href={item.href}
+                          onClick={() => setActiveDropdown(null)}
                           className="block px-6 py-3.5 text-[13px] font-semibold text-[#1a1a1a] hover:bg-[#f7f3f0] hover:text-[#eea000] transition-colors"
                         >
                           {item.name}
@@ -234,6 +268,7 @@ export function WebsiteHeader() {
             {navLinks.map((link, index) => (
               <div 
                 key={link.name} 
+                data-nav-dropdown="true"
                 className={`border-b border-gray-200/50 last:border-0 transition-all duration-500 ease-out transform ${
                   isMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
                 }`}
