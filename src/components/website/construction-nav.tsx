@@ -39,7 +39,7 @@ export function ConstructionNav() {
     { name: "Construction", href: "/services/construction" },
     { name: "About", href: "/#about" },
     { name: "Services", href: "/services/construction/services" },
-    { name: "Projects", href: "#projects" },
+    { name: "Projects", href: "/services/construction/projects" },
     { name: "Contact", href: "/services/construction/request" },
   ];
 
@@ -84,7 +84,7 @@ export function ConstructionNav() {
         <Link href="/services/construction" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${pathname === '/services/construction' ? 'text-[#FFD100]' : isScrolled ? 'text-[#1a1a1a]' : 'text-white'}`}>Construction</Link>
         <Link href="/#about" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${isScrolled ? "text-[#1a1a1a]" : "text-white"}`}>About</Link>
         <Link href="/services/construction/services" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${pathname === '/services/construction/services' ? 'text-[#FFD100]' : isScrolled ? 'text-[#1a1a1a]' : 'text-white'}`}>Services</Link>
-        <Link href="#projects" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${isScrolled ? "text-[#1a1a1a]" : "text-white"}`}>Projects</Link>
+        <Link href="/services/construction/projects" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${pathname === '/services/construction/projects' ? 'text-[#FFD100]' : isScrolled ? 'text-[#1a1a1a]' : 'text-white'}`}>Projects</Link>
         <Link href="/services/construction/request" className={`text-[15px] font-bold transition-colors duration-500 hover:text-[#FFD100] ${pathname === '/services/construction/request' ? 'text-[#FFD100]' : isScrolled ? 'text-[#1a1a1a]' : 'text-white'}`}>Contact</Link>
       </div>
 

@@ -104,7 +104,7 @@ function InvoiceContent2() {
             </h1>
             <p className="font-bold text-sm">Dansoman, Accra - Ghana</p>
             <p className="font-bold text-sm mt-0.5">Phone: +233 54 288 34 96 / +232 75 126 123</p>
-            <p className="font-bold text-sm mt-0.5">Email: manonomanphis@gmail.com</p>
+            <p className="font-bold text-sm mt-0.5">Email: manono@manonomanphis.com</p>
           </div>
         </div>
 

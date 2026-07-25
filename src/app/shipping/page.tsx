@@ -302,7 +302,7 @@ export default function CreateShippingPage() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">Email Address</label>
-                      <input type="email" value={productName ? "manonomanphis@gmail.com" : ""} readOnly className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-500 outline-none cursor-not-allowed font-bold" />
+                      <input type="email" value={productName ? "manono@manonomanphis.com" : ""} readOnly className="w-full h-12 px-4 border border-gray-200 rounded-sm bg-gray-50 text-gray-500 outline-none cursor-not-allowed font-bold" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700">Phone / WhatsApp</label>
