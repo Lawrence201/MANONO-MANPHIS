@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import React, { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
@@ -11,31 +12,41 @@ const slides = [
     image: "/images/hony.png",
     subtitle: "100% Pure Organic Honey",
     title: "PREMIUM NATURAL & ORGANIC HONEY",
-    description: "Sustainably harvested and pure organic honey, rich in natural goodness and perfect for health, culinary, and commercial applications globally. For more info contact +233 54 288 3496 | +233 55 860 0605 | +233 59 450 0059"
+    description: "Sustainably harvested and pure organic honey, rich in natural goodness and perfect for health, culinary, and commercial applications globally. For more info contact +233 54 288 3496 | +233 55 860 0605 | +233 59 450 0059",
+    primaryLink: "/products",
+    secondaryLink: "/products"
   },
   {
     image: "/bill_board.png",
     subtitle: "Premium Outdoor Advertising",
     title: "DIGITAL BILLBOARD & ADVERTISING SOLUTIONS",
-    description: "Promote your brand, business, event, or campaign through our strategically positioned digital billboards. Reach targeted audiences with high-visibility advertising placements and flexible booking options."
+    description: "Promote your brand, business, event, or campaign through our strategically positioned digital billboards. Reach targeted audiences with high-visibility advertising placements and flexible booking options.",
+    primaryLink: "/services/billboards",
+    secondaryLink: "/services/billboards"
   },
   {
     image: "/construction/hero.jpg",
     subtitle: "Professional Construction Services",
     title: "BUILDING STRONG & FOUNDATIONS FOR SUCCESS",
-    description: "We provide high-quality construction solutions for residential, commercial, and industrial projects, ensuring durability, precision, and customer satisfaction at every stage."
+    description: "We provide high-quality construction solutions for residential, commercial, and industrial projects, ensuring durability, precision, and customer satisfaction at every stage.",
+    primaryLink: "/services/construction/request",
+    secondaryLink: "/services/construction/services"
   },
   {
     image: "/hero_img_2.png",
-    subtitle: "Reliable Cashew Supply",
-    title: "PREMIUM CASHEW EXPORT SERVICES",
-    description: "Supplying high-quality export-grade cashew nuts to international buyers through reliable sourcing, careful processing, and efficient logistics coordination."
+    subtitle: "Premium Quality. Naturally Grown.",
+    title: "MANONO MANPHIS CASHEWS",
+    description: "Carefully selected cashews processed to international standards for exceptional taste, freshness, and export quality.",
+    primaryLink: "/products",
+    secondaryLink: "/products"
   },
   {
     image: "/sheabutta.png",
     subtitle: "Premium Shea Butter Supply",
     title: "EXPORT-GRADE SHEA BUTTER SOLUTIONS",
-    description: "Providing high-quality Ghanaian shea butter for cosmetic, pharmaceutical, and industrial markets through reliable sourcing and professional export services."
+    description: "Providing high-quality Ghanaian shea butter for cosmetic, pharmaceutical, and industrial markets through reliable sourcing and professional export services.",
+    primaryLink: "#",
+    secondaryLink: "#"
   }
 ];
 
@@ -117,12 +128,16 @@ export function HoneyHero() {
                   </p>
                   
                   <div className="flex flex-row items-center gap-3 max-[480px]:gap-2">
-                    <button className="bg-[#eea000] text-[#1a1a1a] text-[12px] max-[480px]:text-[10px] font-black tracking-[0.25em] max-[480px]:tracking-[0.1em] px-12 py-5 max-[480px]:px-4 max-[480px]:py-3.5 max-[380px]:px-3 max-[380px]:py-2.5 hover:bg-white transition-all shadow-2xl uppercase">
-                      START YOUR REQUEST
-                    </button>
-                    <button className="bg-transparent border-2 border-white text-white text-[12px] max-[480px]:text-[10px] font-black tracking-[0.25em] max-[480px]:tracking-[0.1em] px-12 py-5 max-[480px]:px-4 max-[480px]:py-3.5 max-[380px]:px-3 max-[380px]:py-2.5 hover:bg-white hover:text-[#1a1a1a] transition-all uppercase">
-                      EXPLORE SERVICES
-                    </button>
+                    <Link href={slide.primaryLink || "#"}>
+                      <button className="bg-[#eea000] text-[#1a1a1a] text-[12px] max-[480px]:text-[10px] font-black tracking-[0.25em] max-[480px]:tracking-[0.1em] px-12 py-5 max-[480px]:px-4 max-[480px]:py-3.5 max-[380px]:px-3 max-[380px]:py-2.5 hover:bg-white transition-all shadow-2xl uppercase">
+                        START YOUR REQUEST
+                      </button>
+                    </Link>
+                    <Link href={slide.secondaryLink || "#"}>
+                      <button className="bg-transparent border-2 border-white text-white text-[12px] max-[480px]:text-[10px] font-black tracking-[0.25em] max-[480px]:tracking-[0.1em] px-12 py-5 max-[480px]:px-4 max-[480px]:py-3.5 max-[380px]:px-3 max-[380px]:py-2.5 hover:bg-white hover:text-[#1a1a1a] transition-all uppercase">
+                        EXPLORE SERVICES
+                      </button>
+                    </Link>
                   </div>
                 </div>
               </div>

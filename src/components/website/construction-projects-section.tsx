@@ -4,8 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowUpRight, ChevronRight, ArrowUp } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 
 export function ConstructionProjectsSection({ dbProjects = [] }: { dbProjects?: any[] }) {
+  const [emblaRef] = useEmblaCarousel(
+    { 
+      loop: true, 
+      align: "start",
+      skipSnaps: false
+    }, 
+    [Autoplay({ delay: 3500, stopOnInteraction: true })]
+  );
   const [activeFilter, setActiveFilter] = useState("All Projects");
   
   const filters = [
@@ -63,27 +73,11 @@ export function ConstructionProjectsSection({ dbProjects = [] }: { dbProjects?: 
         </div>
       </div>
 
-      {/* Grid of Images (Marquee) */}
-      <div className="w-full overflow-hidden h-[500px] md:h-[650px] max-[480px]:h-[400px] relative">
-        <style dangerouslySetInnerHTML={{__html: `
-          @keyframes marquee-step {
-            0%, 15% { transform: translateX(0%); }
-            25%, 40% { transform: translateX(-12.5%); }
-            50%, 65% { transform: translateX(-25%); }
-            75%, 90% { transform: translateX(-37.5%); }
-            100% { transform: translateX(-50%); }
-          }
-          .animate-marquee {
-            animation: marquee-step 20s ease-in-out infinite;
-            width: max-content;
-          }
-          .animate-marquee:hover {
-            animation-play-state: paused;
-          }
-        `}} />
-        <div className="flex h-full animate-marquee">
-          {[...filteredProjects, ...filteredProjects].map((project, index) => (
-            <div key={`${project.id}-${index}`} className="relative w-[100vw] md:w-[50vw] lg:w-[25vw] h-full group overflow-hidden cursor-pointer shrink-0">
+      {/* Grid of Images (Carousel) */}
+      <div className="w-full overflow-hidden h-[500px] md:h-[650px] max-[480px]:h-[400px] relative" ref={emblaRef}>
+        <div className="flex h-full">
+          {[...filteredProjects, ...filteredProjects, ...filteredProjects].map((project, index) => (
+            <div key={`${project.id}-${index}`} className="relative flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_25%] min-w-0 h-full group overflow-hidden cursor-pointer">
               <Image 
                 src={project.image} 
                 alt={project.title} 

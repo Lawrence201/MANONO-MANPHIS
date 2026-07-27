@@ -14,6 +14,7 @@ import { NewsletterBanner } from "@/components/website/newsletter-banner";
 import { WebsiteFooter } from "@/components/website/footer";
 import { OutdoorSolution } from "@/components/website/outdoor-solution";
 import { ConstructionCTASection } from "@/components/website/construction-cta-section";
+import { AboutConstruction } from "@/components/website/about-construction";
 
 export const dynamic = "force-dynamic";
 
@@ -30,8 +31,9 @@ export default function LandingPage() {
         <HoneyCatalog />
         <FeaturedProducts />
         <HowWeWork />
-        <BillboardCatalog />
+        <AboutConstruction />
         <ConstructionCTASection />
+        <BillboardCatalog />
         <OutdoorSolution />
         <TestimonialsSection />
         <ContactSection />

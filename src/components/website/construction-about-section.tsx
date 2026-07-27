@@ -17,7 +17,7 @@ export function ConstructionAboutSection() {
           <div className="w-full lg:w-1/2 relative">
             <div className="relative aspect-[3/4] w-full max-w-[600px] mx-auto overflow-hidden rounded-md shadow-lg">
               <Image 
-                src="/construction/cons/img.png" 
+                src="/construction/former.png" 
                 alt="Construction Workers" 
                 fill 
                 className="object-cover"
