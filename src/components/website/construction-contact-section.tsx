@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Headphones, Clock, Globe } from "lucide-react";
+import { Headphones, Clock, Mail } from "lucide-react";
 
 export function ConstructionContactSection() {
   return (
@@ -13,7 +13,7 @@ export function ConstructionContactSection() {
       {/* Left Image (touches bottom and left of section) - Desktop Only */}
       <div className="absolute left-0 bottom-0 lg:w-[38vw] xl:w-[35vw] lg:h-[85%] xl:h-[90%] overflow-hidden z-0 hidden lg:block">
         <Image 
-          src="/construction/cons/img.png" 
+          src="/construction/former_2.png" 
           alt="Worker" 
           fill 
           className="object-cover" 
@@ -26,7 +26,7 @@ export function ConstructionContactSection() {
         <div className="w-full lg:w-1/2 relative flex items-start lg:items-center mb-16 lg:mb-0 lg:min-h-[700px]">
           
           {/* Floating Form Box */}
-          <div className="w-full max-[480px]:w-full lg:w-[480px] bg-[#313131] relative z-20 p-10 md:p-12 max-[480px]:p-6 shadow-2xl lg:ml-auto lg:mr-[20px] xl:mr-[60px] mt-10 lg:mt-0 xl:mt-8 lg:translate-y-20 xl:translate-y-28 mx-auto rounded-lg">
+          <div className="w-full max-[480px]:w-full lg:w-[480px] bg-[#313131] relative z-20 p-10 md:p-12 max-[480px]:p-6 shadow-2xl lg:ml-auto lg:-mr-[10px] xl:-mr-[10px] mt-10 lg:mt-0 xl:mt-8 lg:translate-y-20 xl:translate-y-28 mx-auto rounded-lg">
             <h3 className="text-white text-[28px] lg:text-[32px] font-bold mb-2 tracking-tight">Have Any Questions?</h3>
             <p className="text-gray-400 text-[13px] md:text-[14px] mb-8 font-medium">The point of using Lorem Ipsum is that it has more</p>
             
@@ -87,7 +87,7 @@ export function ConstructionContactSection() {
             </div>
             <div className="flex flex-col justify-center h-[60px] max-[480px]:h-[50px]">
               <h4 className="text-[#1a1a1a] text-[18px] max-[480px]:text-[16px] font-bold mb-1 max-[480px]:mb-0.5">Phone Number:</h4>
-              <p className="text-gray-500 text-[14px] max-[480px]:text-[13px]">+88015569569</p>
+              <p className="text-gray-500 text-[14px] max-[480px]:text-[13px]">+233 54 288 3496 | +233 55 860 0605 | +233 59 450 0059</p>
             </div>
           </div>
           
@@ -98,18 +98,18 @@ export function ConstructionContactSection() {
             </div>
             <div className="flex flex-col justify-center h-[60px] max-[480px]:h-[50px]">
               <h4 className="text-[#1a1a1a] text-[18px] max-[480px]:text-[16px] font-bold mb-1 max-[480px]:mb-0.5">Opening Hours:</h4>
-              <p className="text-gray-500 text-[14px] max-[480px]:text-[13px]">Mon-Fri: 08:00 - 17:00 Sat-Sun: Closed</p>
+              <p className="text-gray-500 text-[14px] max-[480px]:text-[13px]">9:00AM to 8:00PM</p>
             </div>
           </div>
 
           {/* Contact Item 3 */}
           <div className="flex items-start gap-5 max-[480px]:gap-4">
             <div className="w-[60px] h-[60px] max-[480px]:w-[50px] max-[480px]:h-[50px] bg-[#313131] rounded-none flex items-center justify-center shrink-0 shadow-md">
-              <Globe className="w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 text-[#FFD100]" strokeWidth={1.5} />
+              <Mail className="w-6 h-6 max-[480px]:w-5 max-[480px]:h-5 text-[#FFD100]" strokeWidth={1.5} />
             </div>
             <div className="flex flex-col justify-center h-[60px] max-[480px]:h-[50px]">
-              <h4 className="text-[#1a1a1a] text-[18px] max-[480px]:text-[16px] font-bold mb-1 max-[480px]:mb-0.5">Office Location:</h4>
-              <p className="text-gray-500 text-[14px] max-[480px]:text-[13px]">New Jesrsy, 1201, USA</p>
+              <h4 className="text-[#1a1a1a] text-[18px] max-[480px]:text-[16px] font-bold mb-1 max-[480px]:mb-0.5">Email Address:</h4>
+              <p className="text-gray-500 text-[14px] max-[480px]:text-[13px]">manono@manonomanphis.com</p>
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export function ConstructionContactSection() {
         {/* Big Image for Mobile/Tablet */}
         <div className="w-full h-[400px] md:h-[500px] max-[480px]:h-[300px] relative mt-16 max-[480px]:mt-10 lg:hidden rounded-lg overflow-hidden shadow-2xl z-20">
           <Image 
-            src="/construction/cons/img.png" 
+            src="/construction/former_2.png" 
             alt="Worker" 
             fill 
             className="object-cover" 

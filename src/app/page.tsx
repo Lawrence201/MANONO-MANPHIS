@@ -15,6 +15,7 @@ import { WebsiteFooter } from "@/components/website/footer";
 import { OutdoorSolution } from "@/components/website/outdoor-solution";
 import { ConstructionCTASection } from "@/components/website/construction-cta-section";
 import { AboutConstruction } from "@/components/website/about-construction";
+import { HomeConstructionAboutSection } from "@/components/website/home-construction-about";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ export default function LandingPage() {
       <main>
         <HoneyHero />
         <FeaturesBanner />
+        <HomeConstructionAboutSection />
         <ServicesSection />
         <AboutUsSection />
         <HoneyCatalog />

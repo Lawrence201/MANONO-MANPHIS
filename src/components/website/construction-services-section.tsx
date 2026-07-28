@@ -1,12 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { getConstructionServices } from "@/lib/actions/construction-actions";
+import { getConstructionServices, getConstructionProjects } from "@/lib/actions/construction-actions";
 
 export async function ConstructionServicesSection() {
   const result = await getConstructionServices();
   const allServices = result.success ? result.services || [] : [];
   const publishedServices = allServices.filter((s: any) => s.status === 'published').slice(0, 4);
+
+  const projectsResult = await getConstructionProjects();
+  const allProjects = projectsResult.success ? projectsResult.projects || [] : [];
+  
+  let projectImages: string[] = [];
+  allProjects.forEach((p: any) => {
+    if (p.mainImage) projectImages.push(p.mainImage);
+    if (p.galleryImages && p.galleryImages.length > 0) {
+      p.galleryImages.forEach((g: any) => {
+        if (g.url) projectImages.push(g.url);
+      });
+    }
+  });
+
+  if (projectImages.length === 0) {
+    projectImages = ["/construction/cons/img.png"];
+  }
+
+  // Shuffle the images so they are random on every refresh
+  const shuffledImages = [...projectImages].sort(() => 0.5 - Math.random());
 
   return (
     <section className="py-24 bg-[#FAFAFA] relative">
@@ -41,7 +61,7 @@ export async function ConstructionServicesSection() {
                 }}
               >
                 <Image 
-                  src={service.heroImage || "/construction/cons/img.png"} 
+                  src={shuffledImages[index % shuffledImages.length]} 
                   alt="Construction background" 
                   fill 
                   className="object-cover opacity-60" 

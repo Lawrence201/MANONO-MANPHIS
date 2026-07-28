@@ -2,11 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, ArrowUpRight } from "lucide-react";
 
 export function ConstructionAboutSection() {
   const [activeTab, setActiveTab] = useState("mission");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = ["/construction/former.png", "/construction/former_2.png"];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="py-24 bg-white relative z-10">
@@ -16,12 +25,17 @@ export function ConstructionAboutSection() {
           {/* Left Column - Large Image */}
           <div className="w-full lg:w-1/2 relative">
             <div className="relative aspect-[3/4] w-full max-w-[600px] mx-auto overflow-hidden rounded-md shadow-lg">
-              <Image 
-                src="/construction/former.png" 
-                alt="Construction Workers" 
-                fill 
-                className="object-cover"
-              />
+              {images.map((src, idx) => (
+                <Image 
+                  key={src}
+                  src={src} 
+                  alt={`Construction Workers ${idx + 1}`} 
+                  fill 
+                  className={`object-cover transition-opacity duration-1000 ${
+                    idx === currentImageIndex ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              ))}
               {/* Yellow Logo Badge */}
               <div className="absolute bottom-0 right-0 w-28 h-28 bg-[#FFD100] flex items-center justify-center rounded-tl-md p-2">
                 <div className="relative w-full h-full">

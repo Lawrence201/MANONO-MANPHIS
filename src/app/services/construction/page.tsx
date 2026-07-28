@@ -65,6 +65,8 @@ export default async function ConstructionPage() {
 
       </div>
 
+      <ConstructionAboutSection />
+
       {/* Features Section */}
       <section className="bg-white py-20">
         <div className="container mx-auto px-4 md:px-8 lg:px-12">
@@ -128,7 +130,6 @@ export default async function ConstructionPage() {
         </div>
       </section>
 
-      <ConstructionAboutSection />
       <ConstructionServicesSection />
       <ConstructionCTASection videoSrc="/construction/vid_2.mp4" />
       <ConstructionProcessSection />
