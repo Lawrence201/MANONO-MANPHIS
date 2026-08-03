@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { getConstructionServices, getConstructionProjects } from "@/lib/actions/construction-actions";
+import { RandomHoverImage } from "@/components/website/random-hover-image";
 
 export async function ConstructionServicesSection() {
   const result = await getConstructionServices();
@@ -24,9 +25,6 @@ export async function ConstructionServicesSection() {
   if (projectImages.length === 0) {
     projectImages = ["/construction/cons/img.png"];
   }
-
-  // Shuffle the images so they are random on every refresh
-  const shuffledImages = [...projectImages].sort(() => 0.5 - Math.random());
 
   return (
     <section className="py-24 bg-[#FAFAFA] relative">
@@ -60,12 +58,7 @@ export async function ConstructionServicesSection() {
                   WebkitMaskImage: 'radial-gradient(circle at top right, black 0%, transparent 75%)' 
                 }}
               >
-                <Image 
-                  src={shuffledImages[index % shuffledImages.length]} 
-                  alt="Construction background" 
-                  fill 
-                  className="object-cover opacity-60" 
-                />
+                <RandomHoverImage images={projectImages} index={index} />
               </div>
 
               {/* Icon Container */}

@@ -8,6 +8,7 @@ import { ConstructionNav } from "@/components/website/construction-nav";
 import { ConstructionProcessSection } from "@/components/website/construction-process-section";
 import { ConstructionMarquee } from "@/components/website/construction-marquee";
 import { ConstructionProjectsSection } from "@/components/website/construction-projects-section";
+import { ConstructionGallerySection } from "@/components/website/construction-gallery-section";
 import { ConstructionContactSection } from "@/components/website/construction-contact-section";
 import { TopBar } from "@/components/website/top-bar";
 import { WebsiteFooter } from "@/components/website/footer";
@@ -135,6 +136,7 @@ export default async function ConstructionPage() {
       <ConstructionProcessSection />
       <ConstructionMarquee />
       <ConstructionProjectsSection dbProjects={dbProjects} />
+      <ConstructionGallerySection />
       <ConstructionContactSection />
       <WebsiteFooter />
     </div>
