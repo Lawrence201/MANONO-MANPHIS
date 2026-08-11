@@ -27,8 +27,7 @@ export function ConstructionContactSection() {
           
           {/* Floating Form Box */}
           <div className="w-full max-[480px]:w-full lg:w-[480px] bg-[#313131] relative z-20 p-10 md:p-12 max-[480px]:p-6 shadow-2xl lg:ml-auto lg:-mr-[10px] xl:-mr-[10px] mt-10 lg:mt-0 xl:mt-8 lg:translate-y-20 xl:translate-y-28 mx-auto rounded-lg">
-            <h3 className="text-white text-[28px] lg:text-[32px] font-bold mb-2 tracking-tight">Have Any Questions?</h3>
-            <p className="text-gray-400 text-[13px] md:text-[14px] mb-8 font-medium">The point of using Lorem Ipsum is that it has more</p>
+            <h3 className="text-white text-[28px] lg:text-[32px] font-bold mb-8 tracking-tight">Have Any Questions?</h3>
             
             <form className="flex flex-col gap-5">
               <input 

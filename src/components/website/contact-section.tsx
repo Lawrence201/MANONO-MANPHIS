@@ -52,7 +52,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="text-[#1a1a1a] font-black text-[12px] md:text-sm uppercase tracking-tight mb-1">Our Location</h4>
-                  <p className="text-gray-500 text-[13px] md:text-[14px]">Manono Manphis Lane, Accra, Ghana</p>
+                  <p className="text-gray-500 text-[13px] md:text-[14px]">42 Adote nwenmeete road dansoman</p>
                 </div>
               </div>
 
@@ -62,7 +62,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="text-[#1a1a1a] font-black text-[12px] md:text-sm uppercase tracking-tight mb-1">Phone Number</h4>
-                  <p className="text-gray-500 text-[13px] md:text-[14px] font-bold">+233 24 123 4567</p>
+                  <p className="text-gray-500 text-[13px] md:text-[14px] font-bold">+233 54 288 3496 | +233 55 860 0605 | +233 59 450 0059</p>
                   <p className="text-gray-400 text-[11px] md:text-[12px]">Mon - Fri, 9am - 6pm</p>
                 </div>
               </div>
@@ -73,7 +73,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="text-[#1a1a1a] font-black text-[12px] md:text-sm uppercase tracking-tight mb-1">Email Address</h4>
-                  <p className="text-gray-500 text-[13px] md:text-[14px] font-bold">trade@manonomanphis.com</p>
+                  <p className="text-gray-500 text-[13px] md:text-[14px] font-bold">manono@manonomanphis.com</p>
                   <p className="text-gray-400 text-[11px] md:text-[12px]">We reply within 24 hours</p>
                 </div>
               </div>

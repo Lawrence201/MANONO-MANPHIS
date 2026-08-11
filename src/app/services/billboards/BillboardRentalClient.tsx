@@ -166,6 +166,7 @@ export default function BillboardRentalClient({ dynamicBillboards }: { dynamicBi
           </div>
 
           {/* Billboard Categories Section */}
+          {false && (
           <div className="mt-12 min-[451px]:mt-20 min-[1029px]:mt-32">
             <div className="text-center mb-10 min-[1029px]:mb-16">
               <span 
@@ -217,6 +218,7 @@ export default function BillboardRentalClient({ dynamicBillboards }: { dynamicBi
               ))}
             </div>
           </div>
+          )}
 
           {/* Detailed Billboard Slots Grid */}
           <div className="mt-8">

@@ -83,15 +83,15 @@ export function WebsiteFooter() {
             <ul className="space-y-4 text-[13px] text-gray-400">
               <li className="flex gap-3">
                 <MapPin className="w-5 h-5 text-[#eea000] shrink-0" />
-                <span>Manono Manphis Lane, Accra, Ghana</span>
+                <span>42 Adote nwenmeete road dansoman</span>
               </li>
               <li className="flex gap-3">
                 <Phone className="w-5 h-5 text-[#eea000] shrink-0" />
-                <span>+233 24 123 4567</span>
+                <span>+233 54 288 3496 | +233 55 860 0605 | +233 59 450 0059</span>
               </li>
               <li className="flex gap-3">
                 <Mail className="w-5 h-5 text-[#eea000] shrink-0" />
-                <span>trade@manonomanphis.com</span>
+                <span>manono@manonomanphis.com</span>
               </li>
             </ul>
           </div>

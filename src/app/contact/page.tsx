@@ -3,67 +3,45 @@ import { WebsiteHeader } from "@/components/website/header";
 import { WebsiteFooter } from "@/components/website/footer";
 import { MapSection } from "@/components/website/map-section";
 import { AdvancedContactForm } from "@/components/website/advanced-contact-form";
-import { Phone, Mail, MapPin } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+
+export const metadata = {
+  title: "Contact Us - Manono Manphis",
+  description: "Get in touch with Manono Manphis via phone, email, or our contact form.",
+};
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#f7f3f0] selection:bg-[#eea000] selection:text-white flex flex-col">
+    <div className="min-h-screen bg-white selection:bg-[#d11231] selection:text-white flex flex-col font-sans">
       <TopBar />
       <WebsiteHeader />
       
       <main className="flex-1">
-        {/* Page Header */}
-        <section className="bg-[#1a1a1a] pt-32 pb-20 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
-          <div className="container mx-auto px-4 max-w-6xl relative z-10 text-center">
-            <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight mb-6">Let's Talk <span className="text-[#eea000]">Business</span></h1>
-            <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-              Whether you need premium African commodities for export or strategic outdoor advertising in Ghana, our team is ready to deliver.
-            </p>
-          </div>
-        </section>
-
-        {/* Quick Contact Info */}
-        <section className="relative z-20 -mt-10 mb-8 px-4">
-          <div className="container mx-auto max-w-5xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center gap-4 hover:-translate-y-1 transition-transform">
-                <div className="w-12 h-12 bg-[#fcf9f6] rounded-full flex items-center justify-center shrink-0">
-                  <Phone className="w-5 h-5 text-[#eea000]" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Call Us Directly</div>
-                  <div className="font-bold text-[#1a1a1a]">+233 24 123 4567</div>
-                </div>
+        {/* Hero Section */}
+        <section className="relative bg-[#1a1a1a] pt-32 pb-24 overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0 bg-[url('/billboards/contact_us.jpg')] bg-cover bg-center bg-no-repeat opacity-50"></div>
+          {/* Dark Overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a1a]/90 via-[#1a1a1a]/60 to-[#1a1a1a]/90"></div>
+          
+          <div className="container mx-auto px-4 max-w-7xl relative z-10">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">
+                <Link href="/" className="hover:text-[#eea000] transition-colors">Home</Link>
+                <ChevronRight className="w-3 h-3" />
+                <span className="text-[#eea000]">Contact Us</span>
               </div>
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center gap-4 hover:-translate-y-1 transition-transform">
-                <div className="w-12 h-12 bg-[#fcf9f6] rounded-full flex items-center justify-center shrink-0">
-                  <Mail className="w-5 h-5 text-[#eea000]" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Email Support</div>
-                  <div className="font-bold text-[#1a1a1a]">trade@manonomanphis.com</div>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center gap-4 hover:-translate-y-1 transition-transform">
-                <div className="w-12 h-12 bg-[#fcf9f6] rounded-full flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5 text-[#eea000]" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Head Office</div>
-                  <div className="font-bold text-[#1a1a1a]">Accra, Ghana</div>
-                </div>
-              </div>
+              
+              <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-[-0.02em] leading-tight mb-6">
+                Let's Talk <span className="text-[#eea000]">Business</span>
+              </h1>
             </div>
           </div>
         </section>
 
-        {/* Form Section */}
-        <section className="px-4">
-          <AdvancedContactForm />
-        </section>
-
-        {/* Map */}
+        <AdvancedContactForm />
+        
         <MapSection />
       </main>
 
