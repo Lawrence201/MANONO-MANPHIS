@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-import { Playfair_Display, Montserrat } from 'next/font/google';
+import { Playfair_Display, Inter } from 'next/font/google';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600', '700', '800', '900'] });
-const montserrat = Montserrat({ subsets: ['latin'], weight: '800' });
+const Inter = Inter({ subsets: ['latin'], weight: '800' });
 
 export default function LogosTemplate2() {
   const searchParams = useSearchParams();
@@ -57,7 +57,7 @@ export default function LogosTemplate2() {
                   Whitecap
                 </span>
                 <span 
-                  className={`text-[11px] tracking-[0.25em] mt-1 ${montserrat.className}`}
+                  className={`text-[11px] tracking-[0.25em] mt-1 ${Inter.className}`}
                   style={{ 
                     backgroundImage: 'linear-gradient(to right, #095b9e, #37b3db, #099aca, #82d6e7)',
                     WebkitBackgroundClip: 'text',
@@ -90,7 +90,7 @@ export default function LogosTemplate2() {
                   ABIE MACAULEY
                 </h2>
                 <div className="w-full h-[2px] min-h-[2px] bg-gradient-to-r from-[#095b9e] via-[#37b3db] to-transparent my-1.5" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
-                <p className={`text-[9px] font-bold tracking-[0.2em] text-[#095b9e] uppercase ${montserrat.className}`}>
+                <p className={`text-[9px] font-bold tracking-[0.2em] text-[#095b9e] uppercase ${Inter.className}`}>
                   GENERAL MANAGER
                 </p>
               </div>
@@ -99,7 +99,7 @@ export default function LogosTemplate2() {
               <div className="flex justify-between items-end mt-auto z-10">
                 
                 {/* Contact Info */}
-                <div className={`flex flex-col space-y-1 text-[10px] text-gray-700 font-medium tracking-wide ${montserrat.className}`}>
+                <div className={`flex flex-col space-y-1 text-[10px] text-gray-700 font-medium tracking-wide ${Inter.className}`}>
                   <p>
                     <span className="font-bold text-[#095b9e]">T: </span>
                     +232-31-837-455
@@ -143,3 +143,4 @@ export default function LogosTemplate2() {
     </div>
   );
 }
+

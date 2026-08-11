@@ -2,10 +2,10 @@
 
 import React, { useEffect, useRef } from 'react';
 import domtoimage from 'dom-to-image';
-import { Playfair_Display, Montserrat } from 'next/font/google';
+import { Playfair_Display, Inter } from 'next/font/google';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600', '700', '800', '900'] });
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['500', '600', '700', '800'] });
+const Inter = Inter({ subsets: ['latin'], weight: ['500', '600', '700', '800'] });
 
 export default function DigitalBusinessCard2() {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -76,13 +76,13 @@ export default function DigitalBusinessCard2() {
             
             <div className="w-full h-[2px] bg-gradient-to-r from-[#095b9e] via-[#37b3db] to-transparent my-2 rounded-full"></div>
             
-            <p className={`text-[10px] sm:text-[11px] font-extrabold tracking-[0.25em] text-[#0973a8] uppercase ${montserrat.className}`}>
+            <p className={`text-[10px] sm:text-[11px] font-extrabold tracking-[0.25em] text-[#0973a8] uppercase ${Inter.className}`}>
               GENERAL MANAGER
             </p>
           </div>
 
           {/* Contact Section */}
-          <div className={`flex flex-col space-y-2 text-[12px] sm:text-[13px] text-[#09355c] font-semibold tracking-wide ${montserrat.className}`}>
+          <div className={`flex flex-col space-y-2 text-[12px] sm:text-[13px] text-[#09355c] font-semibold tracking-wide ${Inter.className}`}>
             <p>
               <span className="font-extrabold text-[#095b9e]">T: </span>
               +232-31-837-455
@@ -120,3 +120,4 @@ export default function DigitalBusinessCard2() {
     </div>
   );
 }
+
