@@ -5,7 +5,7 @@ import domtoimage from 'dom-to-image';
 import { Playfair_Display, Inter } from 'next/font/google';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600', '700', '800', '900'] });
-const Inter = Inter({ subsets: ['latin'], weight: ['500', '600', '700', '800'] });
+const inter = Inter({ subsets: ['latin'], weight: ['500', '600', '700', '800'] });
 
 export default function AdonisEcofarmicaCard() {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -76,13 +76,13 @@ export default function AdonisEcofarmicaCard() {
             
             <div className="w-full h-[2px] bg-gradient-to-r from-[#137A20] via-[#44B623] to-transparent my-2 rounded-full"></div>
             
-            <p className={`text-[10px] sm:text-[11px] font-extrabold tracking-[0.25em] text-[#137A20] uppercase ${Inter.className}`}>
+            <p className={`text-[10px] sm:text-[11px] font-extrabold tracking-[0.25em] text-[#0973a8] uppercase ${inter.className}`}>
               CHIEF EXECUTIVE OFFICER
             </p>
           </div>
 
           {/* Contact Section */}
-          <div className={`flex flex-col space-y-2 text-[12px] sm:text-[13px] text-[#0d4f13] font-semibold tracking-wide ${Inter.className}`}>
+          <div className={`flex flex-col space-y-2 text-[12px] sm:text-[13px] text-[#09355c] font-semibold tracking-wide ${inter.className}`}>
             <p>
               <span className="font-extrabold text-[#137A20]">T: </span>
               +232-75-126-123 / +232-31-126-123

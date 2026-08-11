@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Playfair_Display, Inter } from 'next/font/google';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600', '700', '800', '900'] });
-const Inter = Inter({ subsets: ['latin'], weight: '800' });
+const inter = Inter({ subsets: ['latin'], weight: '800' });
 
 export default function LogosTemplate() {
   const searchParams = useSearchParams();
@@ -57,7 +57,7 @@ export default function LogosTemplate() {
                   Whitecap
                 </span>
                 <span 
-                  className={`text-[11px] tracking-[0.25em] mt-1 ${Inter.className}`}
+                  className={`text-[11px] tracking-[0.25em] mt-1 ${inter.className}`}
                   style={{ 
                     backgroundImage: 'linear-gradient(to right, #095b9e, #37b3db, #099aca, #82d6e7)',
                     WebkitBackgroundClip: 'text',
@@ -90,7 +90,7 @@ export default function LogosTemplate() {
                   ADONIS L. MACAULEY
                 </h2>
                 <div className="w-full h-[2px] min-h-[2px] bg-gradient-to-r from-[#095b9e] via-[#37b3db] to-transparent my-1.5" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
-                <p className={`text-[9px] font-bold tracking-[0.2em] text-[#095b9e] uppercase ${Inter.className}`}>
+                <p className={`text-[9px] font-bold tracking-[0.2em] text-[#095b9e] uppercase ${inter.className}`}>
                   CHIEF EXECUTIVE OFFICER
                 </p>
               </div>
@@ -99,7 +99,7 @@ export default function LogosTemplate() {
               <div className="flex justify-between items-end mt-auto z-10">
                 
                 {/* Contact Info */}
-                <div className={`flex flex-col space-y-1 text-[10px] text-gray-700 font-medium tracking-wide ${Inter.className}`}>
+                <div className={`flex flex-col space-y-1 text-[10px] text-gray-700 font-medium tracking-wide ${inter.className}`}>
                   <p>
                     <span className="font-bold text-[#095b9e]">T: </span>
                     +232-75-126-123 / +232-31-126-123
