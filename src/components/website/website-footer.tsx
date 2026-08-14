@@ -24,6 +24,7 @@ export function WebsiteFooter() {
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
               Manono Manphis is a trusted export company based in Ghana, specializing in the supply of high-quality agricultural commodities including honey, cashew nuts, and shea butter.
             </p>
+
             <div className="flex gap-4">
               <Link href="#" className="w-8 h-8 bg-white/5 flex items-center justify-center rounded-full hover:bg-[#eea000] transition-colors">
                 <Facebook className="w-4 h-4" />

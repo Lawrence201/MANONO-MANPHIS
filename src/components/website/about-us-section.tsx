@@ -54,21 +54,25 @@ export function AboutUsSection() {
           {/* Left Content (White) */}
           <div className="flex-[1.5] p-10 md:p-14 flex flex-col justify-center items-center text-center bg-white relative min-w-full md:min-w-[350px] min-h-[380px] md:min-h-[480px]">
             <h3 className="text-2xl md:text-3xl font-black text-[#1a1a1a] leading-tight mb-4 uppercase" style={{fontFamily: "'Plus Jakarta Sans', sans-serif"}}>
-              Reliable <br />
-              Bulk Export <br />
-              <span className="text-[#eea000]">from Ghana</span>
+              Certified <br />
+              GEPA <br />
+              <span className="text-[#eea000]">Member</span>
             </h3>
             
             <p className="text-gray-500 text-[13px] md:text-[14px] leading-relaxed mb-8 max-w-[280px] mx-auto font-medium">
-              Quality products. Trusted supply. Global delivery.
+              Officially recognized by the Ghana Export Promotion Authority for trusted global supply.
             </p>
             
-            <Link 
-              href="#" 
-              className="inline-block bg-[#eea000] text-[#1a1a1a] px-10 py-4 rounded-full font-bold text-[11px] tracking-[0.1em] uppercase hover:bg-[#1a1a1a] hover:text-white transition-all shadow-sm"
-            >
-              Know More
-            </Link>
+            <div className="mt-2 bg-white/90 p-3 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+              <span className="text-[10px] text-gray-500 font-bold mb-2 uppercase tracking-widest">Proud Member Of</span>
+              <Image 
+                src="/images/gepa1.png" 
+                alt="Ghana Export Promotion Authority" 
+                width={180} 
+                height={80} 
+                className="object-contain h-16 w-auto"
+              />
+            </div>
             
             {/* Small honeycomb accent bottom right of white section */}
             <div className="absolute bottom-0 right-0 w-20 h-20 md:w-24 md:h-24 pointer-events-none">

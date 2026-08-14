@@ -24,6 +24,7 @@ export function WebsiteFooter() {
             <p className="text-gray-400 text-[13px] leading-relaxed mb-6">
               Manono Manphis is a trusted multi-sector company based in Ghana, specializing in high-quality agricultural exports, outdoor digital media solutions, and professional construction services.
             </p>
+
             <div className="flex flex-nowrap gap-2 sm:gap-2.5">
               <Link
                 href="#"
